@@ -8,13 +8,13 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from 'src/interceptors/response.interceptor';
 import { GlobalExceptionFilter } from 'src/interceptors/exception.interceptor';
 import { LoggingMiddleware } from '../middlewares/logging.middleware';
-import { CloudinaryModule } from '../modules/cloudinary/cloudinary.module';
 import { CommonModule } from '../common/common.module';
+import { CustomerMetaModule } from '../modules/customer/customer.module';
 
 @Module({
   imports: [
     CommonModule,
-    CloudinaryModule,
+    CustomerMetaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',

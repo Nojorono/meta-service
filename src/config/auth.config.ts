@@ -1,20 +1,16 @@
+// src/config/auth.config.ts
 import { registerAs } from '@nestjs/config';
-import ms from 'ms';
-
-function seconds(msValue: string): number {
-  return ms(msValue) / 1000;
-}
 
 export default registerAs(
   'auth',
   (): Record<string, any> => ({
     accessToken: {
       secret: process.env.ACCESS_TOKEN_SECRET_KEY,
-      expirationTime: seconds(process.env.ACCESS_TOKEN_EXPIRED ?? '1d'),
+      expirationTime: process.env.ACCESS_TOKEN_EXPIRED,
     },
     refreshToken: {
       secret: process.env.REFRESH_TOKEN_SECRET_KEY,
-      expirationTime: seconds(process.env.REFRESH_TOKEN_EXPIRED ?? '7d'),
+      expirationTime: process.env.REFRESH_TOKEN_EXPIRED,
     },
   }),
 );

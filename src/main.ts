@@ -34,7 +34,7 @@ async function bootstrap() {
   });
 
   const port: number = configService.get<number>('app.http.port');
-  const host: string = configService.get<string>('app.http.host');
+  const host: string = configService.get<string>('app.http.host') || '0.0.0.0'; // This allows access from any IP
   const globalPrefix: string = configService.get<string>('app.globalPrefix');
   const versioningPrefix: string = configService.get<string>(
     'app.versioning.prefix',
@@ -43,7 +43,31 @@ async function bootstrap() {
   const versionEnable: string = configService.get<string>(
     'app.versioning.enable',
   );
-  app.use(helmet());
+  // Configure security headers
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginOpenerPolicy: false,
+    }),
+  );
+
+  // Configure CORS
+  app.enableCors({
+    origin: true, // Use request origin
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
+    exposedHeaders: ['Authorization'],
+    credentials: true,
+    maxAge: 3600,
+  });
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix(globalPrefix);
   if (versionEnable) {
@@ -53,7 +77,7 @@ async function bootstrap() {
       prefix: versioningPrefix,
     });
   }
-  setupSwagger(app);
+  // Authentication microservice
   app.connectMicroservice({
     transport: Transport.RMQ,
     options: {
@@ -63,6 +87,27 @@ async function bootstrap() {
       prefetchCount: 1,
     },
   });
+
+  // Customer microservice
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: [`${configService.get('rmq.uri')}`],
+      queue: `${configService.get('rmq.customer')}`,
+      queueOptions: {
+        durable: false, // Keep this false to match existing queue configuration
+      },
+      noAck: true, // Disable acknowledgments to match existing queue configuration
+      persistent: false, // Match existing queue configuration
+      prefetchCount: 1, // Process one message at a time
+      // Connection management
+      socketOptions: {
+        heartbeatIntervalInSeconds: 5, // Keep connection alive with frequent heartbeats
+        reconnectTimeInSeconds: 5, // Reconnect quickly if connection drops
+      },
+    },
+  });
+  setupSwagger(app);
   await app.startAllMicroservices();
   await app.listen(port, host);
   logger.log(

@@ -1,7 +1,8 @@
 import configs from '../config';
 import { Module } from '@nestjs/common';
-import { PrismaService } from './services/prisma.service';
+import { TypeormService } from './services/typeorm.service';
 import { ConfigModule } from '@nestjs/config';
+import { OracleService } from './services/oracle.service';
 
 @Module({
   controllers: [],
@@ -14,7 +15,7 @@ import { ConfigModule } from '@nestjs/config';
       expandVariables: true,
     }),
   ],
-  providers: [PrismaService],
-  exports: [PrismaService],
+  providers: [TypeormService, OracleService],
+  exports: [TypeormService, OracleService],
 })
 export class CommonModule {}

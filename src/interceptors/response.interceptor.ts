@@ -13,7 +13,7 @@ import {
   HTTP_SUCCESS_STATUS_MESSAGES,
   RESPONSE_SERIALIZATION_META_KEY,
 } from 'src/app/app.constant';
-import { GenericResponseDto } from 'src/modules/product/dtos/generic.response.dto';
+import { GenericResponseDto } from 'src/dtos/generic.response.dto';
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
