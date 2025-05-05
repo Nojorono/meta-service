@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   MetaCustomerDto,
@@ -6,33 +6,61 @@ import {
   PaginationParamsDto,
 } from '../dto/customer.dto';
 import { OracleService } from '../../../common/services/oracle.service';
+import { RedisService } from '../../../common/services/redis.service';
 
 @Injectable()
 export class CustomerMetaService {
+  private readonly logger = new Logger(CustomerMetaService.name);
+  private readonly CACHE_TTL = 60; // Cache for 60 seconds
+
   constructor(
     private readonly configService: ConfigService,
     private readonly oracleService: OracleService,
+    private readonly redisService: RedisService,
   ) {}
 
   async getCustomersFromOracle(
     params?: PaginationParamsDto,
   ): Promise<MetaCustomerResponseDto> {
     // Set default values if not provided
-    const page = params?.page || 1;
-    const limit = params?.limit || 10;
+    const page = params?.page;
+    const limit = params?.limit;
     const search = params?.search || '';
+
+    // Generate unique cache key based on parameters
+    const cacheKey =
+      page && limit
+        ? `customers:page:${page}:limit:${limit}:search:${search}`
+        : `customers:all:search:${search}`;
+
+    // Try to get data from cache first
+    try {
+      const cachedData = await this.redisService.get(cacheKey);
+      if (cachedData) {
+        this.logger.log(`Cache hit for ${cacheKey}`);
+        return JSON.parse(cachedData as string) as MetaCustomerResponseDto;
+      }
+      this.logger.log(`Cache miss for ${cacheKey}, fetching from Oracle`);
+    } catch (error) {
+      this.logger.error(
+        `Error accessing Redis cache: ${error.message}`,
+        error.stack,
+      );
+      // Continue with database query if cache access fails
+    }
+
     try {
       // Using uppercase for object names since Oracle typically stores them in uppercase
-      // This aligns with the memory about uppercase role names in the database
       let query = `
         SELECT * FROM APPS.XTD_AR_CUSTOMERS_V
-              `;
+        WHERE 1=1
+      `;
 
       // Add search condition if search term is provided
-      const params = [];
+      const queryParams = [];
       if (search) {
         query += ` AND (UPPER(CUSTOMER_NAME) LIKE UPPER('%' || :search || '%') OR UPPER(CUSTOMER_NUMBER) LIKE UPPER('%' || :search || '%'))`;
-        params.push(search);
+        queryParams.push(search);
       }
 
       // Count total records for pagination
@@ -42,17 +70,19 @@ export class CustomerMetaService {
 
       const countResult = await this.oracleService.executeQuery(
         countQuery,
-        params,
+        queryParams,
       );
       const totalCount = parseInt(countResult.rows[0].TOTAL, 10) || 0;
 
-      // Add pagination
-      query += `
-        OFFSET ${(page - 1) * limit} ROWS
-        FETCH NEXT ${limit} ROWS ONLY
-      `;
+      // Apply pagination if page and limit are provided
+      if (page !== undefined && limit !== undefined) {
+        query += `
+          OFFSET ${(page - 1) * limit} ROWS
+          FETCH NEXT ${limit} ROWS ONLY
+        `;
+      }
 
-      const result = await this.oracleService.executeQuery(query, params);
+      const result = await this.oracleService.executeQuery(query, queryParams);
 
       // Transform Oracle result to DTO format
       const customers: MetaCustomerDto[] = result.rows.map((row) => ({
@@ -92,18 +122,38 @@ export class CustomerMetaService {
         trx_credit_limit: row.TRX_CREDIT_LIMIT,
       }));
 
-      // Calculate pagination metadata
-      const totalPages = Math.ceil(totalCount / limit);
-
-      return {
+      // Prepare response
+      const response: MetaCustomerResponseDto = {
         data: customers,
         count: totalCount,
-        totalPages,
-        currentPage: page,
-        limit,
         status: true,
         message: 'Customer data retrieved successfully from Oracle',
       };
+
+      // Add pagination metadata if pagination is used
+      if (page !== undefined && limit !== undefined) {
+        response.totalPages = Math.ceil(totalCount / limit);
+        response.currentPage = page;
+        response.limit = limit;
+      }
+
+      // Store in Redis cache
+      try {
+        await this.redisService.set(
+          cacheKey,
+          JSON.stringify(response),
+          this.CACHE_TTL,
+        );
+        this.logger.log(`Data stored in cache with key ${cacheKey}`);
+      } catch (cacheError) {
+        this.logger.error(
+          `Error storing data in Redis: ${cacheError.message}`,
+          cacheError.stack,
+        );
+        // Continue even if cache storage fails
+      }
+
+      return response;
     } catch (error) {
       return {
         data: [],
@@ -117,6 +167,25 @@ export class CustomerMetaService {
   async getCustomerByIdFromOracle(
     customerId: number,
   ): Promise<MetaCustomerResponseDto> {
+    // Generate cache key for customer by ID
+    const cacheKey = `customer:id:${customerId}`;
+
+    // Try to get data from cache first
+    try {
+      const cachedData = await this.redisService.get(cacheKey);
+      if (cachedData) {
+        this.logger.log(`Cache hit for ${cacheKey}`);
+        return JSON.parse(cachedData as string) as MetaCustomerResponseDto;
+      }
+      this.logger.log(`Cache miss for ${cacheKey}, fetching from Oracle`);
+    } catch (error) {
+      this.logger.error(
+        `Error accessing Redis cache: ${error.message}`,
+        error.stack,
+      );
+      // Continue with database query if cache access fails
+    }
+
     try {
       const query = `
         SELECT * FROM APPS.XTD_AR_CUSTOMERS_V
@@ -171,19 +240,65 @@ export class CustomerMetaService {
         trx_credit_limit: result.rows[0].TRX_CREDIT_LIMIT,
       };
 
-      return {
+      const response = {
         data: [customer],
         count: 1,
         status: true,
         message: 'Customer data retrieved successfully from Oracle',
       };
+
+      // Store in Redis cache
+      try {
+        await this.redisService.set(
+          cacheKey,
+          JSON.stringify(response),
+          this.CACHE_TTL,
+        );
+        this.logger.log(`Data stored in cache with key ${cacheKey}`);
+      } catch (cacheError) {
+        this.logger.error(
+          `Error storing data in Redis: ${cacheError.message}`,
+          cacheError.stack,
+        );
+        // Continue even if cache storage fails
+      }
+
+      return response;
     } catch (error) {
+      this.logger.error(
+        `Error in getCustomerByIdFromOracle: ${error.message}`,
+        error.stack,
+      );
       return {
         data: [],
         count: 0,
         status: false,
         message: `Error retrieving customer data: ${error.message}`,
       };
+    }
+  }
+
+  /**
+   * Invalidates customer-related caches
+   * @param customerId Optional customer ID to invalidate specific customer cache
+   */
+  async invalidateCustomerCache(customerId?: number): Promise<void> {
+    try {
+      if (customerId) {
+        // Invalidate specific customer cache
+        const cacheKey = `customer:id:${customerId}`;
+        await this.redisService.delete(cacheKey);
+        this.logger.log(`Invalidated cache for customer ID ${customerId}`);
+      }
+
+      // Invalidate all customers list cache entries
+      await this.redisService.deleteByPattern('customers:page:*');
+      this.logger.log('Invalidated all customers list caches');
+    } catch (error) {
+      this.logger.error(
+        `Error invalidating cache: ${error.message}`,
+        error.stack,
+      );
     }
   }
 }

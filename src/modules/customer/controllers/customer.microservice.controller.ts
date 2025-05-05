@@ -95,4 +95,33 @@ export class CustomerMetaMicroserviceController {
       };
     }
   }
+
+  @MessagePattern('invalidate_customer_cache')
+  async invalidateCustomerCache(
+    @Payload() data?: { customerId?: number },
+  ): Promise<{ status: boolean; message: string }> {
+    try {
+      this.logger.log(
+        `Received request to invalidate customer cache: ${JSON.stringify(data || {})}`,
+      );
+
+      await this.customerMetaService.invalidateCustomerCache(data?.customerId);
+
+      return {
+        status: true,
+        message: data?.customerId
+          ? `Cache invalidated for customer ID ${data.customerId}`
+          : 'All customer caches invalidated',
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error invalidating cache: ${error.message}`,
+        error.stack,
+      );
+      return {
+        status: false,
+        message: `Error invalidating cache: ${error.message}`,
+      };
+    }
+  }
 }

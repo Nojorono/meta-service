@@ -140,11 +140,11 @@ export class MetaCustomerDto {
 export class PaginationParamsDto {
   @IsNumber()
   @IsOptional()
-  page?: number = 1;
+  page?: number;
 
   @IsNumber()
   @IsOptional()
-  limit?: number = 10;
+  limit?: number;
 
   @IsString()
   @IsOptional()
