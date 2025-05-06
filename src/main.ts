@@ -107,6 +107,27 @@ async function bootstrap() {
       },
     },
   });
+
+  // Branch microservice
+  app.connectMicroservice({
+    transport: Transport.RMQ,
+    options: {
+      urls: [`${configService.get('rmq.uri')}`],
+      queue: `${configService.get('rmq.branch')}`,
+      queueOptions: {
+        durable: false, // Keep this false to match existing queue configuration
+      },
+      noAck: true, // Disable acknowledgments to match existing queue configuration
+      persistent: false, // Match existing queue configuration
+      prefetchCount: 1, // Process one message at a time
+      // Connection management
+      socketOptions: {
+        heartbeatIntervalInSeconds: 5, // Keep connection alive with frequent heartbeats
+        reconnectTimeInSeconds: 5, // Reconnect quickly if connection drops
+      },
+    },
+  });
+
   setupSwagger(app);
   await app.startAllMicroservices();
   await app.listen(port, host);

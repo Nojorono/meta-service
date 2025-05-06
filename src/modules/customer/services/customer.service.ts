@@ -5,14 +5,14 @@ import {
   MetaCustomerDtoByDate,
   MetaCustomerResponseDto,
   PaginationParamsDto,
-} from '../dto/customer.dto';
+} from '../dtos/customer.dtos';
 import { OracleService } from '../../../common/services/oracle.service';
 import { RedisService } from '../../../common/services/redis.service';
 
 @Injectable()
 export class CustomerMetaService {
   private readonly logger = new Logger(CustomerMetaService.name);
-  private readonly CACHE_TTL = 60; // Cache for 60 seconds
+  private readonly CACHE_TTL = 60 * 60; // Cache for 1 hour
 
   constructor(
     private readonly configService: ConfigService,

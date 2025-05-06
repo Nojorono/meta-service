@@ -5,7 +5,7 @@ import {
   MetaCustomerResponseDto,
   PaginationParamsDto,
   MetaCustomerDtoByDate,
-} from '../dto/customer.dto';
+} from '../dtos/customer.dtos';
 
 @Controller()
 export class CustomerMetaMicroserviceController {
@@ -15,13 +15,16 @@ export class CustomerMetaMicroserviceController {
 
   @MessagePattern('ping')
   ping() {
-    this.logger.log('Received ping request');
+    this.logger.log('Received ping request customer microservice');
     return { status: true, message: 'pong' };
   }
 
   @MessagePattern('echo')
   echo(@Payload() data: any) {
-    this.logger.log('Received echo request with payload:', data);
+    this.logger.log(
+      'Received echo request with payload customer microservice',
+      data,
+    );
     return { status: true, message: 'echo', data };
   }
 
