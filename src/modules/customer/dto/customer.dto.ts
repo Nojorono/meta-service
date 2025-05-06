@@ -137,6 +137,10 @@ export class MetaCustomerDto {
   trx_credit_limit?: number;
 }
 
+export class MetaCustomerDtoByDate {
+  last_update_date: string; // 2024-05-22 18:10:01
+}
+
 export class PaginationParamsDto {
   @IsNumber()
   @IsOptional()

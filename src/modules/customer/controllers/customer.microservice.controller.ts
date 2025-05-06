@@ -4,6 +4,7 @@ import { CustomerMetaService } from '../services/customer.service';
 import {
   MetaCustomerResponseDto,
   PaginationParamsDto,
+  MetaCustomerDtoByDate,
 } from '../dto/customer.dto';
 
 @Controller()
@@ -36,6 +37,36 @@ export class CustomerMetaMicroserviceController {
     try {
       const result =
         await this.customerMetaService.getCustomersFromOracle(params);
+      this.logger.log(
+        `Oracle getCustomers result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving Oracle customers: ${error.message}`,
+        error.stack,
+      );
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error in microservice: ${error.message}`,
+      };
+    }
+  }
+
+  @MessagePattern('get_meta_customers_by_date')
+  async getCustomersByDate(
+    @Payload() params?: MetaCustomerDtoByDate,
+  ): Promise<MetaCustomerResponseDto> {
+    this.logger.log(
+      '==== Received request for Oracle customers with params ====',
+    );
+    this.logger.log(JSON.stringify(params || {}));
+
+    try {
+      const result =
+        await this.customerMetaService.getCustomersFromOracleByDate(params);
       this.logger.log(
         `Oracle getCustomers result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
       );

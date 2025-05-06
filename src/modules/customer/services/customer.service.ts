@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   MetaCustomerDto,
+  MetaCustomerDtoByDate,
   MetaCustomerResponseDto,
   PaginationParamsDto,
 } from '../dto/customer.dto';
@@ -136,6 +137,125 @@ export class CustomerMetaService {
         response.currentPage = page;
         response.limit = limit;
       }
+
+      // Store in Redis cache
+      try {
+        await this.redisService.set(
+          cacheKey,
+          JSON.stringify(response),
+          this.CACHE_TTL,
+        );
+        this.logger.log(`Data stored in cache with key ${cacheKey}`);
+      } catch (cacheError) {
+        this.logger.error(
+          `Error storing data in Redis: ${cacheError.message}`,
+          cacheError.stack,
+        );
+        // Continue even if cache storage fails
+      }
+
+      return response;
+    } catch (error) {
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error retrieving customer data: ${error.message}`,
+      };
+    }
+  }
+
+  async getCustomersFromOracleByDate(
+    params?: MetaCustomerDtoByDate,
+  ): Promise<MetaCustomerResponseDto> {
+    // Set default values if not provided
+    const last_update_date = params;
+
+    this.logger.log('params.last_update_date' + last_update_date);
+    this.logger.log('params' + params);
+
+    // Generate unique cache key based on parameters
+    const cacheKey = last_update_date
+      ? `customers:last_update_date:${last_update_date}`
+      : `customers:last_update_date:${last_update_date}`;
+
+    // Try to get data from cache first
+    try {
+      const cachedData = await this.redisService.get(cacheKey);
+      if (cachedData) {
+        this.logger.log(`Cache hit for ${cacheKey}`);
+        return JSON.parse(cachedData as string) as MetaCustomerResponseDto;
+      }
+      this.logger.log(`Cache miss for ${cacheKey}, fetching from Oracle`);
+    } catch (error) {
+      this.logger.error(
+        `Error accessing Redis cache: ${error.message}`,
+        error.stack,
+      );
+      // Continue with database query if cache access fails
+    }
+
+    try {
+      // Using uppercase for object names since Oracle typically stores them in uppercase
+      let query = `
+        SELECT * FROM APPS.XTD_AR_CUSTOMERS_V
+        WHERE 1=1
+      `;
+
+      // Add search condition if search term is provided
+      const queryParams = [];
+      if (last_update_date) {
+        query += ` AND LAST_UPDATE_DATE >= TO_DATE(:last_update_date, 'YYYY-MM-DD') AND LAST_UPDATE_DATE < TO_DATE(:last_update_date, 'YYYY-MM-DD') + 1`;
+        queryParams.push(last_update_date, last_update_date);
+      }
+
+      const result = await this.oracleService.executeQuery(query, queryParams);
+
+      // Transform Oracle result to DTO format
+      const customers: MetaCustomerDto[] = result.rows.map((row) => ({
+        cust_account_id: row.CUST_ACCOUNT_ID,
+        customer_name: row.CUSTOMER_NAME,
+        customer_number: row.CUSTOMER_NUMBER,
+        address1: row.ADDRESS1,
+        bill_to_location: row.BILL_TO_LOCATION,
+        bill_to_site_use_id: row.BILL_TO_SITE_USE_ID,
+        channel: row.CHANNEL,
+        credit_checking: row.CREDIT_CHECKING,
+        credit_exposure: row.CREDIT_EXPOSURE,
+        kab_kodya: row.KAB_KODYA,
+        kecamatan: row.KECAMATAN,
+        kelurahan: row.KELURAHAN,
+        last_update_date: row.LAST_UPDATE_DATE,
+        order_type_id: row.ORDER_TYPE_ID,
+        order_type_name: row.ORDER_TYPE_NAME,
+        org_id: row.ORG_ID,
+        org_name: row.ORG_NAME,
+        organization_code: row.ORGANIZATION_CODE,
+        organization_id: row.ORGANIZATION_ID,
+        organization_name: row.ORGANIZATION_NAME,
+        overall_credit_limit: row.OVERALL_CREDIT_LIMIT,
+        price_list_id: row.PRICE_LIST_ID,
+        price_list_name: row.PRICE_LIST_NAME,
+        provinsi: row.PROVINSI,
+        return_order_type_id: row.RETURN_ORDER_TYPE_ID,
+        return_order_type_name: row.RETURN_ORDER_TYPE_NAME,
+        ship_to_location: row.SHIP_TO_LOCATION,
+        ship_to_site_use_id: row.SHIP_TO_SITE_USE_ID,
+        site_type: row.SITE_TYPE,
+        status: row.STATUS,
+        term_day: row.TERM_DAY,
+        term_id: row.TERM_ID,
+        term_name: row.TERM_NAME,
+        trx_credit_limit: row.TRX_CREDIT_LIMIT,
+      }));
+
+      // Prepare response
+      const response: MetaCustomerResponseDto = {
+        data: customers,
+        count: customers.length,
+        status: true,
+        message: 'Customer data retrieved successfully from Oracle',
+      };
 
       // Store in Redis cache
       try {
