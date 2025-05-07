@@ -21,13 +21,13 @@ export class BranchMetaService {
     params?: MetaBranchDtoByDate,
   ): Promise<MetaBranchResponseDto> {
     // Set default values if not provided
-    const last_update_date = params;
+    const date = params;
 
-    this.logger.log('params.last_update_date' + last_update_date);
+    this.logger.log('params.last_update_date' + date);
     // Generate unique cache key based on parameters
-    const cacheKey = last_update_date
-      ? `branches:last_update_date:${last_update_date}`
-      : `branches:last_update_date:${last_update_date}`;
+    const cacheKey = date
+      ? `branches:last_update_date:${date}`
+      : `branches:last_update_date:${date}`;
 
     // Try to get data from cache first
     try {
@@ -47,19 +47,12 @@ export class BranchMetaService {
 
     try {
       // Using uppercase for object names since Oracle typically stores them in uppercase
-      let query = `
+      const query = `
         SELECT * FROM APPS.XTD_INV_BRANCHES_V
         WHERE 1=1
       `;
 
-      // Add search condition if search term is provided
-      const queryParams = [];
-      if (last_update_date) {
-        query += ` AND LAST_UPDATE_DATE >= TO_DATE(:last_update_date, 'YYYY-MM-DD') AND LAST_UPDATE_DATE < TO_DATE(:last_update_date, 'YYYY-MM-DD') + 1`;
-        queryParams.push(last_update_date, last_update_date);
-      }
-
-      const result = await this.oracleService.executeQuery(query, queryParams);
+      const result = await this.oracleService.executeQuery(query);
 
       // Transform Oracle result to DTO format
       const branches: MetaBranchDto[] = result.rows.map((row) => ({
