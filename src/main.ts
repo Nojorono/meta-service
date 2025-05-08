@@ -77,56 +77,49 @@ async function bootstrap() {
       prefix: versioningPrefix,
     });
   }
-  // Authentication microservice
-  app.connectMicroservice({
-    transport: Transport.RMQ,
-    options: {
-      urls: [`${configService.get('rmq.uri')}`],
-      queue: `${configService.get('rmq.auth')}`,
-      queueOptions: { durable: false },
-      prefetchCount: 1,
+  // Microservices configuration
+  const microservices = [
+    {
+      name: 'AUTH_SERVICE',
+      queue: configService.get('rmq.auth'),
     },
-  });
+    {
+      name: 'CUSTOMER_SERVICE',
+      queue: configService.get('rmq.customer'),
+    },
+    {
+      name: 'BRANCH_SERVICE',
+      queue: configService.get('rmq.branch'),
+    },
+    {
+      name: 'REGION_SERVICE',
+      queue: configService.get('rmq.region'),
+    },
+  ];
 
-  // Customer microservice
-  app.connectMicroservice({
-    transport: Transport.RMQ,
-    options: {
-      urls: [`${configService.get('rmq.uri')}`],
-      queue: `${configService.get('rmq.customer')}`,
-      queueOptions: {
-        durable: false, // Keep this false to match existing queue configuration
+  // Initialize all microservices
+  for (const service of microservices) {
+    app.connectMicroservice({
+      transport: Transport.RMQ,
+      options: {
+        urls: [configService.get('rmq.uri')],
+        queue: service.queue,
+        queueOptions: {
+          durable: false,
+        },
+        noAck: true,
+        persistent: false,
+        prefetchCount: 1,
+        socketOptions: {
+          heartbeatIntervalInSeconds: 5,
+          reconnectTimeInSeconds: 5,
+        },
       },
-      noAck: true, // Disable acknowledgments to match existing queue configuration
-      persistent: false, // Match existing queue configuration
-      prefetchCount: 1, // Process one message at a time
-      // Connection management
-      socketOptions: {
-        heartbeatIntervalInSeconds: 5, // Keep connection alive with frequent heartbeats
-        reconnectTimeInSeconds: 5, // Reconnect quickly if connection drops
-      },
-    },
-  });
-
-  // Branch microservice
-  app.connectMicroservice({
-    transport: Transport.RMQ,
-    options: {
-      urls: [`${configService.get('rmq.uri')}`],
-      queue: `${configService.get('rmq.branch')}`,
-      queueOptions: {
-        durable: false, // Keep this false to match existing queue configuration
-      },
-      noAck: true, // Disable acknowledgments to match existing queue configuration
-      persistent: false, // Match existing queue configuration
-      prefetchCount: 1, // Process one message at a time
-      // Connection management
-      socketOptions: {
-        heartbeatIntervalInSeconds: 5, // Keep connection alive with frequent heartbeats
-        reconnectTimeInSeconds: 5, // Reconnect quickly if connection drops
-      },
-    },
-  });
+    });
+    logger.log(
+      `🚀 ${service.name} microservice initialized with queue: ${service.queue}`,
+    );
+  }
 
   setupSwagger(app);
   await app.startAllMicroservices();

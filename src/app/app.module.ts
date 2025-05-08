@@ -11,12 +11,14 @@ import { LoggingMiddleware } from '../middlewares/logging.middleware';
 import { CommonModule } from '../common/common.module';
 import { CustomerMetaModule } from '../modules/customer/customer.module';
 import { BranchMetaModule } from '../modules/branch/branch.module';
+import { RegionMetaModule } from '../modules/region/region.module';
 
 @Module({
   imports: [
     CommonModule,
     CustomerMetaModule,
     BranchMetaModule,
+    RegionMetaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
