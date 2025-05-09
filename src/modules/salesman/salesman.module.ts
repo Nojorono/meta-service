@@ -3,7 +3,7 @@ import { SalesmanMetaMicroserviceController } from './controllers/salesman.micro
 import { OracleService } from '../../common/services/oracle.service';
 import { RedisService } from '../../common/services/redis.service';
 import { ConfigModule } from '@nestjs/config';
-import { SalesmanMetaService } from './services/salesmas.service';
+import { SalesmanMetaService } from './services/salesman.service';
 
 @Module({
   imports: [ConfigModule],

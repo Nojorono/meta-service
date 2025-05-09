@@ -1,11 +1,11 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { SalesmanMetaService } from '../services/salesmas.service';
+import { SalesmanMetaService } from '../services/salesman.service';
 import {
   SalesmanMetaResponseDto,
   SalesmanMetaDtoByDate,
   SalesmanMetaDtoBySalesrepNumber,
-} from '../dtos/salesmas.dtos';
+} from '../dtos/salesman.dtos';
 
 @Controller()
 export class SalesmanMetaMicroserviceController {

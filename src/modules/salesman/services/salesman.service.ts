@@ -2,10 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OracleService } from '../../../common/services/oracle.service';
 import { RedisService } from '../../../common/services/redis.service';
-import { SalesmanMetaResponseDto } from '../dtos/salesmas.dtos';
-import { SalesmanMetaDtoByDate } from '../dtos/salesmas.dtos';
-import { SalesmanMetaDtoBySalesrepNumber } from '../dtos/salesmas.dtos';
-import { SalesmanMetaDto } from '../dtos/salesmas.dtos';
+import { SalesmanMetaResponseDto } from '../dtos/salesman.dtos';
+import { SalesmanMetaDtoByDate } from '../dtos/salesman.dtos';
+import { SalesmanMetaDtoBySalesrepNumber } from '../dtos/salesman.dtos';
+import { SalesmanMetaDto } from '../dtos/salesman.dtos';
 
 @Injectable()
 export class SalesmanMetaService {
@@ -27,25 +27,25 @@ export class SalesmanMetaService {
     this.logger.log('params' + params);
 
     // Generate unique cache key based on parameters
-    // const cacheKey = salesrep_number
-    //   ? `salesman:salesrep_number:${salesrep_number}`
-    //   : `salesman:salesrep_number:${salesrep_number}`;
+    const cacheKey = salesrep_number
+      ? `salesman:salesrep_number:${salesrep_number}`
+      : `salesman:salesrep_number:${salesrep_number}`;
 
-    // // Try to get data from cache first
-    // try {
-    //   const cachedData = await this.redisService.get(cacheKey);
-    //   if (cachedData) {
-    //     this.logger.log(`Cache hit for ${cacheKey}`);
-    //     return JSON.parse(cachedData as string) as SalesmanMetaResponseDto;
-    //   }
-    //   this.logger.log(`Cache miss for ${cacheKey}, fetching from Oracle`);
-    // } catch (error) {
-    //   this.logger.error(
-    //     `Error accessing Redis cache: ${error.message}`,
-    //     error.stack,
-    //   );
-    //   // Continue with database query if cache access fails
-    // }
+    // Try to get data from cache first
+    try {
+      const cachedData = await this.redisService.get(cacheKey);
+      if (cachedData) {
+        this.logger.log(`Cache hit for ${cacheKey}`);
+        return JSON.parse(cachedData as string) as SalesmanMetaResponseDto;
+      }
+      this.logger.log(`Cache miss for ${cacheKey}, fetching from Oracle`);
+    } catch (error) {
+      this.logger.error(
+        `Error accessing Redis cache: ${error.message}`,
+        error.stack,
+      );
+      // Continue with database query if cache access fails
+    }
 
     try {
       // Using uppercase for object names since Oracle typically stores them in uppercase
@@ -96,21 +96,21 @@ export class SalesmanMetaService {
         message: 'Salesman data retrieved successfully from Oracle',
       };
 
-      // // Store in Redis cache
-      // try {
-      //   await this.redisService.set(
-      //     cacheKey,
-      //     JSON.stringify(response),
-      //     this.CACHE_TTL,
-      //   );
-      //   this.logger.log(`Data stored in cache with key ${cacheKey}`);
-      // } catch (cacheError) {
-      //   this.logger.error(
-      //     `Error storing data in Redis: ${cacheError.message}`,
-      //     cacheError.stack,
-      //   );
-      //   // Continue even if cache storage fails
-      // }
+      // Store in Redis cache
+      try {
+        await this.redisService.set(
+          cacheKey,
+          JSON.stringify(response),
+          this.CACHE_TTL,
+        );
+        this.logger.log(`Data stored in cache with key ${cacheKey}`);
+      } catch (cacheError) {
+        this.logger.error(
+          `Error storing data in Redis: ${cacheError.message}`,
+          cacheError.stack,
+        );
+        // Continue even if cache storage fails
+      }
 
       return response;
     } catch (error) {
@@ -154,19 +154,19 @@ export class SalesmanMetaService {
 
     try {
       // Using uppercase for object names since Oracle typically stores them in uppercase
-      let query = `
+      const query = `
         SELECT * FROM APPS.XTD_ONT_SALESREPS_V
         WHERE 1=1
       `;
 
       // Add search condition if search term is provided
-      const queryParams = [];
-      if (last_update_date) {
-        query += ` AND LAST_UPDATE_DATE >= TO_DATE(:last_update_date, 'YYYY-MM-DD') AND LAST_UPDATE_DATE < TO_DATE(:last_update_date, 'YYYY-MM-DD') + 1`;
-        queryParams.push(last_update_date, last_update_date);
-      }
+      // const queryParams = [];
+      // if (last_update_date) {
+      //   query += ` AND LAST_UPDATE_DATE >= TO_DATE(:last_update_date, 'YYYY-MM-DD') AND LAST_UPDATE_DATE < TO_DATE(:last_update_date, 'YYYY-MM-DD') + 1`;
+      //   queryParams.push(last_update_date, last_update_date);
+      // }
 
-      const result = await this.oracleService.executeQuery(query, queryParams);
+      const result = await this.oracleService.executeQuery(query);
 
       // Transform Oracle result to DTO format
       const salesmen: SalesmanMetaDto[] = result.rows.map((row) => ({
