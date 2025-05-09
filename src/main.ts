@@ -95,6 +95,10 @@ async function bootstrap() {
       name: 'REGION_SERVICE',
       queue: configService.get('rmq.region'),
     },
+    {
+      name: 'SALESMAN_SERVICE',
+      queue: configService.get('rmq.salesman'),
+    },
   ];
 
   // Initialize all microservices

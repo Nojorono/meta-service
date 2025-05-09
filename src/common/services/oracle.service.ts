@@ -9,8 +9,7 @@ import * as oracledb from 'oracledb';
 
 @Injectable()
 export class OracleService implements OnModuleInit, OnModuleDestroy {
-  private connection: oracledb.Connection;
-  private pool: oracledb.Pool;
+  private pool: oracledb.Pool | undefined;
   private readonly logger = new Logger(OracleService.name);
 
   constructor(private configService: ConfigService) {}
