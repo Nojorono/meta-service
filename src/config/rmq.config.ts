@@ -10,5 +10,6 @@ export default registerAs(
     branch: process.env.RABBITMQ_BRANCH_QUEUE,
     region: process.env.RABBITMQ_REGION_QUEUE,
     salesman: process.env.RABBITMQ_SALESMAN_QUEUE,
+    employee: process.env.RABBITMQ_EMPLOYEE_QUEUE,
   }),
 );

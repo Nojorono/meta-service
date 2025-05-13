@@ -99,6 +99,10 @@ async function bootstrap() {
       name: 'SALESMAN_SERVICE',
       queue: configService.get('rmq.salesman'),
     },
+    {
+      name: 'EMPLOYEE_SERVICE',
+      queue: configService.get('rmq.employee'),
+    },
   ];
 
   // Initialize all microservices
