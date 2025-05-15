@@ -13,6 +13,8 @@ import { CustomerMetaModule } from '../modules/customer/customer.module';
 import { BranchMetaModule } from '../modules/branch/branch.module';
 import { RegionMetaModule } from '../modules/region/region.module';
 import { SalesmanMetaModule } from '../modules/salesman/salesman.module';
+import { EmployeeMetaModule } from '../modules/employee/employee.module';
+import { GeoTreeMetaModule } from '../modules/geotree/geotree.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { SalesmanMetaModule } from '../modules/salesman/salesman.module';
     CustomerMetaModule,
     BranchMetaModule,
     RegionMetaModule,
+    GeoTreeMetaModule,
+    EmployeeMetaModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
