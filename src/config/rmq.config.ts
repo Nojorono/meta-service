@@ -11,5 +11,6 @@ export default registerAs(
     region: process.env.RABBITMQ_REGION_QUEUE,
     salesman: process.env.RABBITMQ_SALESMAN_QUEUE,
     employee: process.env.RABBITMQ_EMPLOYEE_QUEUE,
+    geotree: process.env.RABBITMQ_GEOTREE_QUEUE,
   }),
 );

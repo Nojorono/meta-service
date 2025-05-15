@@ -103,6 +103,10 @@ async function bootstrap() {
       name: 'EMPLOYEE_SERVICE',
       queue: configService.get('rmq.employee'),
     },
+    {
+      name: 'GEOTREE_SERVICE',
+      queue: configService.get('rmq.geotree'),
+    },
   ];
 
   // Initialize all microservices
