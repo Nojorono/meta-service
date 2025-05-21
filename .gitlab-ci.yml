@@ -18,9 +18,12 @@ deploy_production:
       git config --global user.email 'bagas.mahaswara@limamail.net' &&
       git config --global user.name 'bagas.mahasmara' &&
       cd /var/www/html/service-meta-dms &&
+      git fetch origin master &&
       git pull origin master &&
+      git reset --hard origin/master &&
       yarn install &&
-      ./srvsfa.sh
+      yarn run build &&
+      pm2 restart sfmeta
       "
   environment:
     name: production
