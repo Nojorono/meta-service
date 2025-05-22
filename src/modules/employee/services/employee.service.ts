@@ -453,7 +453,7 @@ export class EmployeeMetaService {
     try {
       // Using uppercase for object names since Oracle typically stores them in uppercase
       const query = `
-        SELECT * FROM APPS.XTD_ONT_SALESREPS_V
+        SELECT * FROM APPS.XTD_PAPF_EMPLOYEE_V
         WHERE 1=1
       `;
 
