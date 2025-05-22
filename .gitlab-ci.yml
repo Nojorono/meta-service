@@ -20,7 +20,6 @@ deploy_production:
       cd /var/www/html/service-meta-dms &&
       git fetch origin master &&
       git pull origin master &&
-      git reset --hard origin/master &&
       yarn install &&
       yarn run build &&
       pm2 restart sfmeta
