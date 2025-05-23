@@ -171,7 +171,7 @@ export class EmployeeMetaService {
         JOIN_DATE: params.JOIN_DATE ? new Date(params.JOIN_DATE) : new Date(),
         ORG_NAME: params.ORG_NAME || 'SALES',
         ORG_ID: params.ORG_ID || '',
-        POSITION_TITLE: params.POSITION_TITLE || 'SALES RRO',
+        POSITION_TITLE: params.POSITION_TITLE || 'SALES RRO MOTOR',
         POSITION_LEVEL: params.POSITION_LEVEL || 'STAFF',
         EMAIL: params.EMAIL || '',
         ATTRIBUTE15: 'TSF',
@@ -183,16 +183,16 @@ export class EmployeeMetaService {
         LAST_UPDATED_BY: 'DMS',
         // Default null for all other fields
         HRIS_HEADER_ID: null,
-        TRX_TYPE: null,
+        TRX_TYPE: 'NEW',
         HEADER_ID: null,
         COST_CENTER: null,
         TERMINATE_DATE: null,
         POSITION_ID: null,
-        POSITION_GROUP: null,
+        POSITION_GROUP: params.POSITION_GROUP || 'SALES RRO',
         SALES_FLAG: 'Y',
         SPV_COMPANY_ID: null,
-        SPV_ID: null,
-        SPV_NAME: null,
+        SPV_ID: params.SPV_ID || '',
+        SPV_NAME: params.SPV_NAME || '',
         SPV_POSITION_ID: null,
         SPV_POSITION_NAME: null,
         BANK_CODE: null,
@@ -223,7 +223,7 @@ export class EmployeeMetaService {
         SOURCE_BATCH_ID: null,
         SOURCE_HEADER_ID: null,
         SOURCE_LINE_ID: null,
-        LAST_UPDATE_LOGIN: null,
+        LAST_UPDATE_LOGIN: -1,
         // Override with current date for audit fields
         CREATION_DATE: new Date(),
         LAST_UPDATE_DATE: new Date(),
@@ -453,7 +453,7 @@ export class EmployeeMetaService {
     try {
       // Using uppercase for object names since Oracle typically stores them in uppercase
       const query = `
-        SELECT * FROM APPS.XTD_ONT_SALESREPS_V
+        SELECT * FROM APPS.XTD_PAPF_EMPLOYEE_V
         WHERE 1=1
       `;
 
