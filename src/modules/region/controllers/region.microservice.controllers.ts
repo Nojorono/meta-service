@@ -12,13 +12,12 @@ export class RegionMetaMicroserviceController {
 
   constructor(private readonly regionMetaService: RegionMetaService) {}
 
-  @MessagePattern('ping')
+  @MessagePattern('ping_region')
   ping() {
-    this.logger.log('Received ping request region microservice');
-    return { status: true, message: 'pong' };
+    return { status: true, message: 'connected to region microservice' };
   }
 
-  @MessagePattern('echo')
+  @MessagePattern('echo_region')
   echo(@Payload() data: any) {
     this.logger.log(
       'Received echo request with payload region microservice',

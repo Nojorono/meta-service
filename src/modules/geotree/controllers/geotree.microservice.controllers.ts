@@ -12,13 +12,12 @@ export class GeoTreeMetaMicroserviceController {
 
   constructor(private readonly geoTreeMetaService: GeoTreeMetaService) {}
 
-  @MessagePattern('ping')
+  @MessagePattern('ping_geotree')
   ping() {
-    this.logger.log('Received ping request geotree microservice');
-    return { status: true, message: 'pong' };
+    return { status: true, message: 'connected to geotree microservice' };
   }
 
-  @MessagePattern('echo')
+  @MessagePattern('echo_geotree')
   echo(@Payload() data: any) {
     this.logger.log(
       'Received echo request with payload geotree microservice',
