@@ -14,13 +14,12 @@ export class EmployeeMetaMicroserviceController {
 
   constructor(private readonly employeeMetaService: EmployeeMetaService) {}
 
-  @MessagePattern('ping')
+  @MessagePattern('ping_employee')
   ping() {
-    this.logger.log('Received ping request employee microservice');
-    return { status: true, message: 'pong' };
+    return { status: true, message: 'connected to employee microservice' };
   }
 
-  @MessagePattern('echo')
+  @MessagePattern('echo_employee')
   echo(@Payload() data: any) {
     this.logger.log(
       'Received echo request with payload employee microservice',

@@ -12,13 +12,12 @@ export class BranchMetaMicroserviceController {
 
   constructor(private readonly branchMetaService: BranchMetaService) {}
 
-  @MessagePattern('ping')
+  @MessagePattern('ping_branch')
   ping() {
-    this.logger.log('Received ping request branch microservice');
-    return { status: true, message: 'pong' };
+    return { status: true, message: 'connected to branch microservice' };
   }
 
-  @MessagePattern('echo')
+  @MessagePattern('echo_branch')
   echo(@Payload() data: any) {
     this.logger.log(
       'Received echo request with payload branch microservice',
