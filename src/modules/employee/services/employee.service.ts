@@ -368,6 +368,10 @@ export class EmployeeMetaService {
 
       // Transform Oracle result to DTO format
       const employees: EmployeeMetaDto[] = result.rows.map((row) => ({
+        salesrep_id: row.SALESREP_ID,
+        sales_credit_type_id: row.SALES_CREDIT_TYPE_ID,
+        subinventory_code: row.SUBINVENTORY_CODE,
+        locator_id: row.LOCATOR_ID,
         employee_number: row.EMPLOYEE_NUMBER,
         employee_name: row.EMPLOYEE_NAME,
         flag_salesman: row.FLAG_SALESMAN,
@@ -468,6 +472,10 @@ export class EmployeeMetaService {
 
       // Transform Oracle result to DTO format
       const employees: EmployeeMetaDto[] = result.rows.map((row) => ({
+        salesrep_id: row.SALESREP_ID,
+        sales_credit_type_id: row.SALES_CREDIT_TYPE_ID,
+        subinventory_code: row.SUBINVENTORY_CODE,
+        locator_id: row.LOCATOR_ID,
         employee_number: row.EMPLOYEE_NUMBER,
         employee_name: row.EMPLOYEE_NAME,
         flag_salesman: row.FLAG_SALESMAN,

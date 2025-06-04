@@ -2,6 +2,10 @@ export class EmployeeMetaDto {
   employee_number: string;
   employee_name: string;
   flag_salesman?: string;
+  salesrep_id?: number;
+  sales_credit_type_id?: number;
+  subinventory_code?: string;
+  locator_id?: number;
   supervisor_number?: string;
   vendor_name?: string;
   vendor_num?: string;
