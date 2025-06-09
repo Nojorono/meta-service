@@ -12,14 +12,12 @@ import { CommonModule } from '../common/common.module';
 import { CustomerMetaModule } from '../modules/customer/customer.module';
 import { BranchMetaModule } from '../modules/branch/branch.module';
 import { RegionMetaModule } from '../modules/region/region.module';
-import { SalesmanMetaModule } from '../modules/salesman/salesman.module';
 import { EmployeeMetaModule } from '../modules/employee/employee.module';
 import { GeoTreeMetaModule } from '../modules/geotree/geotree.module';
 
 @Module({
   imports: [
     CommonModule,
-    SalesmanMetaModule,
     CustomerMetaModule,
     BranchMetaModule,
     RegionMetaModule,
