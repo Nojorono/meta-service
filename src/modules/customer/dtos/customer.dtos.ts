@@ -1,6 +1,8 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class MetaCustomerDto {
+  @ApiPropertyOptional({ description: 'Customer address line 1' })
   @IsString()
   @IsOptional()
   address1?: string;
@@ -29,6 +31,7 @@ export class MetaCustomerDto {
   @IsOptional()
   cust_account_id?: number;
 
+  @ApiProperty({ description: 'Customer name', example: 'PT. ABCD Indonesia' })
   @IsString()
   customer_name: string;
 
@@ -138,29 +141,58 @@ export class MetaCustomerDto {
 }
 
 export class MetaCustomerDtoByDate {
+  @ApiProperty({
+    description: 'Last update date filter',
+    example: '2024-01-15',
+  })
   last_update_date: string; // 2024-05-22 18:10:01
 }
 
 export class PaginationParamsDto {
+  @ApiPropertyOptional({ description: 'Page number', example: 1 })
   @IsNumber()
   @IsOptional()
   page?: number;
 
+  @ApiPropertyOptional({ description: 'Items per page', example: 10 })
   @IsNumber()
   @IsOptional()
   limit?: number;
 
+  @ApiPropertyOptional({ description: 'Search term', example: 'PT. ABCD' })
   @IsString()
   @IsOptional()
   search?: string;
 }
 
 export class MetaCustomerResponseDto {
+  @ApiProperty({
+    description: 'Array of customer data',
+    type: [MetaCustomerDto],
+  })
   data: MetaCustomerDto[];
+
+  @ApiProperty({ description: 'Total count of customers', example: 100 })
   count: number;
+
+  @ApiPropertyOptional({
+    description: 'Total pages for pagination',
+    example: 10,
+  })
   totalPages?: number;
+
+  @ApiPropertyOptional({ description: 'Current page number', example: 1 })
   currentPage?: number;
+
+  @ApiPropertyOptional({ description: 'Items per page', example: 10 })
   limit?: number;
+
+  @ApiPropertyOptional({
+    description: 'Response message',
+    example: 'Customer data retrieved successfully',
+  })
   message?: string;
+
+  @ApiPropertyOptional({ description: 'Response status', example: true })
   status?: boolean;
 }

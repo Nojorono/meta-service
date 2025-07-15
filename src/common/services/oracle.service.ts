@@ -18,11 +18,34 @@ export class OracleService implements OnModuleInit, OnModuleDestroy {
     this.logger.log('Initializing Oracle Service...');
     // Initialize Oracle client
     try {
+      // Try to initialize without libDir first (using PATH)
       oracledb.initOracleClient();
-      this.logger.log('Oracle client initialized successfully');
+      this.logger.log('Oracle client initialized successfully using PATH');
     } catch (err) {
-      // If initOracleClient fails, it might be already initialized
-      this.logger.warn(`Oracle client initialization note: ${err.message}`);
+      // If PATH doesn't work, try with explicit libDir from environment variable
+      const oracleLibDir = this.configService.get<string>(
+        'ORACLE_INSTANT_CLIENT_PATH',
+      );
+      if (oracleLibDir) {
+        try {
+          oracledb.initOracleClient({ libDir: oracleLibDir });
+          this.logger.log(
+            `Oracle client initialized successfully using libDir: ${oracleLibDir}`,
+          );
+        } catch (libDirErr) {
+          this.logger.warn(
+            `Oracle client initialization failed with libDir: ${libDirErr.message}`,
+          );
+          this.logger.warn(
+            'Please ensure Oracle Instant Client is in PATH or ORACLE_INSTANT_CLIENT_PATH is set correctly',
+          );
+        }
+      } else {
+        this.logger.warn(`Oracle client initialization note: ${err.message}`);
+        this.logger.warn(
+          'Consider adding Oracle Instant Client to PATH or set ORACLE_INSTANT_CLIENT_PATH environment variable',
+        );
+      }
     }
 
     // We'll set autoCommit in the executeQuery method directly
@@ -46,6 +69,10 @@ export class OracleService implements OnModuleInit, OnModuleDestroy {
         poolMax: 20,
         poolMin: 5,
         poolTimeout: 300,
+        connectTimeout: 60, // 60 seconds timeout
+        enableStatistics: true,
+        queueMax: 500,
+        queueTimeout: 30000, // 30 seconds queue timeout
       });
       this.logger.log('Oracle connection pool created successfully');
     } catch (error) {
@@ -53,7 +80,14 @@ export class OracleService implements OnModuleInit, OnModuleDestroy {
         `Error creating Oracle connection pool: ${error.message}`,
         error.stack,
       );
-      throw error;
+      this.logger.warn(
+        'Oracle connection failed. Service will start without database connection.',
+      );
+      this.logger.warn(
+        'Please check: 1) Database host/port accessibility, 2) Oracle Instant Client installation, 3) Network connectivity',
+      );
+      // Don't throw error, allow service to start without DB connection
+      // throw error;
     }
   }
 
@@ -72,6 +106,11 @@ export class OracleService implements OnModuleInit, OnModuleDestroy {
   }
 
   async getConnection(): Promise<oracledb.Connection> {
+    if (!this.pool) {
+      throw new Error(
+        'Oracle connection pool is not available. Database connection failed during initialization.',
+      );
+    }
     try {
       this.logger.log('Getting connection from Oracle pool...');
       const connection = await this.pool.getConnection();
