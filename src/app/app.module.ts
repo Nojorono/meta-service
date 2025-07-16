@@ -14,6 +14,39 @@ import { BranchMetaModule } from '../modules/branch/branch.module';
 import { RegionMetaModule } from '../modules/region/region.module';
 import { EmployeeMetaModule } from '../modules/employee/employee.module';
 import { GeoTreeMetaModule } from '../modules/geotree/geotree.module';
+import { WarehouseMetaModule } from '../modules/warehouse/warehouse.module';
+import { SalesItemMetaModule } from '../modules/sales-item/sales-item.module';
+import { SalesmanMetaModule } from '../modules/salesman/salesman.module';
+import { ProvinceMetaModule } from '../modules/province/province.module';
+import { CityMetaModule } from '../modules/city/city.module';
+import { DistrictMetaModule } from '../modules/district/district.module';
+import { SubDistrictMetaModule } from '../modules/sub-district/sub-district.module';
+import { OrganizationMetaModule } from '../modules/organization/organization.module';
+import { PositionMetaModule } from '../modules/position/position.module';
+import { SupplierMetaModule } from '../modules/supplier/supplier.module';
+import { CategoryMetaModule } from '../modules/category/category.module';
+import { SalesItemConversionModule } from '../modules/sales-item-conversion/sales-item-conversion.module';
+import { ReceiptMethodModule } from '../modules/receipt-method/receipt-method.module';
+import { SalesActivityModule } from '../modules/sales-activity/sales-activity.module';
+import { CoaExpenseModule } from '../modules/coa-expense/coa-expense.module';
+import { PaymentMethodModule } from '../modules/payment-method/payment-method.module';
+import { TransactionTypeModule } from '../modules/transaction-type/transaction-type.module';
+import { UserDmsModule } from '../modules/user-dms/user-dms.module';
+import { CurrencyModule } from '../modules/currency/currency.module';
+import { PriceListModule } from '../modules/price-list/price-list.module';
+import { SalesOrderTypesModule } from '../modules/sales-order-types/sales-order-types.module';
+import { FpprTypesModule } from '../modules/fppr-types/fppr-types.module';
+import { FpprSalesTypesModule } from '../modules/fppr-sales-types/fppr-sales-types.module';
+import { ArTermsModule } from '../modules/ar-terms/ar-terms.module';
+import { ApTermsModule } from '../modules/ap-terms/ap-terms.module';
+import { ApInvoiceTypesModule } from '../modules/ap-invoice-types/ap-invoice-types.module';
+import { ZxTaxModule } from '../modules/zx-tax/zx-tax.module';
+import { ArOutstandingsModule } from '../modules/ar-outstandings/ar-outstandings.module';
+import { SalesOrderStockModule } from '../modules/sales-order-stock/sales-order-stock.module';
+import { MtlTrxListsModule } from '../modules/mtl-trx-lists/mtl-trx-lists.module';
+import { SummaryFpprModule } from '../modules/summary-fppr/summary-fppr.module';
+import { PurchaseOrderModule } from 'src/modules/purchase-order/purchase-order.module';
+import { ItemListMetaModule } from '../modules/item-list/item-list.module';
 
 @Module({
   imports: [
@@ -23,6 +56,41 @@ import { GeoTreeMetaModule } from '../modules/geotree/geotree.module';
     RegionMetaModule,
     GeoTreeMetaModule,
     EmployeeMetaModule,
+    WarehouseMetaModule,
+    SalesItemMetaModule,
+    SalesmanMetaModule,
+    ProvinceMetaModule,
+    CityMetaModule,
+    DistrictMetaModule,
+    SubDistrictMetaModule,
+    OrganizationMetaModule,
+    PositionMetaModule,
+    SupplierMetaModule,
+    CategoryMetaModule,
+    SalesItemConversionModule,
+    ReceiptMethodModule,
+    SalesActivityModule,
+    CoaExpenseModule,
+    PaymentMethodModule,
+    TransactionTypeModule,
+    UserDmsModule,
+    CurrencyModule,
+    PriceListModule,
+    SalesOrderTypesModule,
+    FpprTypesModule,
+    FpprSalesTypesModule,
+    ArTermsModule,
+    ApTermsModule,
+    ApInvoiceTypesModule,
+    ZxTaxModule,
+    ArOutstandingsModule,
+    SalesOrderStockModule,
+    MtlTrxListsModule,
+    SummaryFpprModule,
+    PurchaseOrderModule,
+    ItemListMetaModule,
+    // Other modules can be added here
+
     PassportModule.register({ defaultStrategy: 'jwt' }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',

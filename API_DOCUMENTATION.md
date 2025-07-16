@@ -19,88 +19,169 @@ SOFIA Meta Service menyediakan API untuk mengakses data master dari Oracle Datab
 ## API Endpoints
 
 ### 1. Customer Meta APIs
-
-#### Get All Customers
-```http
-GET /api/v1/customer
-```
-**Parameters:**
-- `page` (optional): Page number for pagination
-- `limit` (optional): Items per page (default: all)
-- `search` (optional): Search term for filtering customers
-
-**Example:**
-```http
-GET /api/v1/customer?page=1&limit=10&search=PT
-```
-
-#### Get Customers by Date
-```http
-GET /api/v1/customer/by-date?last_update_date=2024-01-15
-```
-
-#### Get Customer by ID
-```http
-GET /api/v1/customer/{id}
-```
+- `GET /api/v1/customer`
+- `GET /api/v1/customer/by-date`
+- `GET /api/v1/customer/{id}`
 
 ### 2. Branch Meta APIs
-
-#### Get All Branches
-```http
-GET /api/v1/branch
-```
-
-#### Get Branches by Date
-```http
-GET /api/v1/branch/by-date?last_update_date=2024-01-15
-```
+- `GET /api/v1/branch`
+- `GET /api/v1/branch/by-date`
+- `GET /api/v1/branch/{id}`
 
 ### 3. Region Meta APIs
-
-#### Get All Regions
-```http
-GET /api/v1/region
-```
-
-#### Get Regions by Date
-```http
-GET /api/v1/region/by-date?last_update_date=2024-01-15
-```
-
-#### Get Region by Code
-```http
-GET /api/v1/region/{code}
-```
+- `GET /api/v1/region`
+- `GET /api/v1/region/by-date`
+- `GET /api/v1/region/{code}`
 
 ### 4. Employee Meta APIs
-
-#### Get All Employees
-```http
-GET /api/v1/employee
-```
-
-#### Get Employees by Date
-```http
-GET /api/v1/employee/by-date?last_update_date=2024-01-15
-```
-
-#### Get Employee by Number
-```http
-GET /api/v1/employee/{employeeNumber}
-```
+- `GET /api/v1/employee`
+- `GET /api/v1/employee/by-date`
+- `GET /api/v1/employee/{employeeNumber}`
 
 ### 5. GeoTree Meta APIs
+- `GET /api/v1/geotree`
+- `GET /api/v1/geotree/by-date`
+- `GET /api/v1/geotree/{id}`
 
-#### Get All GeoTrees
-```http
-GET /api/v1/geotree
-```
+### 6. Warehouse Meta APIs
+- `GET /api/v1/warehouse`
+- `GET /api/v1/warehouse/by-date`
+- `GET /api/v1/warehouse/organization-code?organization_code=SUB`
+- `GET /api/v1/warehouse/{id}`
 
-#### Get GeoTrees by Date
-```http
-GET /api/v1/geotree/by-date?last_update_date=2024-01-15
-```
+### 7. Item List APIs
+- `GET /api/v1/item-list`
+- `GET /api/v1/item-list/by-item-code`
+
+### 8. Sales Item APIs
+- `GET /api/v1/sales-item`
+- `GET /api/v1/sales-item/by-date`
+
+### 9. Salesman APIs
+- `GET /api/v1/salesman`
+- `GET /api/v1/salesman/{id}`
+
+### 10. Province APIs
+- `GET /api/v1/province`
+- `GET /api/v1/province/{code}`
+
+### 11. City APIs
+- `GET /api/v1/city`
+- `GET /api/v1/city/{code}`
+
+### 12. District APIs
+- `GET /api/v1/district`
+- `GET /api/v1/district/{code}`
+
+### 13. Sub-district APIs
+- `GET /api/v1/subdistrict`
+- `GET /api/v1/subdistrict/{code}`
+
+### 14. Organization APIs
+- `GET /api/v1/organization`
+- `GET /api/v1/organization/{id}`
+
+### 15. Position APIs
+- `GET /api/v1/position`
+- `GET /api/v1/position/{id}`
+
+### 16. Supplier APIs
+- `GET /api/v1/supplier`
+- `GET /api/v1/supplier/{id}`
+
+### 17. Category APIs
+- `GET /api/v1/category`
+- `GET /api/v1/category/{id}`
+
+### 18. Purchase Order APIs
+- `GET /api/v1/purchase-order?nomorPO={nomorPO}`
+
+### 19. Sales Order Stock APIs
+- `GET /api/v1/sales-order-stock`
+- `GET /api/v1/sales-order-stock/{id}`
+
+### 20. AR Outstandings APIs
+- `GET /api/v1/ar-outstandings`
+- `GET /api/v1/ar-outstandings/{id}`
+
+### 21. AR Terms APIs
+- `GET /api/v1/ar-terms`
+- `GET /api/v1/ar-terms/{id}`
+
+### 22. AP Terms APIs
+- `GET /api/v1/ap-terms`
+- `GET /api/v1/ap-terms/{id}`
+
+### 23. AP Invoice Types APIs
+- `GET /api/v1/ap-invoice-types`
+- `GET /api/v1/ap-invoice-types/{id}`
+
+### 24. ZxTax APIs
+- `GET /api/v1/zx-tax`
+- `GET /api/v1/zx-tax/{id}`
+
+### 25. FPPR Types APIs
+- `GET /api/v1/fppr-types`
+- `GET /api/v1/fppr-types/{code}`
+
+### 26. FPPR Sales Types APIs
+- `GET /api/v1/fppr-sales-types`
+- `GET /api/v1/fppr-sales-types/{code}`
+
+### 27. Price List APIs
+- `GET /api/v1/price-list`
+- `GET /api/v1/price-list/{id}`
+
+### 28. Payment Method APIs
+- `GET /api/v1/payment-method`
+- `GET /api/v1/payment-method/name/{name}`
+- `GET /api/v1/payment-method/code/{code}`
+
+### 29. Receipt Method APIs
+- `GET /api/v1/receipt-method`
+- `GET /api/v1/receipt-method/{id}`
+
+### 30. Currency APIs
+- `GET /api/v1/currency`
+- `GET /api/v1/currency/{code}`
+
+### 31. Transaction Type APIs
+- `GET /api/v1/transaction-type`
+- `GET /api/v1/transaction-type/{code}`
+
+### 32. COA Expense APIs
+- `GET /api/v1/coa-expense`
+- `GET /api/v1/coa-expense/{id}`
+
+### 33. User DMS APIs
+- `GET /api/v1/user-dms`
+- `GET /api/v1/user-dms/{id}`
+
+### 34. Sales Item Conversion APIs
+- `GET /api/v1/sales-item-conversion`
+- `GET /api/v1/sales-item-conversion/{id}`
+
+### 35. Sales Activity APIs
+- `GET /api/v1/sales-activity`
+- `GET /api/v1/sales-activity/{id}`
+
+### 36. Sales Order Types APIs
+- `GET /api/v1/sales-order-types`
+- `GET /api/v1/sales-order-types/{id}`
+
+### 37. Mtl Trx Lists APIs
+- `GET /api/v1/mtl-trx-lists`
+- `GET /api/v1/mtl-trx-lists/{id}`
+
+### 38. Summary FPPR APIs
+- `GET /api/v1/summary-fppr`
+- `GET /api/v1/summary-fppr/{id}`
+
+---
+
+**Catatan:**
+- Semua endpoint mendukung query parameter untuk filter, pagination, dan pencarian sesuai dokumentasi Swagger.
+- Untuk detail parameter dan response, cek Swagger UI di `/docs`.
 
 ## Response Format
 
@@ -170,8 +251,19 @@ All APIs fetch data from Oracle Database views:
 - **Customers**: `APPS.XTD_AR_CUSTOMERS_V`
 - **Branches**: `APPS.XTD_INV_BRANCHES_V`
 - **Regions**: `APPS.XTD_INV_REGION_V`
-- **Employees**: `APPS.XTD_HR_EMPLOYEES_V`
+- **Employees**: `APPS.XTD_HR_EMPLOYEES_V` and `APPS.XTD_PAPF_EMPLOYEE_V`
 - **GeoTrees**: `APPS.XTD_INV_GEOTREE_V`
+- **Warehouses**: `APPS.XTD_INV_WAREHOUSES_V`
+- **Sales Items**: `APPS.XTD_INV_SALES_ITEMS_V`
+- **Salesmen**: `APPS.XTD_ONT_SALESREPS_V`
+- **Provinces**: `APPS.XTD_FND_PROVINSI_V`
+- **Cities**: `APPS.XTD_FND_KOTAMADYA_V`
+- **Districts**: `APPS.XTD_FND_KECAMATAN_V`
+- **Sub-districts**: `APPS.XTD_FND_KELURAHAN_V`
+- **Organizations**: `APPS.XTD_HR_ORGANIZATIONS_V`
+- **Positions**: `APPS.XTD_HR_POSITIONS_V`
+- **Suppliers**: `APPS.XTD_AP_SUPPLIERS_V`
+- **Categories**: `APPS.XTD_INV_CATEGORIES_V`
 
 ## Caching
 

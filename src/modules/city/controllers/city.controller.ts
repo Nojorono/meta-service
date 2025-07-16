@@ -1,0 +1,218 @@
+import {
+  Controller,
+  Get,
+  Query,
+  Param,
+  HttpException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { Public } from 'src/decorators/public.decorator';
+import { CityService } from '../services/city.service';
+import { CityDto, CityQueryDto } from '../dtos/city.dtos';
+
+@ApiTags('City')
+@Controller('city')
+@Public()
+export class CityController {
+  private readonly logger = new Logger(CityController.name);
+
+  constructor(private readonly cityService: CityService) {}
+
+  @Get()
+  @ApiOperation({ 
+    summary: 'Get all cities',
+    description: 'Retrieve a list of all cities from XTD_FND_KOTAMADYA_V view'
+  })
+  @ApiQuery({
+    name: 'provinsiCode',
+    required: false,
+    description: 'Filter by province code',
+    example: 'JKT'
+  })
+  @ApiQuery({
+    name: 'kotamadyaCode',
+    required: false,
+    description: 'Filter by city code',
+    example: 'JKT01'
+  })
+  @ApiQuery({
+    name: 'kotamadyaName',
+    required: false,
+    description: 'Filter by city name',
+    example: 'Jakarta'
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number for pagination',
+    example: 1
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of records per page',
+    example: 10
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of cities retrieved successfully',
+    type: [CityDto],
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
+  async findAllCities(@Query() queryDto: CityQueryDto): Promise<CityDto[]> {
+    try {
+      this.logger.log('Fetching all cities with filters:', queryDto);
+      return await this.cityService.findAllCities(queryDto);
+    } catch (error) {
+      this.logger.error('Error fetching cities:', error);
+      throw new HttpException(
+        'Failed to fetch cities',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('count')
+  @ApiOperation({ 
+    summary: 'Get city count',
+    description: 'Get the total count of cities matching the filter criteria'
+  })
+  @ApiQuery({
+    name: 'provinsiCode',
+    required: false,
+    description: 'Filter by province code',
+    example: 'JKT'
+  })
+  @ApiQuery({
+    name: 'kotamadyaCode',
+    required: false,
+    description: 'Filter by city code',
+    example: 'JKT01'
+  })
+  @ApiQuery({
+    name: 'kotamadyaName',
+    required: false,
+    description: 'Filter by city name',
+    example: 'Jakarta'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'City count retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        count: { type: 'number', example: 514 }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
+  async getCityCount(@Query() queryDto: CityQueryDto): Promise<{ count: number }> {
+    try {
+      this.logger.log('Getting city count with filters:', queryDto);
+      const count = await this.cityService.getCityCount(queryDto);
+      return { count };
+    } catch (error) {
+      this.logger.error('Error getting city count:', error);
+      throw new HttpException(
+        'Failed to get city count',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get('province/:provinceCode')
+  @ApiOperation({ 
+    summary: 'Get cities by province code',
+    description: 'Retrieve all cities for a specific province from XTD_FND_KOTAMADYA_V view'
+  })
+  @ApiParam({
+    name: 'provinceCode',
+    description: 'Province code',
+    example: 'JKT',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Cities retrieved successfully',
+    type: [CityDto],
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
+  async findCitiesByProvinceCode(@Param('provinceCode') provinceCode: string): Promise<CityDto[]> {
+    try {
+      this.logger.log(`Fetching cities by province code: ${provinceCode}`);
+      return await this.cityService.findCitiesByProvinceCode(provinceCode);
+    } catch (error) {
+      this.logger.error(`Error fetching cities by province code ${provinceCode}:`, error);
+      throw new HttpException(
+        'Failed to fetch cities',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @Get(':code')
+  @ApiOperation({ 
+    summary: 'Get city by code',
+    description: 'Retrieve a specific city by its code from XTD_FND_KOTAMADYA_V view'
+  })
+  @ApiParam({
+    name: 'code',
+    description: 'City code',
+    example: 'JKT01',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'City retrieved successfully',
+    type: CityDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'City not found',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
+  async findCityByCode(@Param('code') code: string): Promise<CityDto> {
+    try {
+      this.logger.log(`Fetching city by code: ${code}`);
+      const city = await this.cityService.findCityByCode(code);
+      
+      if (!city) {
+        throw new HttpException(
+          `City with code ${code} not found`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      return city;
+    } catch (error) {
+      this.logger.error(`Error fetching city by code ${code}:`, error);
+      
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      
+      throw new HttpException(
+        'Failed to fetch city',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+}
