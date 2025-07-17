@@ -15,7 +15,7 @@ import { ArTermsDto, ArTermsQueryDto } from '../dtos/ar-terms.dtos';
 @ApiTags('AR Terms')
 @Controller('ar-terms')
 export class ArTermsMicroserviceController {
-  constructor(private readonly arTermsService: ArTermsService) {}
+  constructor(private readonly apTermsService: ArTermsService) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all AR terms' })
@@ -23,27 +23,19 @@ export class ArTermsMicroserviceController {
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
   @ApiQuery({ name: 'TERM_ID', required: false, type: Number, description: 'Term ID' })
-  @ApiQuery({ name: 'NAME', required: false, type: String, description: 'Name' })
-  @ApiQuery({ name: 'TYPE', required: false, type: String, description: 'Type' })
+  @ApiQuery({ name: 'TERM_NAME', required: false, type: String, description: 'Term Name' })
+  @ApiQuery({ name: 'DESCRIPTION', required: false, type: String, description: 'Description' })
   @ApiQuery({ name: 'ENABLED_FLAG', required: false, type: String, description: 'Enabled flag' })
   async findAll(@Query() query: ArTermsQueryDto) {
     try {
-      const { page = 1, limit = 10, ...filters } = query;
-      
-      const [data, total] = await Promise.all([
-        this.arTermsService.findAllArTerms(query),
-        this.arTermsService.countArTerms(query)
-      ]);
-
+      const data = await this.apTermsService.findAllArTerms(query);
+      const total = await this.apTermsService.countArTerms(query);
       return {
         success: true,
         data,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          totalPages: Math.ceil(total / Number(limit))
-        }
+        total,
+        page: query.page || 1,
+        limit: query.limit || 10,
       };
     } catch (error) {
       throw new HttpException(
@@ -58,12 +50,12 @@ export class ArTermsMicroserviceController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get AR term by ID' })
-  @ApiResponse({ status: 200, description: 'AR term retrieved successfully', type: ArTermsDto })
-  @ApiResponse({ status: 404, description: 'AR term not found' })
+  @ApiOperation({ summary: 'Get AP term by ID' })
+  @ApiResponse({ status: 200, description: 'AP term retrieved successfully', type: ArTermsDto })
+  @ApiResponse({ status: 404, description: 'AP term not found' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     try {
-      const result = await this.arTermsService.findArTermById(id);
+      const result = await this.apTermsService.findArTermById(id);
       return {
         success: true,
         data: result,
@@ -72,7 +64,7 @@ export class ArTermsMicroserviceController {
       throw new HttpException(
         {
           success: false,
-          message: 'AR term not found',
+          message: 'AP term not found',
           error: error.message,
         },
         HttpStatus.NOT_FOUND,
@@ -80,25 +72,12 @@ export class ArTermsMicroserviceController {
     }
   }
 
-  @MessagePattern('ar_terms.findAll')
+  @MessagePattern('ap_terms.findAll')
   async findAllMicroservice(@Payload() query: ArTermsQueryDto) {
     try {
-      const { page = 1, limit = 10, ...filters } = query;
-      
-      const [data, total] = await Promise.all([
-        this.arTermsService.findAllArTerms(query),
-        this.arTermsService.countArTerms(query)
-      ]);
-
-      return {
-        data,
-        pagination: {
-          page: Number(page),
-          limit: Number(limit),
-          total,
-          totalPages: Math.ceil(total / Number(limit))
-        }
-      };
+      const data = await this.apTermsService.findAllArTerms(query);
+      const total = await this.apTermsService.countArTerms(query);
+      return { data, total };
     } catch (error) {
       throw new HttpException(
         {
@@ -111,15 +90,15 @@ export class ArTermsMicroserviceController {
     }
   }
 
-  @MessagePattern('ar_terms.findOne')
+  @MessagePattern('ap_terms.findOne')
   async findOneMicroservice(@Payload() data: { id: number }) {
     try {
-      return await this.arTermsService.findArTermById(data.id);
+      return await this.apTermsService.findArTermById(data.id);
     } catch (error) {
       throw new HttpException(
         {
           success: false,
-          message: 'AR term not found',
+          message: 'AP term not found',
           error: error.message,
         },
         HttpStatus.NOT_FOUND,

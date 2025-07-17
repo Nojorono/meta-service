@@ -33,9 +33,9 @@ export class SalesItemConversionService {
           BASE_UOM_CODE,
           BASE_UOM,
           CONVERSION_RATE,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_INV_SALES_ITEM_CONVERSIONS_V
         WHERE 1=1
       `;
@@ -76,7 +76,8 @@ export class SalesItemConversionService {
       // Add pagination
       const offset = (page - 1) * limit;
       query += ` ORDER BY ITEM_CODE OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
-      params.push(offset, limit);
+      params.push(offset);      // :paramIndex
+      params.push(limit);       // :paramIndex + 1
 
       const result = await this.oracleService.executeQuery(query, params);
       
@@ -101,9 +102,9 @@ export class SalesItemConversionService {
           BASE_UOM_CODE,
           BASE_UOM,
           CONVERSION_RATE,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_INV_SALES_ITEM_CONVERSIONS_V
         WHERE INVENTORY_ITEM_ID = :1
       `;

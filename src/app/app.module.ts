@@ -24,7 +24,6 @@ import { SubDistrictMetaModule } from '../modules/sub-district/sub-district.modu
 import { OrganizationMetaModule } from '../modules/organization/organization.module';
 import { PositionMetaModule } from '../modules/position/position.module';
 import { SupplierMetaModule } from '../modules/supplier/supplier.module';
-import { CategoryMetaModule } from '../modules/category/category.module';
 import { SalesItemConversionModule } from '../modules/sales-item-conversion/sales-item-conversion.module';
 import { ReceiptMethodModule } from '../modules/receipt-method/receipt-method.module';
 import { SalesActivityModule } from '../modules/sales-activity/sales-activity.module';
@@ -47,6 +46,7 @@ import { MtlTrxListsModule } from '../modules/mtl-trx-lists/mtl-trx-lists.module
 import { SummaryFpprModule } from '../modules/summary-fppr/summary-fppr.module';
 import { PurchaseOrderModule } from 'src/modules/purchase-order/purchase-order.module';
 import { ItemListMetaModule } from '../modules/item-list/item-list.module';
+import { SalesOrderModule } from 'src/modules/sales-order/sales-order.module';
 
 @Module({
   imports: [
@@ -66,7 +66,6 @@ import { ItemListMetaModule } from '../modules/item-list/item-list.module';
     OrganizationMetaModule,
     PositionMetaModule,
     SupplierMetaModule,
-    CategoryMetaModule,
     SalesItemConversionModule,
     ReceiptMethodModule,
     SalesActivityModule,
@@ -89,6 +88,7 @@ import { ItemListMetaModule } from '../modules/item-list/item-list.module';
     SummaryFpprModule,
     PurchaseOrderModule,
     ItemListMetaModule,
+    SalesOrderModule,
     // Other modules can be added here
 
     PassportModule.register({ defaultStrategy: 'jwt' }),

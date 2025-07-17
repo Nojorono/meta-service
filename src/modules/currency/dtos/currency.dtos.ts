@@ -47,33 +47,33 @@ export class CurrencyQueryDto {
     example: 'ADP',
     required: false,
   })
-  currencyCode?: string;
+  CURRENCY_CODE?: string;
 
   @ApiProperty({
     description: 'Currency name to filter by',
     example: 'Andorran Peseta',
     required: false,
   })
-  name?: string;
+  NAME?: string;
 
   @ApiProperty({
     description: 'Enabled flag to filter by',
     example: 'X',
     required: false,
   })
-  enabledFlag?: string;
+  ENABLED_FLAG?: string;
 
   @ApiProperty({
     description: 'Page number for pagination',
     example: 1,
     required: false,
   })
-  page?: number;
+  PAGE?: number;
 
   @ApiProperty({
     description: 'Number of records per page',
     example: 10,
     required: false,
   })
-  limit?: number;
+  LIMIT?: number;
 }

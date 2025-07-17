@@ -13,9 +13,8 @@ export class FpprTypesService {
   ): Promise<FpprTypesDto[]> {
     try {
       const { 
-        LOOKUP_TYPE, 
-        LOOKUP_CODE, 
-        MEANING, 
+        FPPR_TYPE_CODE, 
+        DESCRIPTION, 
         ENABLED_FLAG, 
         page = 1, 
         limit = 10 
@@ -23,38 +22,12 @@ export class FpprTypesService {
       
       let query = `
         SELECT 
-          LOOKUP_TYPE,
-          LOOKUP_CODE,
-          MEANING,
+          FPPR_TYPE_CODE,
           DESCRIPTION,
           ENABLED_FLAG,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          TERRITORY_CODE,
-          ATTRIBUTE1,
-          ATTRIBUTE2,
-          ATTRIBUTE3,
-          ATTRIBUTE4,
-          ATTRIBUTE5,
-          ATTRIBUTE6,
-          ATTRIBUTE7,
-          ATTRIBUTE8,
-          ATTRIBUTE9,
-          ATTRIBUTE10,
-          ATTRIBUTE11,
-          ATTRIBUTE12,
-          ATTRIBUTE13,
-          ATTRIBUTE14,
-          ATTRIBUTE15,
-          ATTRIBUTE_CATEGORY,
-          CREATED_BY,
-          TO_CHAR(CREATION_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS CREATION_DATE,
-          LAST_UPDATED_BY,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
-          LAST_UPDATE_LOGIN,
-          SOURCE_LANG,
-          SECURITY_GROUP_ID,
-          VIEW_APPLICATION_ID
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          LAST_UPDATE_DATE 
         FROM APPS.XTD_ONT_FPPR_TYPES_V
         WHERE 1=1
       `;
@@ -62,21 +35,15 @@ export class FpprTypesService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (LOOKUP_TYPE) {
-        query += ` AND UPPER(LOOKUP_TYPE) = UPPER(:${paramIndex})`;
-        params.push(LOOKUP_TYPE);
+      if (FPPR_TYPE_CODE) {
+        query += ` AND UPPER(FPPR_TYPE_CODE) = UPPER(:${paramIndex})`;
+        params.push(FPPR_TYPE_CODE);
         paramIndex++;
       }
 
-      if (LOOKUP_CODE) {
-        query += ` AND UPPER(LOOKUP_CODE) = UPPER(:${paramIndex})`;
-        params.push(LOOKUP_CODE);
-        paramIndex++;
-      }
-
-      if (MEANING) {
-        query += ` AND UPPER(MEANING) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${MEANING}%`);
+      if (DESCRIPTION) {
+        query += ` AND UPPER(DESCRIPTION) = UPPER(:${paramIndex})`;
+        params.push(DESCRIPTION);
         paramIndex++;
       }
 
@@ -88,7 +55,7 @@ export class FpprTypesService {
 
       // Add pagination
       const offset = (page - 1) * limit;
-      query += ` ORDER BY LOOKUP_CODE OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
+      query += ` ORDER BY FPPR_TYPE_CODE OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
@@ -105,40 +72,14 @@ export class FpprTypesService {
     try {
       const query = `
         SELECT 
-          LOOKUP_TYPE,
-          LOOKUP_CODE,
-          MEANING,
+          FPPR_TYPE_CODE,
           DESCRIPTION,
           ENABLED_FLAG,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          TERRITORY_CODE,
-          ATTRIBUTE1,
-          ATTRIBUTE2,
-          ATTRIBUTE3,
-          ATTRIBUTE4,
-          ATTRIBUTE5,
-          ATTRIBUTE6,
-          ATTRIBUTE7,
-          ATTRIBUTE8,
-          ATTRIBUTE9,
-          ATTRIBUTE10,
-          ATTRIBUTE11,
-          ATTRIBUTE12,
-          ATTRIBUTE13,
-          ATTRIBUTE14,
-          ATTRIBUTE15,
-          ATTRIBUTE_CATEGORY,
-          CREATED_BY,
-          TO_CHAR(CREATION_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS CREATION_DATE,
-          LAST_UPDATED_BY,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
-          LAST_UPDATE_LOGIN,
-          SOURCE_LANG,
-          SECURITY_GROUP_ID,
-          VIEW_APPLICATION_ID
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          LAST_UPDATE_DATE 
         FROM APPS.XTD_ONT_FPPR_TYPES_V
-        WHERE LOOKUP_CODE = :1
+        WHERE DESCRIPTION = :1
       `;
 
       const result = await this.oracleService.executeQuery(query, [lookupCode]);
@@ -158,9 +99,8 @@ export class FpprTypesService {
   async countFpprTypes(queryDto: FpprTypesQueryDto = {}): Promise<number> {
     try {
       const { 
-        LOOKUP_TYPE, 
-        LOOKUP_CODE, 
-        MEANING, 
+        FPPR_TYPE_CODE, 
+        DESCRIPTION,
         ENABLED_FLAG 
       } = queryDto;
       
@@ -173,21 +113,15 @@ export class FpprTypesService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (LOOKUP_TYPE) {
-        query += ` AND UPPER(LOOKUP_TYPE) = UPPER(:${paramIndex})`;
-        params.push(LOOKUP_TYPE);
+      if (FPPR_TYPE_CODE) {
+        query += ` AND UPPER(FPPR_TYPE_CODE) = UPPER(:${paramIndex})`;
+        params.push(FPPR_TYPE_CODE);
         paramIndex++;
       }
 
-      if (LOOKUP_CODE) {
-        query += ` AND UPPER(LOOKUP_CODE) = UPPER(:${paramIndex})`;
-        params.push(LOOKUP_CODE);
-        paramIndex++;
-      }
-
-      if (MEANING) {
-        query += ` AND UPPER(MEANING) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${MEANING}%`);
+      if (DESCRIPTION) {
+        query += ` AND UPPER(DESCRIPTION) = UPPER(:${paramIndex})`;
+        params.push(DESCRIPTION);
         paramIndex++;
       }
 

@@ -13,9 +13,9 @@ export class ApTermsService {
   ): Promise<ApTermsDto[]> {
     try {
       const { 
-        TERM_ID, 
-        NAME, 
-        TYPE, 
+        TERM_ID,  
+        TERM_NAME, 
+        DESCRIPTION, 
         ENABLED_FLAG, 
         page = 1, 
         limit = 10 
@@ -23,41 +23,14 @@ export class ApTermsService {
       
       let query = `
         SELECT 
-          TERM_ID,
-          NAME,
-          DESCRIPTION,
-          TYPE,
-          DUE_DAYS,
-          DUE_DAY_OF_MONTH,
-          DUE_MONTHS_FORWARD,
-          DISCOUNT_DAYS,
-          DISCOUNT_DAY_OF_MONTH,
-          DISCOUNT_MONTHS_FORWARD,
-          DISCOUNT_PERCENT,
-          ENABLED_FLAG,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          ATTRIBUTE1,
-          ATTRIBUTE2,
-          ATTRIBUTE3,
-          ATTRIBUTE4,
-          ATTRIBUTE5,
-          ATTRIBUTE6,
-          ATTRIBUTE7,
-          ATTRIBUTE8,
-          ATTRIBUTE9,
-          ATTRIBUTE10,
-          ATTRIBUTE11,
-          ATTRIBUTE12,
-          ATTRIBUTE13,
-          ATTRIBUTE14,
-          ATTRIBUTE15,
-          ATTRIBUTE_CATEGORY,
-          CREATED_BY,
-          TO_CHAR(CREATION_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS CREATION_DATE,
-          LAST_UPDATED_BY,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
-          LAST_UPDATE_LOGIN
+          TERM_ID, 
+          TERM_NAME, 
+          DESCRIPTION, 
+          ENABLED_FLAG, 
+          START_DATE_ACTIVE, 
+          END_DATE_ACTIVE, 
+          LAST_UPDATE_DATE, 
+          DAY_OF_TERMS 
         FROM APPS.XTD_AP_TERMS_V
         WHERE 1=1
       `;
@@ -71,15 +44,15 @@ export class ApTermsService {
         paramIndex++;
       }
 
-      if (NAME) {
-        query += ` AND UPPER(NAME) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${NAME}%`);
+      if (TERM_NAME) {
+        query += ` AND UPPER(TERM_NAME) LIKE UPPER(:${paramIndex})`;
+        params.push(TERM_NAME);
         paramIndex++;
       }
 
-      if (TYPE) {
-        query += ` AND UPPER(TYPE) = UPPER(:${paramIndex})`;
-        params.push(TYPE);
+      if (DESCRIPTION) {
+        query += ` AND UPPER(DESCRIPTION) = UPPER(:${paramIndex})`;
+        params.push(DESCRIPTION);
         paramIndex++;
       }
 
@@ -108,41 +81,14 @@ export class ApTermsService {
     try {
       const query = `
         SELECT 
-          TERM_ID,
-          NAME,
-          DESCRIPTION,
-          TYPE,
-          DUE_DAYS,
-          DUE_DAY_OF_MONTH,
-          DUE_MONTHS_FORWARD,
-          DISCOUNT_DAYS,
-          DISCOUNT_DAY_OF_MONTH,
-          DISCOUNT_MONTHS_FORWARD,
-          DISCOUNT_PERCENT,
-          ENABLED_FLAG,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          ATTRIBUTE1,
-          ATTRIBUTE2,
-          ATTRIBUTE3,
-          ATTRIBUTE4,
-          ATTRIBUTE5,
-          ATTRIBUTE6,
-          ATTRIBUTE7,
-          ATTRIBUTE8,
-          ATTRIBUTE9,
-          ATTRIBUTE10,
-          ATTRIBUTE11,
-          ATTRIBUTE12,
-          ATTRIBUTE13,
-          ATTRIBUTE14,
-          ATTRIBUTE15,
-          ATTRIBUTE_CATEGORY,
-          CREATED_BY,
-          TO_CHAR(CREATION_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS CREATION_DATE,
-          LAST_UPDATED_BY,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
-          LAST_UPDATE_LOGIN
+          TERM_ID, 
+          TERM_NAME, 
+          DESCRIPTION, 
+          ENABLED_FLAG, 
+          START_DATE_ACTIVE, 
+          END_DATE_ACTIVE, 
+          LAST_UPDATE_DATE, 
+          DAY_OF_TERMS 
         FROM APPS.XTD_AP_TERMS_V
         WHERE TERM_ID = :1
       `;
@@ -165,8 +111,8 @@ export class ApTermsService {
     try {
       const { 
         TERM_ID, 
-        NAME, 
-        TYPE, 
+        TERM_NAME, 
+        DESCRIPTION,
         ENABLED_FLAG 
       } = queryDto;
       
@@ -185,15 +131,15 @@ export class ApTermsService {
         paramIndex++;
       }
 
-      if (NAME) {
-        query += ` AND UPPER(NAME) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${NAME}%`);
+      if (TERM_NAME) {
+        query += ` AND UPPER(TERM_NAME) LIKE UPPER(:${paramIndex})`;
+        params.push(TERM_NAME);
         paramIndex++;
       }
 
-      if (TYPE) {
-        query += ` AND UPPER(TYPE) = UPPER(:${paramIndex})`;
-        params.push(TYPE);
+      if (DESCRIPTION) {
+        query += ` AND UPPER(DESCRIPTION) = UPPER(:${paramIndex})`;
+        params.push(DESCRIPTION);
         paramIndex++;
       }
 

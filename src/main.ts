@@ -68,7 +68,7 @@ async function bootstrap() {
     credentials: true,
     maxAge: 3600,
   });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.setGlobalPrefix(globalPrefix);
   if (versionEnable) {
     app.enableVersioning({

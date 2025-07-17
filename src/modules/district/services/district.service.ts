@@ -18,10 +18,11 @@ export class DistrictService {
         SELECT 
           KOTAMADYA_CODE,
           KECAMATAN_CODE,
-          KECAMATAN_NAME,
+          KECAMATAN,
           KECAMATAN_ENABLED_FLAG,
-          TO_CHAR(KECAMATAN_START_DATE, 'YYYY-MM-DD') AS KECAMATAN_START_DATE,
-          TO_CHAR(KECAMATAN_END_DATE, 'YYYY-MM-DD') AS KECAMATAN_END_DATE
+          KECAMATAN_START_DATE_ACTIVE,
+          KECAMATAN_END_DATE_ACTIVE,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_FND_KECAMATAN_V
         WHERE 1=1
       `;
@@ -42,7 +43,7 @@ export class DistrictService {
       }
 
       if (kecamatanName) {
-        query += ` AND UPPER(KECAMATAN_NAME) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(KECAMATAN) LIKE UPPER(:${paramIndex})`;
         params.push(`%${kecamatanName}%`);
         paramIndex++;
       }
@@ -68,10 +69,11 @@ export class DistrictService {
         SELECT 
           KOTAMADYA_CODE,
           KECAMATAN_CODE,
-          KECAMATAN_NAME,
+          KECAMATAN,
           KECAMATAN_ENABLED_FLAG,
-          TO_CHAR(KECAMATAN_START_DATE, 'YYYY-MM-DD') AS KECAMATAN_START_DATE,
-          TO_CHAR(KECAMATAN_END_DATE, 'YYYY-MM-DD') AS KECAMATAN_END_DATE
+          KECAMATAN_START_DATE_ACTIVE,
+          KECAMATAN_END_DATE_ACTIVE,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_FND_KECAMATAN_V
         WHERE KECAMATAN_CODE = :1
       `;
@@ -97,10 +99,11 @@ export class DistrictService {
         SELECT 
           KOTAMADYA_CODE,
           KECAMATAN_CODE,
-          KECAMATAN_NAME,
+          KECAMATAN,
           KECAMATAN_ENABLED_FLAG,
-          TO_CHAR(KECAMATAN_START_DATE, 'YYYY-MM-DD') AS KECAMATAN_START_DATE,
-          TO_CHAR(KECAMATAN_END_DATE, 'YYYY-MM-DD') AS KECAMATAN_END_DATE
+          KECAMATAN_START_DATE_ACTIVE,
+          KECAMATAN_END_DATE_ACTIVE,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_FND_KECAMATAN_V
         WHERE KOTAMADYA_CODE = :1
         ORDER BY KECAMATAN_CODE
@@ -142,7 +145,7 @@ export class DistrictService {
       }
 
       if (kecamatanName) {
-        query += ` AND UPPER(KECAMATAN_NAME) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(KECAMATAN) LIKE UPPER(:${paramIndex})`;
         params.push(`%${kecamatanName}%`);
         paramIndex++;
       }

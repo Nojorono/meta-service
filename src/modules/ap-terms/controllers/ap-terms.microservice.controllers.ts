@@ -23,8 +23,8 @@ export class ApTermsMicroserviceController {
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
   @ApiQuery({ name: 'TERM_ID', required: false, type: Number, description: 'Term ID' })
-  @ApiQuery({ name: 'NAME', required: false, type: String, description: 'Name' })
-  @ApiQuery({ name: 'TYPE', required: false, type: String, description: 'Type' })
+  @ApiQuery({ name: 'TERM_NAME', required: false, type: String, description: 'Term Name' })
+  @ApiQuery({ name: 'DESCRIPTION', required: false, type: String, description: 'Description' })
   @ApiQuery({ name: 'ENABLED_FLAG', required: false, type: String, description: 'Enabled flag' })
   async findAll(@Query() query: ApTermsQueryDto) {
     try {

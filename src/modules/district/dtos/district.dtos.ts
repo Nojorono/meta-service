@@ -17,7 +17,7 @@ export class DistrictDto {
     description: 'District name',
     example: 'Menteng',
   })
-  KECAMATAN_NAME: string;
+  KECAMATAN: string;
 
   @ApiProperty({
     description: 'District enabled flag',
@@ -43,14 +43,14 @@ export class DistrictDto {
 export class DistrictQueryDto {
   @ApiProperty({
     description: 'City code to filter by',
-    example: 'JKT01',
+    example: '1101',
     required: false,
   })
   kotamadyaCode?: string;
 
   @ApiProperty({
     description: 'District code to filter by',
-    example: 'JKT0101',
+    example: '110102',
     required: false,
   })
   kecamatanCode?: string;

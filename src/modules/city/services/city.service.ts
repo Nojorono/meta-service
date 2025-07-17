@@ -12,16 +12,17 @@ export class CityService {
     queryDto: CityQueryDto = {},
   ): Promise<CityDto[]> {
     try {
-      const { provinsiCode, kotamadyaCode, kotamadyaName, page = 1, limit = 10 } = queryDto;
+      const { PROVINSI_CODE, KOTAMADYA_CODE, KOTAMADYA, PAGE = 1, LIMIT = 10 } = queryDto;
       
       let query = `
         SELECT 
-          PROVINSI_CODE,
           KOTAMADYA_CODE,
-          KOTAMADYA_NAME,
+          KOTAMADYA,
           KOTAMADYA_ENABLED_FLAG,
-          TO_CHAR(KOTAMADYA_START_DATE, 'YYYY-MM-DD') AS KOTAMADYA_START_DATE,
-          TO_CHAR(KOTAMADYA_END_DATE, 'YYYY-MM-DD') AS KOTAMADYA_END_DATE
+          PROVINSI_CODE,
+          KOTAMADYA_START_DATE_ACTIVE,
+          KOTAMADYA_END_DATE_ACTIVE,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_FND_KOTAMADYA_V
         WHERE 1=1
       `;
@@ -29,28 +30,28 @@ export class CityService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (provinsiCode) {
+      if (PROVINSI_CODE) {
         query += ` AND UPPER(PROVINSI_CODE) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${provinsiCode}%`);
+        params.push(`%${PROVINSI_CODE}%`);
         paramIndex++;
       }
 
-      if (kotamadyaCode) {
+      if (KOTAMADYA_CODE) {
         query += ` AND UPPER(KOTAMADYA_CODE) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${kotamadyaCode}%`);
+        params.push(`%${KOTAMADYA_CODE}%`);
         paramIndex++;
       }
 
-      if (kotamadyaName) {
-        query += ` AND UPPER(KOTAMADYA_NAME) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${kotamadyaName}%`);
+      if (KOTAMADYA) {
+        query += ` AND UPPER(KOTAMADYA) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${KOTAMADYA}%`);
         paramIndex++;
       }
 
       // Add pagination
-      const offset = (page - 1) * limit;
+      const offset = (PAGE - 1) * LIMIT;
       query += ` ORDER BY PROVINSI_CODE, KOTAMADYA_CODE OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
-      params.push(offset, limit);
+      params.push(offset, LIMIT);
 
       const result = await this.oracleService.executeQuery(query, params);
       
@@ -62,63 +63,65 @@ export class CityService {
     }
   }
 
-  async findCityByCode(kotamadyaCode: string): Promise<CityDto | null> {
+  async findCityByCode(KOTAMADYA_CODE: string): Promise<CityDto | null> {
     try {
       const query = `
         SELECT 
-          PROVINSI_CODE,
           KOTAMADYA_CODE,
-          KOTAMADYA_NAME,
+          KOTAMADYA,
           KOTAMADYA_ENABLED_FLAG,
-          TO_CHAR(KOTAMADYA_START_DATE, 'YYYY-MM-DD') AS KOTAMADYA_START_DATE,
-          TO_CHAR(KOTAMADYA_END_DATE, 'YYYY-MM-DD') AS KOTAMADYA_END_DATE
+          PROVINSI_CODE,
+          KOTAMADYA_START_DATE_ACTIVE,
+          KOTAMADYA_END_DATE_ACTIVE,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_FND_KOTAMADYA_V
         WHERE KOTAMADYA_CODE = :1
       `;
 
-      const result = await this.oracleService.executeQuery(query, [kotamadyaCode]);
+      const result = await this.oracleService.executeQuery(query, [KOTAMADYA_CODE]);
       
       if (result.rows.length === 0) {
-        this.logger.warn(`City not found for code: ${kotamadyaCode}`);
+        this.logger.warn(`City not found for code: ${KOTAMADYA_CODE}`);
         return null;
       }
 
-      this.logger.log(`Found city: ${kotamadyaCode}`);
+      this.logger.log(`Found city: ${KOTAMADYA_CODE}`);
       return result.rows[0] as CityDto;
     } catch (error) {
-      this.logger.error(`Error finding city by code ${kotamadyaCode}:`, error);
+      this.logger.error(`Error finding city by code ${KOTAMADYA_CODE}:`, error);
       throw error;
     }
   }
 
-  async findCitiesByProvinceCode(provinsiCode: string): Promise<CityDto[]> {
+  async findCitiesByProvinceCode(PROVINSI_CODE: string): Promise<CityDto[]> {
     try {
       const query = `
         SELECT 
-          PROVINSI_CODE,
           KOTAMADYA_CODE,
-          KOTAMADYA_NAME,
+          KOTAMADYA,
           KOTAMADYA_ENABLED_FLAG,
-          TO_CHAR(KOTAMADYA_START_DATE, 'YYYY-MM-DD') AS KOTAMADYA_START_DATE,
-          TO_CHAR(KOTAMADYA_END_DATE, 'YYYY-MM-DD') AS KOTAMADYA_END_DATE
+          PROVINSI_CODE,
+          KOTAMADYA_START_DATE_ACTIVE,
+          KOTAMADYA_END_DATE_ACTIVE,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_FND_KOTAMADYA_V
         WHERE PROVINSI_CODE = :1
         ORDER BY KOTAMADYA_CODE
       `;
 
-      const result = await this.oracleService.executeQuery(query, [provinsiCode]);
+      const result = await this.oracleService.executeQuery(query, [PROVINSI_CODE]);
       
-      this.logger.log(`Found ${result.rows.length} cities for province: ${provinsiCode}`);
+      this.logger.log(`Found ${result.rows.length} cities for province: ${PROVINSI_CODE}`);
       return result.rows as CityDto[];
     } catch (error) {
-      this.logger.error(`Error finding cities by province code ${provinsiCode}:`, error);
+      this.logger.error(`Error finding cities by province code ${PROVINSI_CODE}:`, error);
       throw error;
     }
   }
 
   async getCityCount(queryDto: CityQueryDto = {}): Promise<number> {
     try {
-      const { provinsiCode, kotamadyaCode, kotamadyaName } = queryDto;
+      const { PROVINSI_CODE, KOTAMADYA_CODE, KOTAMADYA } = queryDto;
       
       let query = `
         SELECT COUNT(*) as TOTAL_COUNT
@@ -129,21 +132,21 @@ export class CityService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (provinsiCode) {
+      if (PROVINSI_CODE) {
         query += ` AND UPPER(PROVINSI_CODE) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${provinsiCode}%`);
+        params.push(`%${PROVINSI_CODE}%`);
         paramIndex++;
       }
 
-      if (kotamadyaCode) {
+      if (KOTAMADYA_CODE) {
         query += ` AND UPPER(KOTAMADYA_CODE) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${kotamadyaCode}%`);
+        params.push(`%${KOTAMADYA_CODE}%`);
         paramIndex++;
       }
 
-      if (kotamadyaName) {
-        query += ` AND UPPER(KOTAMADYA_NAME) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${kotamadyaName}%`);
+      if (KOTAMADYA) {
+        query += ` AND UPPER(KOTAMADYA) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${KOTAMADYA}%`);
         paramIndex++;
       }
 

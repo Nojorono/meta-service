@@ -21,9 +21,8 @@ export class FpprSalesTypesMicroserviceController {
   @ApiResponse({ status: 200, description: 'FPPR sales types retrieved successfully', type: [FpprSalesTypesDto] })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'LOOKUP_TYPE', required: false, type: String, description: 'Lookup type' })
-  @ApiQuery({ name: 'LOOKUP_CODE', required: false, type: String, description: 'Lookup code' })
-  @ApiQuery({ name: 'MEANING', required: false, type: String, description: 'Meaning' })
+  @ApiQuery({ name: 'FPPR_SALES_TYPE_CODE', required: false, type: String, description: 'Lookup type' })
+  @ApiQuery({ name: 'DESCRIPTION', required: false, type: String, description: 'Lookup code' })
   @ApiQuery({ name: 'ENABLED_FLAG', required: false, type: String, description: 'Enabled flag' })
   async findAll(@Query() query: FpprSalesTypesQueryDto) {
     try {

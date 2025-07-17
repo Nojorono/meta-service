@@ -102,47 +102,47 @@ export class CoaExpenseQueryDto {
     example: 'BIAYA BANK',
     required: false,
   })
-  expenseName?: string;
+  EXPENSE_NAME?: string;
 
   @ApiProperty({
     description: 'COA combinations to filter by',
     example: 'NNA.A208.00000000.202213.000000.618000004.000.0000.000.000',
     required: false,
   })
-  coaCombinations?: string;
+  COA_COMBINATIONS?: string;
 
   @ApiProperty({
     description: 'FPPR type code to filter by',
     example: 'MD',
     required: false,
   })
-  fpprTypeCode?: string;
+  FPPR_TYPE_CODE?: string;
 
   @ApiProperty({
     description: 'Organization code to filter by',
     example: 'SKB',
     required: false,
   })
-  organizationCode?: string;
+  ORGANIZATION_CODE?: string;
 
   @ApiProperty({
     description: 'Enabled flag to filter by',
     example: 'Y',
     required: false,
   })
-  enabledFlag?: string;
+  ENABLED_FLAG?: string;
 
   @ApiProperty({
     description: 'Page number for pagination',
     example: 1,
     required: false,
   })
-  page?: number;
+  PAGE?: number;
 
   @ApiProperty({
     description: 'Number of records per page',
     example: 10,
     required: false,
   })
-  limit?: number;
+  LIMIT?: number;
 }

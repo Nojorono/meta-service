@@ -169,7 +169,7 @@ export class CustomerMetaService {
     params?: MetaCustomerDtoByDate,
   ): Promise<MetaCustomerResponseDto> {
     // Set default values if not provided
-    const last_update_date = params;
+    const last_update_date = params?.last_update_date;
 
     this.logger.log('params.last_update_date' + last_update_date);
     this.logger.log('params' + params);

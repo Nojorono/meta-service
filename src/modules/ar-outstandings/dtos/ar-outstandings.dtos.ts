@@ -3,250 +3,170 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class ArOutstandingsDto {
-  @ApiProperty({ description: 'Customer ID', example: 1001 })
+  @ApiProperty({ description: 'Call plan number', example: 'CP12345' })
+  @IsOptional()
+  @IsString()
+  CALL_PLAN_NUMBER?: string;
+  
+  @ApiProperty({ description: 'SFA document number', example: 'SFA12345' })
+  @IsOptional()
+  @IsString()
+  SFA_DOCUMENT_NUMBER?: string;
+  
+  @ApiProperty({ description: 'TRX Date', example: '2023-10-01' })
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  TRX_DATE: Date;
+
+  @ApiProperty({ description: 'Invoice Currency Code', example: 'IDR' })
+  @IsOptional()
+  @IsString()
+  INVOICE_CURRENCY_CODE: string;
+
+  @ApiProperty({ description: 'Customer Number', example: 'BD2WSWACX031' })
+  @IsOptional()
+  @IsString()
+  CUSTOMER_NUMBER: string;
+  
+  @ApiProperty({ description: 'Customer Name', example: 'PT. ABCD Indonesia' })
+  @IsOptional()
+  @IsString()
+  CUSTOMER_NAME: string;
+  
+  @ApiProperty({ description: 'Sales Rep Number', example: 'SR12345' })
+  @IsOptional()
+  @IsString()
+  SALESREP_NUMBER?: string;
+  
+  @ApiProperty({ description: 'Ship To', example: 'SUBUR CARINGIN' })
+  @IsOptional()
+  @IsString()
+  SHIP_TO?: string;
+  
+  @ApiProperty({ description: 'Bill To', example: 'SUBUR CARINGIN' })
+  @IsOptional()
+  @IsString()
+  BILL_TO?: string;
+  
+  @ApiProperty({ description: 'Amount', example: '1786000' })
+  @IsOptional()
+  @IsNumber() 
+  AMOUNT: number;
+  
+  @ApiProperty({ description: 'Due Remaining', example: '1086000' })
+  @IsOptional() 
+  @IsNumber()
+  DUE_REMAINING: number;
+
+  @ApiProperty({ description: 'Due Date', example: '2025-03-15' })
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  DUE_DATE: Date;
+  
+  @ApiProperty({ description: 'Oracle Invoice Number', example: '4832951' })
+  @IsOptional()
+  @IsString()
+  ORACLE_INVOICE_NUMBER: string;
+  
+  @ApiProperty({ description: 'Customer Account ID', example: 12345 })
   @IsOptional()
   @IsNumber()
-  CUSTOMER_ID?: number;
+  CUST_ACCOUNT_ID?: number;
+  
+  @ApiProperty({ description: 'Ship To Site Use ID', example: 67890 })
+  @IsOptional()
+  @IsNumber()
+  SHIP_TO_SITE_USE_ID?: number;
+  
+  @ApiProperty({ description: 'Bill To Site Use ID', example: 54321 })
+  @IsOptional()
+  @IsNumber()
+  BILL_TO_SITE_USE_ID?: number;
+  
+  @ApiProperty({ description: 'Customer Transaction ID', example: 98765 })
+  @IsOptional()
+  @IsNumber()
+  CUSTOMER_TRX_ID?: number;
+  
+  @ApiProperty({ description: 'Last Update Date', example: '2024-01-15' })
+  @IsOptional()
+  @IsDate()
+  @Type(() => Date)
+  LAST_UPDATE_DATE: Date;
 
-  @ApiProperty({ description: 'Customer number', example: 'CUST001' })
+  @ApiProperty({ description: 'Organization Code', example: 'ORG001' })
+  @IsOptional()
+  @IsString()
+  ORGANIZATION_CODE?: string;
+  
+  @ApiProperty({ description: 'Organization Name', example: 'Main Organization' })
+  @IsOptional()
+  @IsString()
+  ORGANIZATION_NAME?: string;
+  
+  @ApiProperty({ description: 'Organization ID', example: 123 })
+  @IsOptional()
+  @IsNumber()
+  ORGANIZATION_ID?: number;
+  
+  @ApiProperty({ description: 'Organization Name', example: 'Main Org' })
+  @IsOptional()
+  @IsString()
+  ORG_NAME?: string;
+  
+  @ApiProperty({ description: 'Organization ID', example: 456 })
+  @IsOptional()
+  @IsNumber()
+  ORG_ID?: number;
+}
+
+export class ArOutstandingsQueryDto {
+  @ApiProperty({ description: 'Call plan number', example: 'CP12345' })
+  @IsOptional()
+  @IsString()
+  CALL_PLAN_NUMBER?: string;
+  
+  @ApiProperty({ description: 'SFA document number', example: 'SFA12345' })
+  @IsOptional()
+  @IsString()
+  SFA_DOCUMENT_NUMBER?: string;
+
+  @ApiProperty({ description: 'Customer Number', example: 'BD2WSWACX031' })
   @IsOptional()
   @IsString()
   CUSTOMER_NUMBER?: string;
-
-  @ApiProperty({ description: 'Customer name', example: 'PT. Customer Name' })
+  
+  @ApiProperty({ description: 'Customer Name', example: 'PT. ABCD Indonesia' })
   @IsOptional()
   @IsString()
   CUSTOMER_NAME?: string;
-
-  @ApiProperty({ description: 'Payment schedule ID', example: 1001 })
-  @IsOptional()
-  @IsNumber()
-  PAYMENT_SCHEDULE_ID?: number;
-
-  @ApiProperty({ description: 'Invoice number', example: 'INV001' })
+  
+  @ApiProperty({ description: 'Sales Rep Number', example: 'SR12345' })
   @IsOptional()
   @IsString()
-  INVOICE_NUMBER?: string;
-
-  @ApiProperty({ description: 'Invoice date', example: '2023-01-01' })
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  INVOICE_DATE?: Date;
-
-  @ApiProperty({ description: 'Due date', example: '2023-01-31' })
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  DUE_DATE?: Date;
-
-  @ApiProperty({ description: 'Amount due original', example: 1000000 })
-  @IsOptional()
-  @IsNumber()
-  AMOUNT_DUE_ORIGINAL?: number;
-
-  @ApiProperty({ description: 'Amount due remaining', example: 500000 })
-  @IsOptional()
-  @IsNumber()
-  AMOUNT_DUE_REMAINING?: number;
-
-  @ApiProperty({ description: 'Amount applied', example: 500000 })
-  @IsOptional()
-  @IsNumber()
-  AMOUNT_APPLIED?: number;
-
-  @ApiProperty({ description: 'Amount credited', example: 0 })
-  @IsOptional()
-  @IsNumber()
-  AMOUNT_CREDITED?: number;
-
-  @ApiProperty({ description: 'Amount adjusted', example: 0 })
-  @IsOptional()
-  @IsNumber()
-  AMOUNT_ADJUSTED?: number;
-
-  @ApiProperty({ description: 'Amount line items original', example: 1000000 })
-  @IsOptional()
-  @IsNumber()
-  AMOUNT_LINE_ITEMS_ORIGINAL?: number;
-
-  @ApiProperty({ description: 'Amount line items remaining', example: 500000 })
-  @IsOptional()
-  @IsNumber()
-  AMOUNT_LINE_ITEMS_REMAINING?: number;
-
-  @ApiProperty({ description: 'Tax original', example: 110000 })
-  @IsOptional()
-  @IsNumber()
-  TAX_ORIGINAL?: number;
-
-  @ApiProperty({ description: 'Tax remaining', example: 55000 })
-  @IsOptional()
-  @IsNumber()
-  TAX_REMAINING?: number;
-
-  @ApiProperty({ description: 'Freight original', example: 50000 })
-  @IsOptional()
-  @IsNumber()
-  FREIGHT_ORIGINAL?: number;
-
-  @ApiProperty({ description: 'Freight remaining', example: 25000 })
-  @IsOptional()
-  @IsNumber()
-  FREIGHT_REMAINING?: number;
-
-  @ApiProperty({ description: 'Receivables charges charged', example: 0 })
-  @IsOptional()
-  @IsNumber()
-  RECEIVABLES_CHARGES_CHARGED?: number;
-
-  @ApiProperty({ description: 'Receivables charges remaining', example: 0 })
-  @IsOptional()
-  @IsNumber()
-  RECEIVABLES_CHARGES_REMAINING?: number;
-
-  @ApiProperty({ description: 'Discount taken earned', example: 0 })
-  @IsOptional()
-  @IsNumber()
-  DISCOUNT_TAKEN_EARNED?: number;
-
-  @ApiProperty({ description: 'Discount taken unearned', example: 0 })
-  @IsOptional()
-  @IsNumber()
-  DISCOUNT_TAKEN_UNEARNED?: number;
-
-  @ApiProperty({ description: 'Currency code', example: 'IDR' })
+  SALESREP_NUMBER?: string;
+  
+  @ApiProperty({ description: 'Oracle Invoice Number', example: '4832951' })
   @IsOptional()
   @IsString()
-  CURRENCY_CODE?: string;
-
-  @ApiProperty({ description: 'Exchange rate', example: 1.0 })
+  ORACLE_INVOICE_NUMBER?: string;
+  
+  @ApiProperty({ description: 'Customer Account ID', example: 12345 })
   @IsOptional()
   @IsNumber()
-  EXCHANGE_RATE?: number;
-
-  @ApiProperty({ description: 'Exchange rate type', example: 'Corporate' })
-  @IsOptional()
-  @IsString()
-  EXCHANGE_RATE_TYPE?: string;
-
-  @ApiProperty({ description: 'Exchange date', example: '2023-01-01' })
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  EXCHANGE_DATE?: Date;
-
-  @ApiProperty({ description: 'Status', example: 'OP' })
-  @IsOptional()
-  @IsString()
-  STATUS?: string;
-
-  @ApiProperty({ description: 'Customer trx ID', example: 1001 })
+  CUST_ACCOUNT_ID?: number;
+  
+  @ApiProperty({ description: 'Customer Transaction ID', example: 98765 })
   @IsOptional()
   @IsNumber()
   CUSTOMER_TRX_ID?: number;
 
-  @ApiProperty({ description: 'Terms sequence number', example: 1 })
-  @IsOptional()
-  @IsNumber()
-  TERMS_SEQUENCE_NUMBER?: number;
-
-  @ApiProperty({ description: 'Class', example: 'INV' })
+  @ApiProperty({ description: 'Organization Code', example: 'ORG001' })
   @IsOptional()
   @IsString()
-  CLASS?: string;
-
-  @ApiProperty({ description: 'Dispute date', example: '2023-01-01' })
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  DISPUTE_DATE?: Date;
-
-  @ApiProperty({ description: 'Discount date', example: '2023-01-11' })
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  DISCOUNT_DATE?: Date;
-
-  @ApiProperty({ description: 'Discount amount available', example: 20000 })
-  @IsOptional()
-  @IsNumber()
-  DISCOUNT_AMOUNT_AVAILABLE?: number;
-
-  @ApiProperty({ description: 'Discount amount taken', example: 0 })
-  @IsOptional()
-  @IsNumber()
-  DISCOUNT_AMOUNT_TAKEN?: number;
-
-  @ApiProperty({ description: 'Acctd amount due remaining', example: 500000 })
-  @IsOptional()
-  @IsNumber()
-  ACCTD_AMOUNT_DUE_REMAINING?: number;
-
-  @ApiProperty({ description: 'Acctd amount due original', example: 1000000 })
-  @IsOptional()
-  @IsNumber()
-  ACCTD_AMOUNT_DUE_ORIGINAL?: number;
-
-  @ApiProperty({ description: 'Creation date', example: '2023-01-01T00:00:00Z' })
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  CREATION_DATE?: Date;
-
-  @ApiProperty({ description: 'Created by', example: 'SYSTEM' })
-  @IsOptional()
-  @IsString()
-  CREATED_BY?: string;
-
-  @ApiProperty({ description: 'Last update date', example: '2023-01-01T00:00:00Z' })
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  LAST_UPDATE_DATE?: Date;
-
-  @ApiProperty({ description: 'Last updated by', example: 'SYSTEM' })
-  @IsOptional()
-  @IsString()
-  LAST_UPDATED_BY?: string;
-
-  @ApiProperty({ description: 'Last update login', example: 12345 })
-  @IsOptional()
-  @IsNumber()
-  LAST_UPDATE_LOGIN?: number;
-}
-
-export class ArOutstandingsQueryDto {
-  @ApiProperty({ description: 'Customer ID', required: false })
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  CUSTOMER_ID?: number;
-
-  @ApiProperty({ description: 'Customer number', required: false })
-  @IsOptional()
-  @IsString()
-  CUSTOMER_NUMBER?: string;
-
-  @ApiProperty({ description: 'Customer name', required: false })
-  @IsOptional()
-  @IsString()
-  CUSTOMER_NAME?: string;
-
-  @ApiProperty({ description: 'Invoice number', required: false })
-  @IsOptional()
-  @IsString()
-  INVOICE_NUMBER?: string;
-
-  @ApiProperty({ description: 'Currency code', required: false })
-  @IsOptional()
-  @IsString()
-  CURRENCY_CODE?: string;
-
-  @ApiProperty({ description: 'Status', required: false })
-  @IsOptional()
-  @IsString()
-  STATUS?: string;
+  ORGANIZATION_CODE?: string;
 
   @ApiProperty({ description: 'Page number', required: false, example: 1 })
   @IsOptional()

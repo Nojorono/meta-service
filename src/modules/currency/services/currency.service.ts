@@ -12,16 +12,16 @@ export class CurrencyService {
     queryDto: CurrencyQueryDto = {},
   ): Promise<CurrencyDto[]> {
     try {
-      const { currencyCode, name, enabledFlag, page = 1, limit = 10 } = queryDto;
+      const { CURRENCY_CODE, NAME, ENABLED_FLAG, PAGE = 1, LIMIT = 10 } = queryDto;
       
       let query = `
         SELECT 
           CURRENCY_CODE,
           NAME,
           ENABLED_FLAG,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_FND_CURRENCIES_V
         WHERE 1=1
       `;
@@ -29,28 +29,28 @@ export class CurrencyService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (currencyCode) {
+      if (CURRENCY_CODE) {
         query += ` AND UPPER(CURRENCY_CODE) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${currencyCode}%`);
+        params.push(`%${CURRENCY_CODE}%`);
         paramIndex++;
       }
 
-      if (name) {
+      if (NAME) {
         query += ` AND UPPER(NAME) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${name}%`);
+        params.push(`%${NAME}%`);
         paramIndex++;
       }
 
-      if (enabledFlag) {
+      if (ENABLED_FLAG) {
         query += ` AND UPPER(ENABLED_FLAG) = UPPER(:${paramIndex})`;
-        params.push(enabledFlag);
+        params.push(ENABLED_FLAG);
         paramIndex++;
       }
 
       // Add pagination
-      const offset = (page - 1) * limit;
+      const offset = (PAGE - 1) * LIMIT;
       query += ` ORDER BY CURRENCY_CODE OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
-      params.push(offset, limit);
+      params.push(offset, LIMIT);
 
       const result = await this.oracleService.executeQuery(query, params);
       
@@ -69,9 +69,9 @@ export class CurrencyService {
           CURRENCY_CODE,
           NAME,
           ENABLED_FLAG,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_FND_CURRENCIES_V
         WHERE UPPER(CURRENCY_CODE) = UPPER(:1)
       `;
@@ -88,7 +88,7 @@ export class CurrencyService {
 
   async countCurrencies(queryDto: CurrencyQueryDto = {}): Promise<number> {
     try {
-      const { currencyCode, name, enabledFlag } = queryDto;
+      const { CURRENCY_CODE, NAME, ENABLED_FLAG } = queryDto;
       
       let query = `
         SELECT COUNT(*) AS TOTAL
@@ -99,21 +99,21 @@ export class CurrencyService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (currencyCode) {
+      if (CURRENCY_CODE) {
         query += ` AND UPPER(CURRENCY_CODE) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${currencyCode}%`);
+        params.push(`%${CURRENCY_CODE}%`);
         paramIndex++;
       }
 
-      if (name) {
+      if (NAME) {
         query += ` AND UPPER(NAME) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${name}%`);
+        params.push(`%${NAME}%`);
         paramIndex++;
       }
 
-      if (enabledFlag) {
+      if (ENABLED_FLAG) {
         query += ` AND UPPER(ENABLED_FLAG) = UPPER(:${paramIndex})`;
-        params.push(enabledFlag);
+        params.push(ENABLED_FLAG);
         paramIndex++;
       }
 

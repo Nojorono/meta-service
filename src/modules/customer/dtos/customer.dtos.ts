@@ -1,5 +1,6 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class MetaCustomerDto {
   @ApiPropertyOptional({ description: 'Customer address line 1' })
@@ -145,23 +146,28 @@ export class MetaCustomerDtoByDate {
     description: 'Last update date filter',
     example: '2024-01-15',
   })
+  @Type(() => String)
+  @IsString()
   last_update_date: string; // 2024-05-22 18:10:01
 }
 
 export class PaginationParamsDto {
-  @ApiPropertyOptional({ description: 'Page number', example: 1 })
+  @ApiPropertyOptional({ description: 'Page number', type: Number, example: 1 })
   @IsNumber()
   @IsOptional()
+  @Type(() => Number)
   page?: number;
 
-  @ApiPropertyOptional({ description: 'Items per page', example: 10 })
+  @ApiPropertyOptional({ description: 'Items per page', type: Number, example: 10 })
   @IsNumber()
   @IsOptional()
+  @Type(() => Number)
   limit?: number;
 
-  @ApiPropertyOptional({ description: 'Search term', example: 'PT. ABCD' })
+  @ApiPropertyOptional({ description: 'Search term', type: String, example: 'PT. ABCD' })
   @IsString()
   @IsOptional()
+  @Type(() => String)
   search?: string;
 }
 

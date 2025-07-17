@@ -16,15 +16,15 @@ export class CoaExpenseController {
     description: 'Return all COA expenses',
     type: [CoaExpenseDto],
   })
-  @ApiQuery({ name: 'expenseName', required: false, description: 'Filter by expense name' })
-  @ApiQuery({ name: 'coaCombinations', required: false, description: 'Filter by COA combinations' })
-  @ApiQuery({ name: 'fpprTypeCode', required: false, description: 'Filter by FPPR type code' })
-  @ApiQuery({ name: 'organizationCode', required: false, description: 'Filter by organization code' })
-  @ApiQuery({ name: 'enabledFlag', required: false, description: 'Filter by enabled flag' })
-  @ApiQuery({ name: 'page', required: false, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Records per page' })
+  @ApiQuery({ name: 'EXPENSE_NAME', required: false, description: 'Filter by expense name' })
+  @ApiQuery({ name: 'COA_COMBINATIONS', required: false, description: 'Filter by COA combinations' })
+  @ApiQuery({ name: 'FPPR_TYPE_CODE', required: false, description: 'Filter by FPPR type code' })
+  @ApiQuery({ name: 'ORGANIZATION_CODE', required: false, description: 'Filter by organization code' })
+  @ApiQuery({ name: 'ENABLED_FLAG', required: false, description: 'Filter by enabled flag' })
+  @ApiQuery({ name: 'PAGE', required: false, description: 'Page number' })
+  @ApiQuery({ name: 'LIMIT', required: false, description: 'Records per page' })
   async findAll(@Query() query: CoaExpenseQueryDto): Promise<any> {
-    const { page = 1, limit = 10, ...filters } = query;
+    const { PAGE = 1, LIMIT = 10, ...filters } = query;
     
     const [data, total] = await Promise.all([
       this.coaExpenseService.findAllCoaExpenses(query),
@@ -37,10 +37,10 @@ export class CoaExpenseController {
       message: 'COA expenses retrieved successfully',
       data,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
+        page: Number(PAGE),
+        limit: Number(LIMIT),
         total,
-        totalPages: Math.ceil(total / Number(limit))
+        totalPages: Math.ceil(total / Number(LIMIT))
       }
     };
   }
@@ -66,7 +66,7 @@ export class CoaExpenseController {
   // Microservice endpoints
   @MessagePattern('coa-expense.findAll')
   async findAllMicroservice(@Payload() query: CoaExpenseQueryDto): Promise<any> {
-    const { page = 1, limit = 10, ...filters } = query;
+    const { PAGE = 1, LIMIT = 10, ...filters } = query;
     
     const [data, total] = await Promise.all([
       this.coaExpenseService.findAllCoaExpenses(query),
@@ -76,10 +76,10 @@ export class CoaExpenseController {
     return {
       data,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
+        page: Number(PAGE),
+        limit: Number(LIMIT),
         total,
-        totalPages: Math.ceil(total / Number(limit))
+        totalPages: Math.ceil(total / Number(LIMIT))
       }
     };
   }

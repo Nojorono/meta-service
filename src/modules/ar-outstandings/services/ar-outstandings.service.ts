@@ -11,30 +11,44 @@ export class ArOutstandingsService {
   async findAllArOutstandings(queryDto: ArOutstandingsQueryDto = {}): Promise<ArOutstandingsDto[]> {
     try {
       const {
-        CUSTOMER_ID,
+        CALL_PLAN_NUMBER,
+        SFA_DOCUMENT_NUMBER,
         CUSTOMER_NUMBER,
         CUSTOMER_NAME,
-        INVOICE_NUMBER,
-        CURRENCY_CODE,
-        STATUS,
+        SALESREP_NUMBER,
+        ORACLE_INVOICE_NUMBER,
+        CUST_ACCOUNT_ID,
+        CUSTOMER_TRX_ID,
+        ORGANIZATION_CODE,
         page = 1,
         limit = 10,
       } = queryDto;
 
       let query = `
         SELECT
-          PAYMENT_SCHEDULE_ID,
-          CUSTOMER_ID,
+          CALL_PLAN_NUMBER,
+          SFA_DOCUMENT_NUMBER,
+          TRX_DATE,
+          INVOICE_CURRENCY_CODE,
           CUSTOMER_NUMBER,
           CUSTOMER_NAME,
-          INVOICE_NUMBER,
-          INVOICE_DATE,
+          SALESREP_NUMBER,
+          SHIP_TO,
+          BILL_TO,
+          AMOUNT,
+          DUE_REMAINING,
           DUE_DATE,
-          CURRENCY_CODE,
-          AMOUNT_DUE,
-          STATUS,
-          TO_CHAR(CREATION_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS CREATION_DATE,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
+          ORACLE_INVOICE_NUMBER,
+          CUST_ACCOUNT_ID,
+          SHIP_TO_SITE_USE_ID,
+          BILL_TO_SITE_USE_ID,
+          CUSTOMER_TRX_ID,
+          LAST_UPDATE_DATE,
+          ORGANIZATION_CODE,
+          ORGANIZATION_NAME,
+          ORGANIZATION_ID,
+          ORG_NAME,
+          ORG_ID
         FROM APPS.XTD_AR_OUTSTANDINGS_V
         WHERE 1=1
       `;
@@ -42,14 +56,24 @@ export class ArOutstandingsService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (CUSTOMER_ID) {
-        query += ` AND CUSTOMER_ID = :${paramIndex}`;
-        params.push(CUSTOMER_ID);
+      if (CALL_PLAN_NUMBER) {
+        query += ` AND CALL_PLAN_NUMBER = :${paramIndex}`;
+        params.push(CALL_PLAN_NUMBER);
+        paramIndex++;
+      }
+      if (CALL_PLAN_NUMBER) {
+        query += ` AND CALL_PLAN_NUMBER = :${paramIndex}`;
+        params.push(CALL_PLAN_NUMBER);
+        paramIndex++;
+      }
+      if (SFA_DOCUMENT_NUMBER) {
+        query += ` AND UPPER(SFA_DOCUMENT_NUMBER) LIKE UPPER(:${paramIndex})`;
+        params.push(SFA_DOCUMENT_NUMBER);
         paramIndex++;
       }
       if (CUSTOMER_NUMBER) {
         query += ` AND UPPER(CUSTOMER_NUMBER) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${CUSTOMER_NUMBER}%`);
+        params.push(CUSTOMER_NUMBER);
         paramIndex++;
       }
       if (CUSTOMER_NAME) {
@@ -57,25 +81,35 @@ export class ArOutstandingsService {
         params.push(`%${CUSTOMER_NAME}%`);
         paramIndex++;
       }
-      if (INVOICE_NUMBER) {
-        query += ` AND UPPER(INVOICE_NUMBER) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${INVOICE_NUMBER}%`);
+      if (SALESREP_NUMBER) {
+        query += ` AND UPPER(SALESREP_NUMBER) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${SALESREP_NUMBER}%`);
         paramIndex++;
       }
-      if (CURRENCY_CODE) {
-        query += ` AND UPPER(CURRENCY_CODE) = UPPER(:${paramIndex})`;
-        params.push(CURRENCY_CODE);
+      if (ORACLE_INVOICE_NUMBER) {
+        query += ` AND UPPER(ORACLE_INVOICE_NUMBER) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${ORACLE_INVOICE_NUMBER}%`);
         paramIndex++;
       }
-      if (STATUS) {
-        query += ` AND UPPER(STATUS) = UPPER(:${paramIndex})`;
-        params.push(STATUS);
+      if (CUST_ACCOUNT_ID) {
+        query += ` AND UPPER(CUST_ACCOUNT_ID) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${CUST_ACCOUNT_ID}%`);
+        paramIndex++;
+      }
+      if (CUSTOMER_TRX_ID) {
+        query += ` AND UPPER(CUSTOMER_TRX_ID) = UPPER(:${paramIndex})`;
+        params.push(CUSTOMER_TRX_ID);
+        paramIndex++;
+      }
+      if (ORGANIZATION_CODE) {
+        query += ` AND UPPER(ORGANIZATION_CODE) = UPPER(:${paramIndex})`;
+        params.push(ORGANIZATION_CODE);
         paramIndex++;
       }
 
       // Pagination
       const offset = (page - 1) * limit;
-      query += ` ORDER BY PAYMENT_SCHEDULE_ID OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
+      query += ` ORDER BY CALL_PLAN_NUMBER OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
@@ -91,18 +125,29 @@ export class ArOutstandingsService {
     try {
       const query = `
         SELECT
-          PAYMENT_SCHEDULE_ID,
-          CUSTOMER_ID,
+          CALL_PLAN_NUMBER,
+          SFA_DOCUMENT_NUMBER,
+          TRX_DATE,
+          INVOICE_CURRENCY_CODE,
           CUSTOMER_NUMBER,
           CUSTOMER_NAME,
-          INVOICE_NUMBER,
-          INVOICE_DATE,
+          SALESREP_NUMBER,
+          SHIP_TO,
+          BILL_TO,
+          AMOUNT,
+          DUE_REMAINING,
           DUE_DATE,
-          CURRENCY_CODE,
-          AMOUNT_DUE,
-          STATUS,
-          TO_CHAR(CREATION_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS CREATION_DATE,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
+          ORACLE_INVOICE_NUMBER,
+          CUST_ACCOUNT_ID,
+          SHIP_TO_SITE_USE_ID,
+          BILL_TO_SITE_USE_ID,
+          CUSTOMER_TRX_ID,
+          LAST_UPDATE_DATE,
+          ORGANIZATION_CODE,
+          ORGANIZATION_NAME,
+          ORGANIZATION_ID,
+          ORG_NAME,
+          ORG_ID
         FROM APPS.XTD_AR_OUTSTANDINGS_V
         WHERE PAYMENT_SCHEDULE_ID = :1
       `;
@@ -121,12 +166,15 @@ export class ArOutstandingsService {
   async countArOutstandings(queryDto: ArOutstandingsQueryDto = {}): Promise<number> {
     try {
       const {
-        CUSTOMER_ID,
+        CALL_PLAN_NUMBER,
+        SFA_DOCUMENT_NUMBER,
         CUSTOMER_NUMBER,
         CUSTOMER_NAME,
-        INVOICE_NUMBER,
-        CURRENCY_CODE,
-        STATUS,
+        SALESREP_NUMBER,
+        ORACLE_INVOICE_NUMBER,
+        CUST_ACCOUNT_ID,
+        CUSTOMER_TRX_ID,
+        ORGANIZATION_CODE,
       } = queryDto;
 
       let query = `
@@ -136,14 +184,24 @@ export class ArOutstandingsService {
       `;
       const params: any[] = [];
       let paramIndex = 1;
-      if (CUSTOMER_ID) {
-        query += ` AND CUSTOMER_ID = :${paramIndex}`;
-        params.push(CUSTOMER_ID);
+      if (CALL_PLAN_NUMBER) {
+        query += ` AND CALL_PLAN_NUMBER = :${paramIndex}`;
+        params.push(CALL_PLAN_NUMBER);
+        paramIndex++;
+      }
+      if (CALL_PLAN_NUMBER) {
+        query += ` AND CALL_PLAN_NUMBER = :${paramIndex}`;
+        params.push(CALL_PLAN_NUMBER);
+        paramIndex++;
+      }
+      if (SFA_DOCUMENT_NUMBER) {
+        query += ` AND UPPER(SFA_DOCUMENT_NUMBER) LIKE UPPER(:${paramIndex})`;
+        params.push(SFA_DOCUMENT_NUMBER);
         paramIndex++;
       }
       if (CUSTOMER_NUMBER) {
         query += ` AND UPPER(CUSTOMER_NUMBER) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${CUSTOMER_NUMBER}%`);
+        params.push(CUSTOMER_NUMBER);
         paramIndex++;
       }
       if (CUSTOMER_NAME) {
@@ -151,19 +209,29 @@ export class ArOutstandingsService {
         params.push(`%${CUSTOMER_NAME}%`);
         paramIndex++;
       }
-      if (INVOICE_NUMBER) {
-        query += ` AND UPPER(INVOICE_NUMBER) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${INVOICE_NUMBER}%`);
+      if (SALESREP_NUMBER) {
+        query += ` AND UPPER(SALESREP_NUMBER) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${SALESREP_NUMBER}%`);
         paramIndex++;
       }
-      if (CURRENCY_CODE) {
-        query += ` AND UPPER(CURRENCY_CODE) = UPPER(:${paramIndex})`;
-        params.push(CURRENCY_CODE);
+      if (ORACLE_INVOICE_NUMBER) {
+        query += ` AND UPPER(ORACLE_INVOICE_NUMBER) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${ORACLE_INVOICE_NUMBER}%`);
         paramIndex++;
       }
-      if (STATUS) {
-        query += ` AND UPPER(STATUS) = UPPER(:${paramIndex})`;
-        params.push(STATUS);
+      if (CUST_ACCOUNT_ID) {
+        query += ` AND UPPER(CUST_ACCOUNT_ID) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${CUST_ACCOUNT_ID}%`);
+        paramIndex++;
+      }
+      if (CUSTOMER_TRX_ID) {
+        query += ` AND UPPER(CUSTOMER_TRX_ID) = UPPER(:${paramIndex})`;
+        params.push(CUSTOMER_TRX_ID);
+        paramIndex++;
+      }
+      if (ORGANIZATION_CODE) {
+        query += ` AND UPPER(ORGANIZATION_CODE) = UPPER(:${paramIndex})`;
+        params.push(ORGANIZATION_CODE);
         paramIndex++;
       }
       const result = await this.oracleService.executeQuery(query, params);

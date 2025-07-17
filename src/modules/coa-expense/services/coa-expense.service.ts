@@ -13,24 +13,31 @@ export class CoaExpenseService {
   ): Promise<CoaExpenseDto[]> {
     try {
       const { 
-        expenseName, 
-        coaCombinations, 
-        fpprTypeCode, 
-        organizationCode, 
-        enabledFlag, 
-        page = 1, 
-        limit = 10 
+        EXPENSE_NAME, 
+        COA_COMBINATIONS, 
+        FPPR_TYPE_CODE, 
+        ORGANIZATION_CODE, 
+        ENABLED_FLAG, 
+        PAGE = 1, 
+        LIMIT = 10 
       } = queryDto;
       
       let query = `
         SELECT 
-          CODE_COMBINATION_ID,
           EXPENSE_NAME,
           COA_COMBINATIONS,
+          CODE_COMBINATION_ID,
           FPPR_TYPE_CODE,
-          ORGANIZATION_CODE,
+          FPPR_TYPE_DESCRIPTION,
           ENABLED_FLAG,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          ORGANIZATION_CODE,
+          ORGANIZATION_NAME,
+          ORGANIZATION_ID,
+          ORG_NAME,
+          ORG_ID,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_AP_COA_EXPENSES_V
         WHERE 1=1
       `;
@@ -38,40 +45,40 @@ export class CoaExpenseService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (expenseName) {
+      if (EXPENSE_NAME) {
         query += ` AND UPPER(EXPENSE_NAME) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${expenseName}%`);
+        params.push(`%${EXPENSE_NAME}%`);
         paramIndex++;
       }
 
-      if (coaCombinations) {
+      if (COA_COMBINATIONS) {
         query += ` AND UPPER(COA_COMBINATIONS) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${coaCombinations}%`);
+        params.push(COA_COMBINATIONS);
         paramIndex++;
       }
 
-      if (fpprTypeCode) {
+      if (FPPR_TYPE_CODE) {
         query += ` AND UPPER(FPPR_TYPE_CODE) = UPPER(:${paramIndex})`;
-        params.push(fpprTypeCode);
+        params.push(FPPR_TYPE_CODE);
         paramIndex++;
       }
 
-      if (organizationCode) {
+      if (ORGANIZATION_CODE) {
         query += ` AND UPPER(ORGANIZATION_CODE) = UPPER(:${paramIndex})`;
-        params.push(organizationCode);
+        params.push(ORGANIZATION_CODE);
         paramIndex++;
       }
 
-      if (enabledFlag) {
+      if (ENABLED_FLAG) {
         query += ` AND UPPER(ENABLED_FLAG) = UPPER(:${paramIndex})`;
-        params.push(enabledFlag);
+        params.push(ENABLED_FLAG);
         paramIndex++;
       }
 
       // Add pagination
-      const offset = (page - 1) * limit;
+      const offset = (PAGE - 1) * LIMIT;
       query += ` ORDER BY CODE_COMBINATION_ID OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
-      params.push(offset, limit);
+      params.push(offset, LIMIT);
 
       const result = await this.oracleService.executeQuery(query, params);
       
@@ -87,13 +94,20 @@ export class CoaExpenseService {
     try {
       const query = `
         SELECT 
-          CODE_COMBINATION_ID,
           EXPENSE_NAME,
           COA_COMBINATIONS,
+          CODE_COMBINATION_ID,
           FPPR_TYPE_CODE,
-          ORGANIZATION_CODE,
+          FPPR_TYPE_DESCRIPTION,
           ENABLED_FLAG,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          ORGANIZATION_CODE,
+          ORGANIZATION_NAME,
+          ORGANIZATION_ID,
+          ORG_NAME,
+          ORG_ID,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_AP_COA_EXPENSES_V
         WHERE CODE_COMBINATION_ID = :1
       `;
@@ -115,11 +129,11 @@ export class CoaExpenseService {
   async countCoaExpenses(queryDto: CoaExpenseQueryDto = {}): Promise<number> {
     try {
       const { 
-        expenseName, 
-        coaCombinations, 
-        fpprTypeCode, 
-        organizationCode, 
-        enabledFlag 
+        EXPENSE_NAME, 
+        COA_COMBINATIONS, 
+        FPPR_TYPE_CODE, 
+        ORGANIZATION_CODE, 
+        ENABLED_FLAG 
       } = queryDto;
       
       let query = `
@@ -131,33 +145,33 @@ export class CoaExpenseService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (expenseName) {
+      if (EXPENSE_NAME) {
         query += ` AND UPPER(EXPENSE_NAME) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${expenseName}%`);
+        params.push(`%${EXPENSE_NAME}%`);
         paramIndex++;
       }
 
-      if (coaCombinations) {
+      if (COA_COMBINATIONS) {
         query += ` AND UPPER(COA_COMBINATIONS) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${coaCombinations}%`);
+        params.push(COA_COMBINATIONS);
         paramIndex++;
       }
 
-      if (fpprTypeCode) {
+      if (FPPR_TYPE_CODE) {
         query += ` AND UPPER(FPPR_TYPE_CODE) = UPPER(:${paramIndex})`;
-        params.push(fpprTypeCode);
+        params.push(FPPR_TYPE_CODE);
         paramIndex++;
       }
 
-      if (organizationCode) {
+      if (ORGANIZATION_CODE) {
         query += ` AND UPPER(ORGANIZATION_CODE) = UPPER(:${paramIndex})`;
-        params.push(organizationCode);
+        params.push(ORGANIZATION_CODE);
         paramIndex++;
       }
 
-      if (enabledFlag) {
+      if (ENABLED_FLAG) {
         query += ` AND UPPER(ENABLED_FLAG) = UPPER(:${paramIndex})`;
-        params.push(enabledFlag);
+        params.push(ENABLED_FLAG);
         paramIndex++;
       }
 

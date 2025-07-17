@@ -16,11 +16,11 @@ export class CurrencyController {
     description: 'Return all currencies',
     type: [CurrencyDto],
   })
-  @ApiQuery({ name: 'currencyCode', required: false, description: 'Filter by currency code' })
-  @ApiQuery({ name: 'name', required: false, description: 'Filter by currency name' })
-  @ApiQuery({ name: 'enabledFlag', required: false, description: 'Filter by enabled flag' })
-  @ApiQuery({ name: 'page', required: false, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Records per page' })
+  @ApiQuery({ name: 'CURRENCY_CODE', required: false, description: 'Filter by currency code' })
+  @ApiQuery({ name: 'NAME', required: false, description: 'Filter by currency name' })
+  @ApiQuery({ name: 'ENABLED_FLAG', required: false, description: 'Filter by enabled flag' })
+  @ApiQuery({ name: 'PAGE', required: false, description: 'Page number' })
+  @ApiQuery({ name: 'LIMIT', required: false, description: 'Records per page' })
   async findAll(@Query() query: CurrencyQueryDto): Promise<any> {
     const data = await this.currencyService.findAllCurrencies(query);
     const total = await this.currencyService.countCurrencies(query);
@@ -30,10 +30,10 @@ export class CurrencyController {
       message: 'Currencies retrieved successfully',
       data,
       pagination: {
-        page: query.page || 1,
-        limit: query.limit || 10,
+        page: query.PAGE || 1,
+        limit: query.LIMIT || 10,
         total,
-        totalPages: Math.ceil(total / (query.limit || 10)),
+        totalPages: Math.ceil(total / (query.LIMIT || 10)),
       },
     };
   }
@@ -47,7 +47,7 @@ export class CurrencyController {
     type: [CurrencyDto],
   })
   async findByName(@Param('name') name: string): Promise<any> {
-    const data = await this.currencyService.findAllCurrencies({ name });
+    const data = await this.currencyService.findAllCurrencies({ NAME: name });
     return {
       success: true,
       statusCode: 200,
@@ -56,16 +56,16 @@ export class CurrencyController {
     };
   }
 
-  @Get('enabled/:enabledFlag')
+  @Get('enabled/:ENABLED_FLAG')
   @ApiOperation({ summary: 'Get currencies by enabled flag' })
-  @ApiParam({ name: 'enabledFlag', description: 'Enabled flag (Y/N)' })
+  @ApiParam({ name: 'ENABLED_FLAG', description: 'Enabled flag (Y/N)' })
   @ApiResponse({
     status: 200,
     description: 'Return currencies with the specified enabled flag',
     type: [CurrencyDto],
   })
-  async findByEnabledFlag(@Param('enabledFlag') enabledFlag: string): Promise<any> {
-    const data = await this.currencyService.findAllCurrencies({ enabledFlag });
+  async findByEnabledFlag(@Param('ENABLED_FLAG') ENABLED_FLAG: string): Promise<any> {
+    const data = await this.currencyService.findAllCurrencies({ ENABLED_FLAG });
     return {
       success: true,
       statusCode: 200,
@@ -105,11 +105,11 @@ export class CurrencyController {
 
   @MessagePattern('currency.findByName')
   async findByNameMicroservice(@Payload() name: string): Promise<CurrencyDto[]> {
-    return await this.currencyService.findAllCurrencies({ name });
+    return await this.currencyService.findAllCurrencies({ NAME : name });
   }
 
   @MessagePattern('currency.findByEnabledFlag')
-  async findByEnabledFlagMicroservice(@Payload() enabledFlag: string): Promise<CurrencyDto[]> {
-    return await this.currencyService.findAllCurrencies({ enabledFlag });
+  async findByEnabledFlagMicroservice(@Payload() ENABLED_FLAG: string): Promise<CurrencyDto[]> {
+    return await this.currencyService.findAllCurrencies({ ENABLED_FLAG });
   }
 }
