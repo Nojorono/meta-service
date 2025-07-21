@@ -12,8 +12,16 @@ export class SupplierService {
     queryDto: SupplierQueryDto = {},
   ): Promise<SupplierDto[]> {
     try {
-      const { supplierNumber, supplierName, supplierType, city, country, page = 1, limit = 10 } = queryDto;
-      
+      const {
+        supplierNumber,
+        supplierName,
+        supplierType,
+        city,
+        country,
+        page = 1,
+        limit = 10,
+      } = queryDto;
+
       let query = `
         SELECT 
           SUPPLIER_ID,
@@ -73,7 +81,7 @@ export class SupplierService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} suppliers`);
       return result.rows as SupplierDto[];
     } catch (error) {
@@ -105,7 +113,7 @@ export class SupplierService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [supplierId]);
-      
+
       if (result.rows.length === 0) {
         this.logger.warn(`Supplier not found for ID: ${supplierId}`);
         return null;
@@ -119,7 +127,9 @@ export class SupplierService {
     }
   }
 
-  async findSupplierByNumber(supplierNumber: string): Promise<SupplierDto | null> {
+  async findSupplierByNumber(
+    supplierNumber: string,
+  ): Promise<SupplierDto | null> {
     try {
       const query = `
         SELECT 
@@ -141,8 +151,10 @@ export class SupplierService {
         WHERE SUPPLIER_NUMBER = :1
       `;
 
-      const result = await this.oracleService.executeQuery(query, [supplierNumber]);
-      
+      const result = await this.oracleService.executeQuery(query, [
+        supplierNumber,
+      ]);
+
       if (result.rows.length === 0) {
         this.logger.warn(`Supplier not found for number: ${supplierNumber}`);
         return null;
@@ -151,15 +163,19 @@ export class SupplierService {
       this.logger.log(`Found supplier: ${supplierNumber}`);
       return result.rows[0] as SupplierDto;
     } catch (error) {
-      this.logger.error(`Error finding supplier by number ${supplierNumber}:`, error);
+      this.logger.error(
+        `Error finding supplier by number ${supplierNumber}:`,
+        error,
+      );
       throw error;
     }
   }
 
   async getSupplierCount(queryDto: SupplierQueryDto = {}): Promise<number> {
     try {
-      const { supplierNumber, supplierName, supplierType, city, country } = queryDto;
-      
+      const { supplierNumber, supplierName, supplierType, city, country } =
+        queryDto;
+
       let query = `
         SELECT COUNT(*) as TOTAL_COUNT
         FROM APPS.XTD_AP_SUPPLIERS_V
@@ -201,7 +217,7 @@ export class SupplierService {
 
       const result = await this.oracleService.executeQuery(query, params);
       const count = result.rows[0]?.TOTAL_COUNT || 0;
-      
+
       this.logger.log(`Total suppliers count: ${count}`);
       return count;
     } catch (error) {

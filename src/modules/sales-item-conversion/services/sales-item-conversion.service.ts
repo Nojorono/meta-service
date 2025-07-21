@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { SalesItemConversionDto, SalesItemConversionQueryDto } from '../dtos/sales-item-conversion.dtos';
+import {
+  SalesItemConversionDto,
+  SalesItemConversionQueryDto,
+} from '../dtos/sales-item-conversion.dtos';
 
 @Injectable()
 export class SalesItemConversionService {
@@ -12,16 +15,16 @@ export class SalesItemConversionService {
     queryDto: SalesItemConversionQueryDto = {},
   ): Promise<SalesItemConversionDto[]> {
     try {
-      const { 
-        itemCode, 
-        itemNumber, 
-        itemDescription, 
-        sourceUomCode, 
-        baseUomCode, 
-        page = 1, 
-        limit = 10 
+      const {
+        itemCode,
+        itemNumber,
+        itemDescription,
+        sourceUomCode,
+        baseUomCode,
+        page = 1,
+        limit = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           ITEM_CODE,
@@ -76,11 +79,11 @@ export class SalesItemConversionService {
       // Add pagination
       const offset = (page - 1) * limit;
       query += ` ORDER BY ITEM_CODE OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
-      params.push(offset);      // :paramIndex
-      params.push(limit);       // :paramIndex + 1
+      params.push(offset); // :paramIndex
+      params.push(limit); // :paramIndex + 1
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} sales item conversions`);
       return result.rows;
     } catch (error) {
@@ -89,7 +92,9 @@ export class SalesItemConversionService {
     }
   }
 
-  async findSalesItemConversionById(id: number): Promise<SalesItemConversionDto> {
+  async findSalesItemConversionById(
+    id: number,
+  ): Promise<SalesItemConversionDto> {
     try {
       const query = `
         SELECT 
@@ -110,25 +115,30 @@ export class SalesItemConversionService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-      
+
       this.logger.log(`Found sales item conversion with ID: ${id}`);
       return result.rows[0];
     } catch (error) {
-      this.logger.error(`Error fetching sales item conversion with ID ${id}:`, error);
+      this.logger.error(
+        `Error fetching sales item conversion with ID ${id}:`,
+        error,
+      );
       throw error;
     }
   }
 
-  async countSalesItemConversions(queryDto: SalesItemConversionQueryDto = {}): Promise<number> {
+  async countSalesItemConversions(
+    queryDto: SalesItemConversionQueryDto = {},
+  ): Promise<number> {
     try {
-      const { 
-        itemCode, 
-        itemNumber, 
-        itemDescription, 
-        sourceUomCode, 
-        baseUomCode 
+      const {
+        itemCode,
+        itemNumber,
+        itemDescription,
+        sourceUomCode,
+        baseUomCode,
       } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_INV_SALES_ITEM_CONVERSIONS_V
@@ -169,7 +179,7 @@ export class SalesItemConversionService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting sales item conversions:', error);

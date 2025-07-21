@@ -1,5 +1,11 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { CoaExpenseService } from '../services/coa-expense.service';
 import { CoaExpenseDto, CoaExpenseQueryDto } from '../dtos/coa-expense.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
@@ -16,19 +22,40 @@ export class CoaExpenseController {
     description: 'Return all COA expenses',
     type: [CoaExpenseDto],
   })
-  @ApiQuery({ name: 'EXPENSE_NAME', required: false, description: 'Filter by expense name' })
-  @ApiQuery({ name: 'COA_COMBINATIONS', required: false, description: 'Filter by COA combinations' })
-  @ApiQuery({ name: 'FPPR_TYPE_CODE', required: false, description: 'Filter by FPPR type code' })
-  @ApiQuery({ name: 'ORGANIZATION_CODE', required: false, description: 'Filter by organization code' })
-  @ApiQuery({ name: 'ENABLED_FLAG', required: false, description: 'Filter by enabled flag' })
+  @ApiQuery({
+    name: 'EXPENSE_NAME',
+    required: false,
+    description: 'Filter by expense name',
+  })
+  @ApiQuery({
+    name: 'COA_COMBINATIONS',
+    required: false,
+    description: 'Filter by COA combinations',
+  })
+  @ApiQuery({
+    name: 'FPPR_TYPE_CODE',
+    required: false,
+    description: 'Filter by FPPR type code',
+  })
+  @ApiQuery({
+    name: 'ORGANIZATION_CODE',
+    required: false,
+    description: 'Filter by organization code',
+  })
+  @ApiQuery({
+    name: 'ENABLED_FLAG',
+    required: false,
+    description: 'Filter by enabled flag',
+  })
   @ApiQuery({ name: 'PAGE', required: false, description: 'Page number' })
   @ApiQuery({ name: 'LIMIT', required: false, description: 'Records per page' })
   async findAll(@Query() query: CoaExpenseQueryDto): Promise<any> {
-    const { PAGE = 1, LIMIT = 10, ...filters } = query;
-    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { PAGE = 1, LIMIT = 10, ..._filters } = query;
+
     const [data, total] = await Promise.all([
       this.coaExpenseService.findAllCoaExpenses(query),
-      this.coaExpenseService.countCoaExpenses(query)
+      this.coaExpenseService.countCoaExpenses(query),
     ]);
 
     return {
@@ -40,8 +67,8 @@ export class CoaExpenseController {
         page: Number(PAGE),
         limit: Number(LIMIT),
         total,
-        totalPages: Math.ceil(total / Number(LIMIT))
-      }
+        totalPages: Math.ceil(total / Number(LIMIT)),
+      },
     };
   }
 
@@ -65,12 +92,15 @@ export class CoaExpenseController {
 
   // Microservice endpoints
   @MessagePattern('coa-expense.findAll')
-  async findAllMicroservice(@Payload() query: CoaExpenseQueryDto): Promise<any> {
-    const { PAGE = 1, LIMIT = 10, ...filters } = query;
-    
+  async findAllMicroservice(
+    @Payload() query: CoaExpenseQueryDto,
+  ): Promise<any> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { PAGE = 1, LIMIT = 10, ..._filters } = query;
+
     const [data, total] = await Promise.all([
       this.coaExpenseService.findAllCoaExpenses(query),
-      this.coaExpenseService.countCoaExpenses(query)
+      this.coaExpenseService.countCoaExpenses(query),
     ]);
 
     return {
@@ -79,8 +109,8 @@ export class CoaExpenseController {
         page: Number(PAGE),
         limit: Number(LIMIT),
         total,
-        totalPages: Math.ceil(total / Number(LIMIT))
-      }
+        totalPages: Math.ceil(total / Number(LIMIT)),
+      },
     };
   }
 

@@ -8,12 +8,16 @@ export class CityService {
 
   constructor(private readonly oracleService: OracleService) {}
 
-  async findAllCities(
-    queryDto: CityQueryDto = {},
-  ): Promise<CityDto[]> {
+  async findAllCities(queryDto: CityQueryDto = {}): Promise<CityDto[]> {
     try {
-      const { PROVINSI_CODE, KOTAMADYA_CODE, KOTAMADYA, PAGE = 1, LIMIT = 10 } = queryDto;
-      
+      const {
+        PROVINSI_CODE,
+        KOTAMADYA_CODE,
+        KOTAMADYA,
+        PAGE = 1,
+        LIMIT = 10,
+      } = queryDto;
+
       let query = `
         SELECT 
           KOTAMADYA_CODE,
@@ -54,7 +58,7 @@ export class CityService {
       params.push(offset, LIMIT);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} cities`);
       return result.rows as CityDto[];
     } catch (error) {
@@ -78,8 +82,10 @@ export class CityService {
         WHERE KOTAMADYA_CODE = :1
       `;
 
-      const result = await this.oracleService.executeQuery(query, [KOTAMADYA_CODE]);
-      
+      const result = await this.oracleService.executeQuery(query, [
+        KOTAMADYA_CODE,
+      ]);
+
       if (result.rows.length === 0) {
         this.logger.warn(`City not found for code: ${KOTAMADYA_CODE}`);
         return null;
@@ -109,12 +115,19 @@ export class CityService {
         ORDER BY KOTAMADYA_CODE
       `;
 
-      const result = await this.oracleService.executeQuery(query, [PROVINSI_CODE]);
-      
-      this.logger.log(`Found ${result.rows.length} cities for province: ${PROVINSI_CODE}`);
+      const result = await this.oracleService.executeQuery(query, [
+        PROVINSI_CODE,
+      ]);
+
+      this.logger.log(
+        `Found ${result.rows.length} cities for province: ${PROVINSI_CODE}`,
+      );
       return result.rows as CityDto[];
     } catch (error) {
-      this.logger.error(`Error finding cities by province code ${PROVINSI_CODE}:`, error);
+      this.logger.error(
+        `Error finding cities by province code ${PROVINSI_CODE}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -122,7 +135,7 @@ export class CityService {
   async getCityCount(queryDto: CityQueryDto = {}): Promise<number> {
     try {
       const { PROVINSI_CODE, KOTAMADYA_CODE, KOTAMADYA } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) as TOTAL_COUNT
         FROM APPS.XTD_FND_KOTAMADYA_V
@@ -152,7 +165,7 @@ export class CityService {
 
       const result = await this.oracleService.executeQuery(query, params);
       const count = result.rows[0]?.TOTAL_COUNT || 0;
-      
+
       this.logger.log(`Total cities count: ${count}`);
       return count;
     } catch (error) {

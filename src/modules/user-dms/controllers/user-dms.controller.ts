@@ -1,5 +1,11 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { UserDmsService } from '../services/user-dms.service';
 import { UserDmsDto, UserDmsQueryDto } from '../dtos/user-dms.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
@@ -16,8 +22,16 @@ export class UserDmsController {
     description: 'Return all user DMS records',
     type: [UserDmsDto],
   })
-  @ApiQuery({ name: 'userName', required: false, description: 'Filter by user name' })
-  @ApiQuery({ name: 'description', required: false, description: 'Filter by description' })
+  @ApiQuery({
+    name: 'userName',
+    required: false,
+    description: 'Filter by user name',
+  })
+  @ApiQuery({
+    name: 'description',
+    required: false,
+    description: 'Filter by description',
+  })
   @ApiQuery({ name: 'page', required: false, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, description: 'Records per page' })
   async findAll(@Query() query: UserDmsQueryDto): Promise<any> {
@@ -85,7 +99,9 @@ export class UserDmsController {
   }
 
   @MessagePattern('user-dms.findByUserName')
-  async findByUserNameMicroservice(@Payload() userName: string): Promise<UserDmsDto[]> {
+  async findByUserNameMicroservice(
+    @Payload() userName: string,
+  ): Promise<UserDmsDto[]> {
     return await this.userDmsService.findAllUserDms({ userName });
   }
 }

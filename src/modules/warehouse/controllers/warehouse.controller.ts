@@ -34,7 +34,8 @@ export class WarehouseMetaController {
     this.logger.log('==== REST API: Get all warehouses ====');
 
     try {
-      const result = await this.warehouseMetaService.getWarehousesFromOracleByDate();
+      const result =
+        await this.warehouseMetaService.getWarehousesFromOracleByDate();
       this.logger.log(
         `REST API getWarehouses result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
       );
@@ -59,12 +60,12 @@ export class WarehouseMetaController {
     summary: 'Get warehouses by date',
     description: 'Retrieve warehouses filtered by last update date',
   })
-  @ApiQuery({ 
-    name: 'last_update_date', 
-    required: true, 
-    type: String, 
+  @ApiQuery({
+    name: 'last_update_date',
+    required: true,
+    type: String,
     description: 'Filter warehouses by last update date (YYYY-MM-DD format)',
-    example: '2024-01-15'
+    example: '2024-01-15',
   })
   @ApiResponse({
     status: 200,
@@ -86,8 +87,11 @@ export class WarehouseMetaController {
     this.logger.log(`Date filter: ${lastUpdateDate}`);
 
     try {
-      const params: MetaWarehouseDtoByDate = { last_update_date: lastUpdateDate };
-      const result = await this.warehouseMetaService.getWarehousesFromOracleByDate(params);
+      const params: MetaWarehouseDtoByDate = {
+        last_update_date: lastUpdateDate,
+      };
+      const result =
+        await this.warehouseMetaService.getWarehousesFromOracleByDate(params);
       this.logger.log(
         `REST API getWarehousesByDate result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
       );
@@ -112,12 +116,12 @@ export class WarehouseMetaController {
     summary: 'Get warehouses by organization code',
     description: 'Retrieve warehouses filtered by organization code',
   })
-  @ApiQuery({ 
-    name: 'organization_code', 
-    required: true, 
-    type: String, 
+  @ApiQuery({
+    name: 'organization_code',
+    required: true,
+    type: String,
     description: 'Filter warehouses by organization code',
-    example: 'SUB'
+    example: 'SUB',
   })
   @ApiResponse({
     status: 200,
@@ -139,8 +143,13 @@ export class WarehouseMetaController {
     this.logger.log(`Organization Code filter: ${organizationCode}`);
 
     try {
-      const params: MetaWarehouseDtoByOrganizationCode = { organization_code: organizationCode };
-      const result = await this.warehouseMetaService.getWarehousesFromOracleByOrganizationCode(params);
+      const params: MetaWarehouseDtoByOrganizationCode = {
+        organization_code: organizationCode,
+      };
+      const result =
+        await this.warehouseMetaService.getWarehousesFromOracleByOrganizationCode(
+          params,
+        );
       this.logger.log(
         `REST API getWarehousesByOrganizationCode result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
       );
@@ -158,5 +167,4 @@ export class WarehouseMetaController {
       };
     }
   }
-
 }

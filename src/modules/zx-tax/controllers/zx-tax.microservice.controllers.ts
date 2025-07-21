@@ -19,15 +19,59 @@ export class ZxTaxMicroserviceController {
 
   @Get()
   @ApiOperation({ summary: 'Get all taxes' })
-  @ApiResponse({ status: 200, description: 'Taxes retrieved successfully', type: [ZxTaxDto] })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'TAX_ID', required: false, type: Number, description: 'Tax ID' })
-  @ApiQuery({ name: 'TAX_NAME', required: false, type: String, description: 'Tax name' })
-  @ApiQuery({ name: 'TAX_TYPE_CODE', required: false, type: String, description: 'Tax type code' })
-  @ApiQuery({ name: 'TAX_REGIME_CODE', required: false, type: String, description: 'Tax regime code' })
-  @ApiQuery({ name: 'TAX_JURISDICTION_CODE', required: false, type: String, description: 'Tax jurisdiction code' })
-  @ApiQuery({ name: 'ACTIVE_FLAG', required: false, type: String, description: 'Active flag' })
+  @ApiResponse({
+    status: 200,
+    description: 'Taxes retrieved successfully',
+    type: [ZxTaxDto],
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'TAX_ID',
+    required: false,
+    type: Number,
+    description: 'Tax ID',
+  })
+  @ApiQuery({
+    name: 'TAX_NAME',
+    required: false,
+    type: String,
+    description: 'Tax name',
+  })
+  @ApiQuery({
+    name: 'TAX_TYPE_CODE',
+    required: false,
+    type: String,
+    description: 'Tax type code',
+  })
+  @ApiQuery({
+    name: 'TAX_REGIME_CODE',
+    required: false,
+    type: String,
+    description: 'Tax regime code',
+  })
+  @ApiQuery({
+    name: 'TAX_JURISDICTION_CODE',
+    required: false,
+    type: String,
+    description: 'Tax jurisdiction code',
+  })
+  @ApiQuery({
+    name: 'ACTIVE_FLAG',
+    required: false,
+    type: String,
+    description: 'Active flag',
+  })
   async findAll(@Query() query: ZxTaxQueryDto) {
     try {
       const data = await this.zxTaxService.findAllZxTax(query);
@@ -53,7 +97,11 @@ export class ZxTaxMicroserviceController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get tax by ID' })
-  @ApiResponse({ status: 200, description: 'Tax retrieved successfully', type: ZxTaxDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Tax retrieved successfully',
+    type: ZxTaxDto,
+  })
   @ApiResponse({ status: 404, description: 'Tax not found' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     try {

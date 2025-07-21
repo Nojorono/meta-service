@@ -18,19 +18,49 @@ export class FpprTypesMicroserviceController {
 
   @Get()
   @ApiOperation({ summary: 'Get all FPPR types' })
-  @ApiResponse({ status: 200, description: 'FPPR types retrieved successfully', type: [FpprTypesDto] })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'FPPR_TYPE_CODE', required: false, type: String, description: 'FPPR type' })
-  @ApiQuery({ name: 'DESCRIPTION', required: false, type: String, description: 'Description FPPR' })
-  @ApiQuery({ name: 'ENABLED_FLAG', required: false, type: String, description: 'Enabled flag' })
+  @ApiResponse({
+    status: 200,
+    description: 'FPPR types retrieved successfully',
+    type: [FpprTypesDto],
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'FPPR_TYPE_CODE',
+    required: false,
+    type: String,
+    description: 'FPPR type',
+  })
+  @ApiQuery({
+    name: 'DESCRIPTION',
+    required: false,
+    type: String,
+    description: 'Description FPPR',
+  })
+  @ApiQuery({
+    name: 'ENABLED_FLAG',
+    required: false,
+    type: String,
+    description: 'Enabled flag',
+  })
   async findAll(@Query() query: FpprTypesQueryDto) {
     try {
-      const { page = 1, limit = 10, ...filters } = query;
-      
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { page = 1, limit = 10, ..._filters } = query;
+
       const [data, total] = await Promise.all([
         this.fpprTypesService.findAllFpprTypes(query),
-        this.fpprTypesService.countFpprTypes(query)
+        this.fpprTypesService.countFpprTypes(query),
       ]);
 
       return {
@@ -40,8 +70,8 @@ export class FpprTypesMicroserviceController {
           page: Number(page),
           limit: Number(limit),
           total,
-          totalPages: Math.ceil(total / Number(limit))
-        }
+          totalPages: Math.ceil(total / Number(limit)),
+        },
       };
     } catch (error) {
       throw new HttpException(
@@ -57,7 +87,11 @@ export class FpprTypesMicroserviceController {
 
   @Get(':code')
   @ApiOperation({ summary: 'Get FPPR type by code' })
-  @ApiResponse({ status: 200, description: 'FPPR type retrieved successfully', type: FpprTypesDto })
+  @ApiResponse({
+    status: 200,
+    description: 'FPPR type retrieved successfully',
+    type: FpprTypesDto,
+  })
   @ApiResponse({ status: 404, description: 'FPPR type not found' })
   async findOne(@Param('code') code: string) {
     try {
@@ -81,11 +115,12 @@ export class FpprTypesMicroserviceController {
   @MessagePattern('fppr_types.findAll')
   async findAllMicroservice(@Payload() query: FpprTypesQueryDto) {
     try {
-      const { page = 1, limit = 10, ...filters } = query;
-      
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { page = 1, limit = 10, ..._filters } = query;
+
       const [data, total] = await Promise.all([
         this.fpprTypesService.findAllFpprTypes(query),
-        this.fpprTypesService.countFpprTypes(query)
+        this.fpprTypesService.countFpprTypes(query),
       ]);
 
       return {
@@ -94,8 +129,8 @@ export class FpprTypesMicroserviceController {
           page: Number(page),
           limit: Number(limit),
           total,
-          totalPages: Math.ceil(total / Number(limit))
-        }
+          totalPages: Math.ceil(total / Number(limit)),
+        },
       };
     } catch (error) {
       throw new HttpException(

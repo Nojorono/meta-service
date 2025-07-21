@@ -1,4 +1,10 @@
-import { Controller, Get, Query, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { SalesOrderService } from '../services/sales-order.service';
 import { SalesOrderDto, SalesOrderQueryDto } from '../dtos/sales-order.dtos';
@@ -10,10 +16,29 @@ export class SalesOrderController {
 
   @Get()
   @ApiOperation({ summary: 'Get all sales orders or filter by order_number' })
-  @ApiResponse({ status: 200, description: 'Sales orders retrieved successfully', type: [SalesOrderDto] })
-  @ApiQuery({ name: 'order_number', required: false, type: String, description: 'Order number' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
+  @ApiResponse({
+    status: 200,
+    description: 'Sales orders retrieved successfully',
+    type: [SalesOrderDto],
+  })
+  @ApiQuery({
+    name: 'order_number',
+    required: false,
+    type: String,
+    description: 'Order number',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
   async findAll(@Query() query: SalesOrderQueryDto) {
     try {
       const result = await this.salesOrderService.findAll(query);

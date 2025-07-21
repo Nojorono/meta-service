@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OracleService } from '../../../common/services/oracle.service';
 import { RedisService } from '../../../common/services/redis.service';
-import { MetaItemListDto, MetaItemListDtoByItemCode, MetaItemListResponseDto} from '../dtos/item-list.dtos';
+import {
+  MetaItemListDto,
+  MetaItemListDtoByItemCode,
+  MetaItemListResponseDto,
+} from '../dtos/item-list.dtos';
 
 @Injectable()
 export class ItemListMetaService {

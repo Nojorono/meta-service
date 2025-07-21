@@ -27,39 +27,40 @@ export class DistrictController {
   constructor(private readonly districtService: DistrictService) {}
 
   @Get()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get all districts',
-    description: 'Retrieve a list of all districts from XTD_FND_KECAMATAN_V view'
+    description:
+      'Retrieve a list of all districts from XTD_FND_KECAMATAN_V view',
   })
   @ApiQuery({
     name: 'kotamadyaCode',
     required: false,
     description: 'Filter by city code',
-    example: 'JKT01'
+    example: 'JKT01',
   })
   @ApiQuery({
     name: 'kecamatanCode',
     required: false,
     description: 'Filter by district code',
-    example: 'JKT0101'
+    example: 'JKT0101',
   })
   @ApiQuery({
     name: 'kecamatanName',
     required: false,
     description: 'Filter by district name',
-    example: 'Menteng'
+    example: 'Menteng',
   })
   @ApiQuery({
     name: 'page',
     required: false,
     description: 'Page number for pagination',
-    example: 1
+    example: 1,
   })
   @ApiQuery({
     name: 'limit',
     required: false,
     description: 'Number of records per page',
-    example: 10
+    example: 10,
   })
   @ApiResponse({
     status: 200,
@@ -70,7 +71,9 @@ export class DistrictController {
     status: 500,
     description: 'Internal server error',
   })
-  async findAllDistricts(@Query() queryDto: DistrictQueryDto): Promise<DistrictDto[]> {
+  async findAllDistricts(
+    @Query() queryDto: DistrictQueryDto,
+  ): Promise<DistrictDto[]> {
     try {
       this.logger.log('Fetching all districts with filters:', queryDto);
       return await this.districtService.findAllDistricts(queryDto);
@@ -84,27 +87,28 @@ export class DistrictController {
   }
 
   @Get('count')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get district count',
-    description: 'Get the total count of districts matching the filter criteria'
+    description:
+      'Get the total count of districts matching the filter criteria',
   })
   @ApiQuery({
     name: 'kotamadyaCode',
     required: false,
     description: 'Filter by city code',
-    example: 'JKT01'
+    example: 'JKT01',
   })
   @ApiQuery({
     name: 'kecamatanCode',
     required: false,
     description: 'Filter by district code',
-    example: 'JKT0101'
+    example: 'JKT0101',
   })
   @ApiQuery({
     name: 'kecamatanName',
     required: false,
     description: 'Filter by district name',
-    example: 'Menteng'
+    example: 'Menteng',
   })
   @ApiResponse({
     status: 200,
@@ -112,15 +116,17 @@ export class DistrictController {
     schema: {
       type: 'object',
       properties: {
-        count: { type: 'number', example: 7000 }
-      }
-    }
+        count: { type: 'number', example: 7000 },
+      },
+    },
   })
   @ApiResponse({
     status: 500,
     description: 'Internal server error',
   })
-  async getDistrictCount(@Query() queryDto: DistrictQueryDto): Promise<{ count: number }> {
+  async getDistrictCount(
+    @Query() queryDto: DistrictQueryDto,
+  ): Promise<{ count: number }> {
     try {
       this.logger.log('Getting district count with filters:', queryDto);
       const count = await this.districtService.getDistrictCount(queryDto);
@@ -135,9 +141,10 @@ export class DistrictController {
   }
 
   @Get('city/:cityCode')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get districts by city code',
-    description: 'Retrieve all districts for a specific city from XTD_FND_KECAMATAN_V view'
+    description:
+      'Retrieve all districts for a specific city from XTD_FND_KECAMATAN_V view',
   })
   @ApiParam({
     name: 'cityCode',
@@ -153,12 +160,17 @@ export class DistrictController {
     status: 500,
     description: 'Internal server error',
   })
-  async findDistrictsByCityCode(@Param('cityCode') cityCode: string): Promise<DistrictDto[]> {
+  async findDistrictsByCityCode(
+    @Param('cityCode') cityCode: string,
+  ): Promise<DistrictDto[]> {
     try {
       this.logger.log(`Fetching districts by city code: ${cityCode}`);
       return await this.districtService.findDistrictsByCityCode(cityCode);
     } catch (error) {
-      this.logger.error(`Error fetching districts by city code ${cityCode}:`, error);
+      this.logger.error(
+        `Error fetching districts by city code ${cityCode}:`,
+        error,
+      );
       throw new HttpException(
         'Failed to fetch districts',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -167,9 +179,10 @@ export class DistrictController {
   }
 
   @Get(':code')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get district by code',
-    description: 'Retrieve a specific district by its code from XTD_FND_KECAMATAN_V view'
+    description:
+      'Retrieve a specific district by its code from XTD_FND_KECAMATAN_V view',
   })
   @ApiParam({
     name: 'code',
@@ -193,7 +206,7 @@ export class DistrictController {
     try {
       this.logger.log(`Fetching district by code: ${code}`);
       const district = await this.districtService.findDistrictByCode(code);
-      
+
       if (!district) {
         throw new HttpException(
           `District with code ${code} not found`,
@@ -204,11 +217,11 @@ export class DistrictController {
       return district;
     } catch (error) {
       this.logger.error(`Error fetching district by code ${code}:`, error);
-      
+
       if (error instanceof HttpException) {
         throw error;
       }
-      
+
       throw new HttpException(
         'Failed to fetch district',
         HttpStatus.INTERNAL_SERVER_ERROR,

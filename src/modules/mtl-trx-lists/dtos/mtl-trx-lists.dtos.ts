@@ -18,7 +18,10 @@ export class MtlTrxListsDto {
   @IsString()
   ORGANIZATION_CODE?: string;
 
-  @ApiProperty({ description: 'Organization name', example: 'Organization Name' })
+  @ApiProperty({
+    description: 'Organization name',
+    example: 'Organization Name',
+  })
   @IsOptional()
   @IsString()
   ORGANIZATION_NAME?: string;
@@ -33,7 +36,10 @@ export class MtlTrxListsDto {
   @IsString()
   ITEM_CODE?: string;
 
-  @ApiProperty({ description: 'Item description', example: 'Product Description' })
+  @ApiProperty({
+    description: 'Item description',
+    example: 'Product Description',
+  })
   @IsOptional()
   @IsString()
   ITEM_DESCRIPTION?: string;
@@ -43,7 +49,10 @@ export class MtlTrxListsDto {
   @IsNumber()
   TRANSACTION_TYPE_ID?: number;
 
-  @ApiProperty({ description: 'Transaction type name', example: 'Material Issue' })
+  @ApiProperty({
+    description: 'Transaction type name',
+    example: 'Material Issue',
+  })
   @IsOptional()
   @IsString()
   TRANSACTION_TYPE_NAME?: string;
@@ -58,7 +67,10 @@ export class MtlTrxListsDto {
   @IsNumber()
   TRANSACTION_SOURCE_TYPE_ID?: number;
 
-  @ApiProperty({ description: 'Transaction source name', example: 'Sales Order' })
+  @ApiProperty({
+    description: 'Transaction source name',
+    example: 'Sales Order',
+  })
   @IsOptional()
   @IsString()
   TRANSACTION_SOURCE_NAME?: string;
@@ -184,7 +196,10 @@ export class MtlTrxListsDto {
   @IsString()
   CREATED_BY?: string;
 
-  @ApiProperty({ description: 'Creation date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Creation date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)
@@ -195,7 +210,10 @@ export class MtlTrxListsDto {
   @IsString()
   LAST_UPDATED_BY?: string;
 
-  @ApiProperty({ description: 'Last update date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Last update date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)

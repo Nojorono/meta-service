@@ -21,17 +21,21 @@ export const setupSwagger = async (app: INestApplication) => {
     .setDescription(docDesc)
     .setVersion(docVersion)
     .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-      'accessToken',
-    )
-    .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-      'refreshToken',
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Enter JWT token only (without Bearer prefix)',
+        in: 'header',
+      },
+      'JWT-auth',
     )
     .build();
 
   const document = SwaggerModule.createDocument(app, documentBuild, {
     deepScanRoutes: true,
+    include: [], // Include all modules by default
   });
   const customOptions: SwaggerCustomOptions = {
     swaggerOptions: {
@@ -42,7 +46,48 @@ export const setupSwagger = async (app: INestApplication) => {
       tagsSorter: 'alpha',
       tryItOutEnabled: true,
       filter: true,
+      authAction: {
+        'JWT-auth': {
+          name: 'JWT-auth',
+          schema: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+            description:
+              'Just paste your JWT token here - no need to add "Bearer"',
+          },
+          value: '',
+        },
+      },
     },
+    customCss: `
+      .swagger-ui .auth-btn-wrapper .btn-auth {
+        display: inline-block;
+        margin: 0 10px 0 0;
+        padding: 4px 23px;
+        text-decoration: none;
+        color: #3b4151;
+        border: 1px solid #888;
+        border-radius: 4px;
+        background: transparent;
+        font-family: Titillium Web,sans-serif;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .swagger-ui .auth-container .auth-btn-wrapper {
+        display: flex;
+        padding: 10px 0;
+        justify-content: center;
+      }
+      .swagger-ui .auth-container h4 {
+        margin: 5px 0 5px 0;
+      }
+      .swagger-ui .auth-container input[type=text] {
+        width: 100%;
+        margin: 5px 0;
+      }
+    `,
   };
   SwaggerModule.setup(docPrefix, app, document, {
     explorer: true,

@@ -23,7 +23,10 @@ export class ZxTaxDto {
   @IsString()
   TAX_REGIME_CODE?: string;
 
-  @ApiProperty({ description: 'Tax regime name', example: 'Standard Tax Regime' })
+  @ApiProperty({
+    description: 'Tax regime name',
+    example: 'Standard Tax Regime',
+  })
   @IsOptional()
   @IsString()
   TAX_REGIME_NAME?: string;
@@ -85,7 +88,10 @@ export class ZxTaxDto {
   @IsString()
   ACTIVE_FLAG?: string;
 
-  @ApiProperty({ description: 'Creation date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Creation date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)
@@ -96,7 +102,10 @@ export class ZxTaxDto {
   @IsString()
   CREATED_BY?: string;
 
-  @ApiProperty({ description: 'Last update date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Last update date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)

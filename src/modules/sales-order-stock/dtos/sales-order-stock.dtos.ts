@@ -33,7 +33,10 @@ export class SalesOrderStockDto {
   @IsString()
   ITEM_CODE?: string;
 
-  @ApiProperty({ description: 'Item description', example: 'Product Description' })
+  @ApiProperty({
+    description: 'Item description',
+    example: 'Product Description',
+  })
   @IsOptional()
   @IsString()
   ITEM_DESCRIPTION?: string;
@@ -153,7 +156,10 @@ export class SalesOrderStockDto {
   @IsString()
   SHIP_FROM_ORG_CODE?: string;
 
-  @ApiProperty({ description: 'Ship from org name', example: 'Organization Name' })
+  @ApiProperty({
+    description: 'Ship from org name',
+    example: 'Organization Name',
+  })
   @IsOptional()
   @IsString()
   SHIP_FROM_ORG_NAME?: string;
@@ -178,7 +184,10 @@ export class SalesOrderStockDto {
   @IsString()
   ITEM_TYPE_CODE?: string;
 
-  @ApiProperty({ description: 'Creation date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Creation date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)
@@ -189,7 +198,10 @@ export class SalesOrderStockDto {
   @IsString()
   CREATED_BY?: string;
 
-  @ApiProperty({ description: 'Last update date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Last update date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)

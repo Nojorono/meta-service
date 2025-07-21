@@ -2,7 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OracleService } from '../../../common/services/oracle.service';
 import { RedisService } from '../../../common/services/redis.service';
-import { MetaWarehouseDto, MetaWarehouseDtoByDate, MetaWarehouseResponseDto, MetaWarehouseDtoByOrganizationCode } from '../dtos/warehouse.dtos';
+import {
+  MetaWarehouseDto,
+  MetaWarehouseDtoByDate,
+  MetaWarehouseResponseDto,
+  MetaWarehouseDtoByOrganizationCode,
+} from '../dtos/warehouse.dtos';
 
 @Injectable()
 export class WarehouseMetaService {

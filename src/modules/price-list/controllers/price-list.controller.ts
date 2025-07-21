@@ -1,5 +1,11 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { PriceListService } from '../services/price-list.service';
 import { PriceListDto, PriceListQueryDto } from '../dtos/price-list.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
@@ -16,19 +22,40 @@ export class PriceListController {
     description: 'Return all price lists',
     type: [PriceListDto],
   })
-  @ApiQuery({ name: 'priceName', required: false, description: 'Filter by price name' })
-  @ApiQuery({ name: 'itemCode', required: false, description: 'Filter by item code' })
-  @ApiQuery({ name: 'itemDescription', required: false, description: 'Filter by item description' })
-  @ApiQuery({ name: 'productUomCode', required: false, description: 'Filter by product UOM code' })
-  @ApiQuery({ name: 'customerNumber', required: false, description: 'Filter by customer number' })
+  @ApiQuery({
+    name: 'priceName',
+    required: false,
+    description: 'Filter by price name',
+  })
+  @ApiQuery({
+    name: 'itemCode',
+    required: false,
+    description: 'Filter by item code',
+  })
+  @ApiQuery({
+    name: 'itemDescription',
+    required: false,
+    description: 'Filter by item description',
+  })
+  @ApiQuery({
+    name: 'productUomCode',
+    required: false,
+    description: 'Filter by product UOM code',
+  })
+  @ApiQuery({
+    name: 'customerNumber',
+    required: false,
+    description: 'Filter by customer number',
+  })
   @ApiQuery({ name: 'page', required: false, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, description: 'Records per page' })
   async findAll(@Query() query: PriceListQueryDto): Promise<any> {
-    const { page = 1, limit = 10, ...filters } = query;
-    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { page = 1, limit = 10, ..._filters } = query;
+
     const [data, total] = await Promise.all([
       this.priceListService.findAllPriceLists(query),
-      this.priceListService.countPriceLists(query)
+      this.priceListService.countPriceLists(query),
     ]);
 
     return {
@@ -40,8 +67,8 @@ export class PriceListController {
         page: Number(page),
         limit: Number(limit),
         total,
-        totalPages: Math.ceil(total / Number(limit))
-      }
+        totalPages: Math.ceil(total / Number(limit)),
+      },
     };
   }
 
@@ -89,8 +116,12 @@ export class PriceListController {
     description: 'Return price lists with the specified customer number',
     type: [PriceListDto],
   })
-  async findByCustomerNumber(@Param('customerNumber') customerNumber: string): Promise<any> {
-    const data = await this.priceListService.findAllPriceLists({ customerNumber });
+  async findByCustomerNumber(
+    @Param('customerNumber') customerNumber: string,
+  ): Promise<any> {
+    const data = await this.priceListService.findAllPriceLists({
+      customerNumber,
+    });
     return {
       success: true,
       statusCode: 200,
@@ -107,8 +138,12 @@ export class PriceListController {
     description: 'Return price lists with the specified product UOM code',
     type: [PriceListDto],
   })
-  async findByProductUomCode(@Param('productUomCode') productUomCode: string): Promise<any> {
-    const data = await this.priceListService.findAllPriceLists({ productUomCode });
+  async findByProductUomCode(
+    @Param('productUomCode') productUomCode: string,
+  ): Promise<any> {
+    const data = await this.priceListService.findAllPriceLists({
+      productUomCode,
+    });
     return {
       success: true,
       statusCode: 200,
@@ -138,11 +173,12 @@ export class PriceListController {
   // Microservice endpoints
   @MessagePattern('price-list.findAll')
   async findAllMicroservice(@Payload() query: PriceListQueryDto): Promise<any> {
-    const { page = 1, limit = 10, ...filters } = query;
-    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { page = 1, limit = 10, ..._filters } = query;
+
     const [data, total] = await Promise.all([
       this.priceListService.findAllPriceLists(query),
-      this.priceListService.countPriceLists(query)
+      this.priceListService.countPriceLists(query),
     ]);
 
     return {
@@ -151,8 +187,8 @@ export class PriceListController {
         page: Number(page),
         limit: Number(limit),
         total,
-        totalPages: Math.ceil(total / Number(limit))
-      }
+        totalPages: Math.ceil(total / Number(limit)),
+      },
     };
   }
 
@@ -162,22 +198,30 @@ export class PriceListController {
   }
 
   @MessagePattern('price-list.findByPriceName')
-  async findByPriceNameMicroservice(@Payload() priceName: string): Promise<PriceListDto[]> {
+  async findByPriceNameMicroservice(
+    @Payload() priceName: string,
+  ): Promise<PriceListDto[]> {
     return await this.priceListService.findAllPriceLists({ priceName });
   }
 
   @MessagePattern('price-list.findByItemCode')
-  async findByItemCodeMicroservice(@Payload() itemCode: string): Promise<PriceListDto[]> {
+  async findByItemCodeMicroservice(
+    @Payload() itemCode: string,
+  ): Promise<PriceListDto[]> {
     return await this.priceListService.findAllPriceLists({ itemCode });
   }
 
   @MessagePattern('price-list.findByCustomerNumber')
-  async findByCustomerNumberMicroservice(@Payload() customerNumber: string): Promise<PriceListDto[]> {
+  async findByCustomerNumberMicroservice(
+    @Payload() customerNumber: string,
+  ): Promise<PriceListDto[]> {
     return await this.priceListService.findAllPriceLists({ customerNumber });
   }
 
   @MessagePattern('price-list.findByProductUomCode')
-  async findByProductUomCodeMicroservice(@Payload() productUomCode: string): Promise<PriceListDto[]> {
+  async findByProductUomCodeMicroservice(
+    @Payload() productUomCode: string,
+  ): Promise<PriceListDto[]> {
     return await this.priceListService.findAllPriceLists({ productUomCode });
   }
 }

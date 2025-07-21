@@ -27,39 +27,39 @@ export class CityController {
   constructor(private readonly cityService: CityService) {}
 
   @Get()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get all cities',
-    description: 'Retrieve a list of all cities from XTD_FND_KOTAMADYA_V view'
+    description: 'Retrieve a list of all cities from XTD_FND_KOTAMADYA_V view',
   })
   @ApiQuery({
     name: 'PROVINSI_CODE',
     required: false,
     description: 'Filter by province code',
-    example: '11'
+    example: '11',
   })
   @ApiQuery({
     name: 'KOTAMADYA_CODE',
     required: false,
     description: 'Filter by city code',
-    example: '1111'
+    example: '1111',
   })
   @ApiQuery({
     name: 'KOTAMADYA',
     required: false,
     description: 'Filter by city name',
-    example: 'Jakarta'
+    example: 'Jakarta',
   })
   @ApiQuery({
     name: 'PAGE',
     required: false,
     description: 'Page number for pagination',
-    example: 1
+    example: 1,
   })
   @ApiQuery({
     name: 'LIMIT',
     required: false,
     description: 'Number of records per page',
-    example: 10
+    example: 10,
   })
   @ApiResponse({
     status: 200,
@@ -84,27 +84,27 @@ export class CityController {
   }
 
   @Get('count')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get city count',
-    description: 'Get the total count of cities matching the filter criteria'
+    description: 'Get the total count of cities matching the filter criteria',
   })
   @ApiQuery({
     name: 'PROVINSI_CODE',
     required: false,
     description: 'Filter by province code',
-    example: '11'
+    example: '11',
   })
   @ApiQuery({
     name: 'KOTAMADYA_CODE',
     required: false,
     description: 'Filter by city code',
-    example: '1111'
+    example: '1111',
   })
   @ApiQuery({
     name: 'KOTAMADYA',
     required: false,
     description: 'Filter by city name',
-    example: 'Jakarta'
+    example: 'Jakarta',
   })
   @ApiResponse({
     status: 200,
@@ -112,15 +112,17 @@ export class CityController {
     schema: {
       type: 'object',
       properties: {
-        count: { type: 'number', example: 514 }
-      }
-    }
+        count: { type: 'number', example: 514 },
+      },
+    },
   })
   @ApiResponse({
     status: 500,
     description: 'Internal server error',
   })
-  async getCityCount(@Query() queryDto: CityQueryDto): Promise<{ count: number }> {
+  async getCityCount(
+    @Query() queryDto: CityQueryDto,
+  ): Promise<{ count: number }> {
     try {
       this.logger.log('Getting city count with filters:', queryDto);
       const count = await this.cityService.getCityCount(queryDto);
@@ -135,9 +137,10 @@ export class CityController {
   }
 
   @Get('province/:PROVINSI_CODE')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get cities by province code',
-    description: 'Retrieve all cities for a specific province from XTD_FND_KOTAMADYA_V view'
+    description:
+      'Retrieve all cities for a specific province from XTD_FND_KOTAMADYA_V view',
   })
   @ApiParam({
     name: 'PROVINSI_CODE',
@@ -153,12 +156,17 @@ export class CityController {
     status: 500,
     description: 'Internal server error',
   })
-  async findCitiesByProvinceCode(@Param('PROVINSI_CODE') PROVINSI_CODE: string): Promise<CityDto[]> {
+  async findCitiesByProvinceCode(
+    @Param('PROVINSI_CODE') PROVINSI_CODE: string,
+  ): Promise<CityDto[]> {
     try {
       this.logger.log(`Fetching cities by province code: ${PROVINSI_CODE}`);
       return await this.cityService.findCitiesByProvinceCode(PROVINSI_CODE);
     } catch (error) {
-      this.logger.error(`Error fetching cities by province code ${PROVINSI_CODE}:`, error);
+      this.logger.error(
+        `Error fetching cities by province code ${PROVINSI_CODE}:`,
+        error,
+      );
       throw new HttpException(
         'Failed to fetch cities',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -167,9 +175,10 @@ export class CityController {
   }
 
   @Get(':code')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get city by code',
-    description: 'Retrieve a specific city by its code from XTD_FND_KOTAMADYA_V view'
+    description:
+      'Retrieve a specific city by its code from XTD_FND_KOTAMADYA_V view',
   })
   @ApiParam({
     name: 'code',
@@ -193,7 +202,7 @@ export class CityController {
     try {
       this.logger.log(`Fetching city by code: ${code}`);
       const city = await this.cityService.findCityByCode(code);
-      
+
       if (!city) {
         throw new HttpException(
           `City with code ${code} not found`,
@@ -204,11 +213,11 @@ export class CityController {
       return city;
     } catch (error) {
       this.logger.error(`Error fetching city by code ${code}:`, error);
-      
+
       if (error instanceof HttpException) {
         throw error;
       }
-      
+
       throw new HttpException(
         'Failed to fetch city',
         HttpStatus.INTERNAL_SERVER_ERROR,

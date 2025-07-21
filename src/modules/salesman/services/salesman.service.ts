@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OracleService } from '../../../common/services/oracle.service';
 import { RedisService } from '../../../common/services/redis.service';
-import { MetaSalesmanDto, MetaSalesmanDtoByDate, MetaSalesmanResponseDto } from '../dtos/salesman.dtos';
+import {
+  MetaSalesmanDto,
+  MetaSalesmanDtoByDate,
+  MetaSalesmanResponseDto,
+} from '../dtos/salesman.dtos';
 
 @Injectable()
 export class SalesmanMetaService {

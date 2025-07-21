@@ -91,7 +91,9 @@ export class PurchaseOrderService {
         });
       }
     } else {
-      this.logger.error('No rows returned from Oracle query or result is undefined.');
+      this.logger.error(
+        'No rows returned from Oracle query or result is undefined.',
+      );
       throw new Error('Failed to retrieve Purchase Order');
     }
 

@@ -8,12 +8,10 @@ export class UserDmsService {
 
   constructor(private readonly oracleService: OracleService) {}
 
-  async findAllUserDms(
-    queryDto: UserDmsQueryDto = {},
-  ): Promise<UserDmsDto[]> {
+  async findAllUserDms(queryDto: UserDmsQueryDto = {}): Promise<UserDmsDto[]> {
     try {
       const { userName, description, page = 1, limit = 10 } = queryDto;
-      
+
       let query = `
         SELECT 
           USER_NAME,
@@ -47,7 +45,7 @@ export class UserDmsService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} user DMS records`);
       return result.rows;
     } catch (error) {
@@ -71,7 +69,7 @@ export class UserDmsService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-      
+
       this.logger.log(`Found user DMS with ID: ${id}`);
       return result.rows[0];
     } catch (error) {
@@ -83,7 +81,7 @@ export class UserDmsService {
   async countUserDms(queryDto: UserDmsQueryDto = {}): Promise<number> {
     try {
       const { userName, description } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_FND_USER_DMS_V
@@ -106,7 +104,7 @@ export class UserDmsService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting user DMS records:', error);

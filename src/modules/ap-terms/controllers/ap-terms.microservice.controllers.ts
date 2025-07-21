@@ -19,13 +19,47 @@ export class ApTermsMicroserviceController {
 
   @Get()
   @ApiOperation({ summary: 'Get all AP terms' })
-  @ApiResponse({ status: 200, description: 'AP terms retrieved successfully', type: [ApTermsDto] })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'TERM_ID', required: false, type: Number, description: 'Term ID' })
-  @ApiQuery({ name: 'TERM_NAME', required: false, type: String, description: 'Term Name' })
-  @ApiQuery({ name: 'DESCRIPTION', required: false, type: String, description: 'Description' })
-  @ApiQuery({ name: 'ENABLED_FLAG', required: false, type: String, description: 'Enabled flag' })
+  @ApiResponse({
+    status: 200,
+    description: 'AP terms retrieved successfully',
+    type: [ApTermsDto],
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'TERM_ID',
+    required: false,
+    type: Number,
+    description: 'Term ID',
+  })
+  @ApiQuery({
+    name: 'TERM_NAME',
+    required: false,
+    type: String,
+    description: 'Term Name',
+  })
+  @ApiQuery({
+    name: 'DESCRIPTION',
+    required: false,
+    type: String,
+    description: 'Description',
+  })
+  @ApiQuery({
+    name: 'ENABLED_FLAG',
+    required: false,
+    type: String,
+    description: 'Enabled flag',
+  })
   async findAll(@Query() query: ApTermsQueryDto) {
     try {
       const data = await this.apTermsService.findAllApTerms(query);
@@ -51,7 +85,11 @@ export class ApTermsMicroserviceController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get AP term by ID' })
-  @ApiResponse({ status: 200, description: 'AP term retrieved successfully', type: ApTermsDto })
+  @ApiResponse({
+    status: 200,
+    description: 'AP term retrieved successfully',
+    type: ApTermsDto,
+  })
   @ApiResponse({ status: 404, description: 'AP term not found' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     try {

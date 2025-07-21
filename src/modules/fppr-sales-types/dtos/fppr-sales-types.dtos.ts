@@ -8,7 +8,10 @@ export class FpprSalesTypesDto {
   @IsOptional()
   FPPR_SALES_TYPE_CODE?: string;
 
-  @ApiProperty({ description: 'Description of the sales type', example: 'Standard Sales Type' })
+  @ApiProperty({
+    description: 'Description of the sales type',
+    example: 'Standard Sales Type',
+  })
   @IsString()
   @IsOptional()
   DESCRIPTION?: string;
@@ -18,19 +21,28 @@ export class FpprSalesTypesDto {
   @IsOptional()
   ENABLED_FLAG?: string;
 
-  @ApiProperty({ description: 'Start date when the sales type is active', example: '2023-01-01' })
+  @ApiProperty({
+    description: 'Start date when the sales type is active',
+    example: '2023-01-01',
+  })
   @IsDate()
   @IsOptional()
   @Type(() => Date)
   START_DATE_ACTIVE?: Date;
 
-  @ApiProperty({ description: 'End date when the sales type is no longer active', example: '2023-12-31' })
+  @ApiProperty({
+    description: 'End date when the sales type is no longer active',
+    example: '2023-12-31',
+  })
   @IsDate()
   @IsOptional()
   @Type(() => Date)
   END_DATE_ACTIVE?: Date;
 
-  @ApiProperty({ description: 'Last update date of the sales type', example: '2023-10-01' })
+  @ApiProperty({
+    description: 'Last update date of the sales type',
+    example: '2023-10-01',
+  })
   @IsDate()
   @IsOptional()
   @Type(() => Date)
@@ -43,7 +55,10 @@ export class FpprSalesTypesQueryDto {
   @IsOptional()
   FPPR_SALES_TYPE_CODE?: string;
 
-  @ApiProperty({ description: 'Description of the sales type', example: 'Standard Sales Type' })
+  @ApiProperty({
+    description: 'Description of the sales type',
+    example: 'Standard Sales Type',
+  })
   @IsString()
   @IsOptional()
   DESCRIPTION?: string;

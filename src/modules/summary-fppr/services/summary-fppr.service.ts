@@ -8,10 +8,19 @@ export class SummaryFpprService {
 
   constructor(private readonly oracleService: OracleService) {}
 
-  async findAllSummaryFppr(queryDto: SummaryFpprQueryDto = {}): Promise<SummaryFpprDto[]> {
+  async findAllSummaryFppr(
+    queryDto: SummaryFpprQueryDto = {},
+  ): Promise<SummaryFpprDto[]> {
     try {
-      const { HEADER_ID, FPPR_NUMBER, FPPR_TYPE, FPPR_SALES_TYPE, page = 1, limit = 10 } = queryDto;
-      
+      const {
+        HEADER_ID,
+        FPPR_NUMBER,
+        FPPR_TYPE,
+        FPPR_SALES_TYPE,
+        page = 1,
+        limit = 10,
+      } = queryDto;
+
       let query = `
         SELECT 
           HEADER_ID,
@@ -60,7 +69,7 @@ export class SummaryFpprService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} summary FPPR records`);
       return result.rows;
     } catch (error) {
@@ -88,11 +97,11 @@ export class SummaryFpprService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-      
+
       if (!result.rows.length) {
         throw new Error(`Summary FPPR with ID ${id} not found`);
       }
-      
+
       this.logger.log(`Found summary FPPR with ID: ${id}`);
       return result.rows[0];
     } catch (error) {
@@ -104,7 +113,7 @@ export class SummaryFpprService {
   async countSummaryFppr(queryDto: SummaryFpprQueryDto = {}): Promise<number> {
     try {
       const { HEADER_ID, FPPR_NUMBER, FPPR_TYPE, FPPR_SALES_TYPE } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_ONT_SUMMARY_FPPR_V
@@ -139,7 +148,7 @@ export class SummaryFpprService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting summary FPPR records:', error);

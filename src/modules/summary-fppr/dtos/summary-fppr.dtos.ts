@@ -69,7 +69,10 @@ export class SummaryFpprDto {
   @IsString()
   ITEM_CODE?: string;
 
-  @ApiProperty({ description: 'Item description', example: 'Product Description' })
+  @ApiProperty({
+    description: 'Item description',
+    example: 'Product Description',
+  })
   @IsOptional()
   @IsString()
   ITEM_DESCRIPTION?: string;
@@ -145,7 +148,10 @@ export class SummaryFpprDto {
   @IsString()
   ORGANIZATION_CODE?: string;
 
-  @ApiProperty({ description: 'Organization name', example: 'Organization Name' })
+  @ApiProperty({
+    description: 'Organization name',
+    example: 'Organization Name',
+  })
   @IsOptional()
   @IsString()
   ORGANIZATION_NAME?: string;
@@ -187,7 +193,10 @@ export class SummaryFpprDto {
   @IsString()
   REMARKS?: string;
 
-  @ApiProperty({ description: 'Creation date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Creation date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)
@@ -198,7 +207,10 @@ export class SummaryFpprDto {
   @IsString()
   CREATED_BY?: string;
 
-  @ApiProperty({ description: 'Last update date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Last update date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)

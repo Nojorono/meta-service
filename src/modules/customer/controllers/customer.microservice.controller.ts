@@ -6,6 +6,7 @@ import {
   PaginationParamsDto,
   MetaCustomerDtoByDate,
 } from '../dtos/customer.dtos';
+import { Internal } from 'src/common/decorators/internal.decorator';
 
 @Controller()
 export class CustomerMetaMicroserviceController {
@@ -154,6 +155,50 @@ export class CustomerMetaMicroserviceController {
       return {
         status: false,
         message: `Error invalidating cache: ${error.message}`,
+      };
+    }
+  }
+
+  // Additional message patterns from customer.microservice.controllers.ts
+  @MessagePattern('customer.findAll')
+  @Internal()
+  async findAll(@Payload() data: any) {
+    try {
+      return await this.customerMetaService.getCustomersFromOracle(data);
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  @MessagePattern('customer.findById')
+  @Internal()
+  async findById(@Payload() data: { customerId: string }) {
+    try {
+      return await this.customerMetaService.getCustomersFromOracle({
+        page: 1,
+        limit: 1,
+        search: data.customerId,
+      });
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  @MessagePattern('customer.findByDate')
+  @Internal()
+  async findByDate(@Payload() data: any) {
+    try {
+      return await this.customerMetaService.getCustomersFromOracleByDate(data);
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
       };
     }
   }

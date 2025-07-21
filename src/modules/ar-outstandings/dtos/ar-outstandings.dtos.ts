@@ -7,12 +7,12 @@ export class ArOutstandingsDto {
   @IsOptional()
   @IsString()
   CALL_PLAN_NUMBER?: string;
-  
+
   @ApiProperty({ description: 'SFA document number', example: 'SFA12345' })
   @IsOptional()
   @IsString()
   SFA_DOCUMENT_NUMBER?: string;
-  
+
   @ApiProperty({ description: 'TRX Date', example: '2023-10-01' })
   @IsOptional()
   @IsDate()
@@ -28,34 +28,34 @@ export class ArOutstandingsDto {
   @IsOptional()
   @IsString()
   CUSTOMER_NUMBER: string;
-  
+
   @ApiProperty({ description: 'Customer Name', example: 'PT. ABCD Indonesia' })
   @IsOptional()
   @IsString()
   CUSTOMER_NAME: string;
-  
+
   @ApiProperty({ description: 'Sales Rep Number', example: 'SR12345' })
   @IsOptional()
   @IsString()
   SALESREP_NUMBER?: string;
-  
+
   @ApiProperty({ description: 'Ship To', example: 'SUBUR CARINGIN' })
   @IsOptional()
   @IsString()
   SHIP_TO?: string;
-  
+
   @ApiProperty({ description: 'Bill To', example: 'SUBUR CARINGIN' })
   @IsOptional()
   @IsString()
   BILL_TO?: string;
-  
+
   @ApiProperty({ description: 'Amount', example: '1786000' })
   @IsOptional()
-  @IsNumber() 
+  @IsNumber()
   AMOUNT: number;
-  
+
   @ApiProperty({ description: 'Due Remaining', example: '1086000' })
-  @IsOptional() 
+  @IsOptional()
   @IsNumber()
   DUE_REMAINING: number;
 
@@ -64,32 +64,32 @@ export class ArOutstandingsDto {
   @IsDate()
   @Type(() => Date)
   DUE_DATE: Date;
-  
+
   @ApiProperty({ description: 'Oracle Invoice Number', example: '4832951' })
   @IsOptional()
   @IsString()
   ORACLE_INVOICE_NUMBER: string;
-  
+
   @ApiProperty({ description: 'Customer Account ID', example: 12345 })
   @IsOptional()
   @IsNumber()
   CUST_ACCOUNT_ID?: number;
-  
+
   @ApiProperty({ description: 'Ship To Site Use ID', example: 67890 })
   @IsOptional()
   @IsNumber()
   SHIP_TO_SITE_USE_ID?: number;
-  
+
   @ApiProperty({ description: 'Bill To Site Use ID', example: 54321 })
   @IsOptional()
   @IsNumber()
   BILL_TO_SITE_USE_ID?: number;
-  
+
   @ApiProperty({ description: 'Customer Transaction ID', example: 98765 })
   @IsOptional()
   @IsNumber()
   CUSTOMER_TRX_ID?: number;
-  
+
   @ApiProperty({ description: 'Last Update Date', example: '2024-01-15' })
   @IsOptional()
   @IsDate()
@@ -100,22 +100,25 @@ export class ArOutstandingsDto {
   @IsOptional()
   @IsString()
   ORGANIZATION_CODE?: string;
-  
-  @ApiProperty({ description: 'Organization Name', example: 'Main Organization' })
+
+  @ApiProperty({
+    description: 'Organization Name',
+    example: 'Main Organization',
+  })
   @IsOptional()
   @IsString()
   ORGANIZATION_NAME?: string;
-  
+
   @ApiProperty({ description: 'Organization ID', example: 123 })
   @IsOptional()
   @IsNumber()
   ORGANIZATION_ID?: number;
-  
+
   @ApiProperty({ description: 'Organization Name', example: 'Main Org' })
   @IsOptional()
   @IsString()
   ORG_NAME?: string;
-  
+
   @ApiProperty({ description: 'Organization ID', example: 456 })
   @IsOptional()
   @IsNumber()
@@ -127,7 +130,7 @@ export class ArOutstandingsQueryDto {
   @IsOptional()
   @IsString()
   CALL_PLAN_NUMBER?: string;
-  
+
   @ApiProperty({ description: 'SFA document number', example: 'SFA12345' })
   @IsOptional()
   @IsString()
@@ -137,27 +140,27 @@ export class ArOutstandingsQueryDto {
   @IsOptional()
   @IsString()
   CUSTOMER_NUMBER?: string;
-  
+
   @ApiProperty({ description: 'Customer Name', example: 'PT. ABCD Indonesia' })
   @IsOptional()
   @IsString()
   CUSTOMER_NAME?: string;
-  
+
   @ApiProperty({ description: 'Sales Rep Number', example: 'SR12345' })
   @IsOptional()
   @IsString()
   SALESREP_NUMBER?: string;
-  
+
   @ApiProperty({ description: 'Oracle Invoice Number', example: '4832951' })
   @IsOptional()
   @IsString()
   ORACLE_INVOICE_NUMBER?: string;
-  
+
   @ApiProperty({ description: 'Customer Account ID', example: 12345 })
   @IsOptional()
   @IsNumber()
   CUST_ACCOUNT_ID?: number;
-  
+
   @ApiProperty({ description: 'Customer Transaction ID', example: 98765 })
   @IsOptional()
   @IsNumber()

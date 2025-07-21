@@ -57,7 +57,10 @@ export class SalesOrderDto {
 }
 
 export class SalesOrderQueryDto {
-  @ApiPropertyOptional({ description: 'Order number', example: '2510121000141' })
+  @ApiPropertyOptional({
+    description: 'Order number',
+    example: '2510121000141',
+  })
   @IsOptional()
   @IsString()
   @Type(() => String)
@@ -69,7 +72,11 @@ export class SalesOrderQueryDto {
   @Type(() => Number)
   page?: number;
 
-  @ApiPropertyOptional({ description: 'Items per page', type: Number, example: 10 })
+  @ApiPropertyOptional({
+    description: 'Items per page',
+    type: Number,
+    example: 10,
+  })
   @IsOptional()
   @IsNumber()
   @Type(() => Number)

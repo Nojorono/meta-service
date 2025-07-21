@@ -10,7 +10,10 @@ import {
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { ArOutstandingsService } from '../services/ar-outstandings.service';
-import { ArOutstandingsDto, ArOutstandingsQueryDto } from '../dtos/ar-outstandings.dtos';
+import {
+  ArOutstandingsDto,
+  ArOutstandingsQueryDto,
+} from '../dtos/ar-outstandings.dtos';
 
 @ApiTags('AR Outstandings')
 @Controller('ar-outstandings')
@@ -19,15 +22,59 @@ export class ArOutstandingsMicroserviceController {
 
   @Get()
   @ApiOperation({ summary: 'Get all AR outstandings' })
-  @ApiResponse({ status: 200, description: 'AR outstandings retrieved successfully', type: [ArOutstandingsDto] })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'CUSTOMER_ID', required: false, type: Number, description: 'Customer ID' })
-  @ApiQuery({ name: 'CUSTOMER_NUMBER', required: false, type: String, description: 'Customer number' })
-  @ApiQuery({ name: 'CUSTOMER_NAME', required: false, type: String, description: 'Customer name' })
-  @ApiQuery({ name: 'INVOICE_NUMBER', required: false, type: String, description: 'Invoice number' })
-  @ApiQuery({ name: 'CURRENCY_CODE', required: false, type: String, description: 'Currency code' })
-  @ApiQuery({ name: 'STATUS', required: false, type: String, description: 'Status' })
+  @ApiResponse({
+    status: 200,
+    description: 'AR outstandings retrieved successfully',
+    type: [ArOutstandingsDto],
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'CUSTOMER_ID',
+    required: false,
+    type: Number,
+    description: 'Customer ID',
+  })
+  @ApiQuery({
+    name: 'CUSTOMER_NUMBER',
+    required: false,
+    type: String,
+    description: 'Customer number',
+  })
+  @ApiQuery({
+    name: 'CUSTOMER_NAME',
+    required: false,
+    type: String,
+    description: 'Customer name',
+  })
+  @ApiQuery({
+    name: 'INVOICE_NUMBER',
+    required: false,
+    type: String,
+    description: 'Invoice number',
+  })
+  @ApiQuery({
+    name: 'CURRENCY_CODE',
+    required: false,
+    type: String,
+    description: 'Currency code',
+  })
+  @ApiQuery({
+    name: 'STATUS',
+    required: false,
+    type: String,
+    description: 'Status',
+  })
   async findAll(@Query() query: ArOutstandingsQueryDto) {
     try {
       const [data, total] = await Promise.all([
@@ -55,7 +102,11 @@ export class ArOutstandingsMicroserviceController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get AR outstanding by ID' })
-  @ApiResponse({ status: 200, description: 'AR outstanding retrieved successfully', type: ArOutstandingsDto })
+  @ApiResponse({
+    status: 200,
+    description: 'AR outstanding retrieved successfully',
+    type: ArOutstandingsDto,
+  })
   @ApiResponse({ status: 404, description: 'AR outstanding not found' })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     try {

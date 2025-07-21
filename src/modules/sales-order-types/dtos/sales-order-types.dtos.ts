@@ -8,12 +8,18 @@ export class SalesOrderTypesDto {
   @IsNumber()
   TRANSACTION_TYPE_ID?: number;
 
-  @ApiProperty({ description: 'Transaction type name', example: 'Standard Order' })
+  @ApiProperty({
+    description: 'Transaction type name',
+    example: 'Standard Order',
+  })
   @IsOptional()
   @IsString()
   TRANSACTION_TYPE_NAME?: string;
 
-  @ApiProperty({ description: 'Description', example: 'Standard sales order type' })
+  @ApiProperty({
+    description: 'Description',
+    example: 'Standard sales order type',
+  })
   @IsOptional()
   @IsString()
   DESCRIPTION?: string;
@@ -35,7 +41,10 @@ export class SalesOrderTypesDto {
   @Type(() => Date)
   END_DATE_ACTIVE?: Date;
 
-  @ApiProperty({ description: 'Creation date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Creation date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)
@@ -46,7 +55,10 @@ export class SalesOrderTypesDto {
   @IsString()
   CREATED_BY?: string;
 
-  @ApiProperty({ description: 'Last update date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Last update date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)

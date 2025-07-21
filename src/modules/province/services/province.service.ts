@@ -13,7 +13,7 @@ export class ProvinceService {
   ): Promise<ProvinceDto[]> {
     try {
       const { provinsiCode, provinsiName, page = 1, limit = 10 } = queryDto;
-      
+
       let query = `
         SELECT 
           PROVINSI_CODE,
@@ -46,7 +46,7 @@ export class ProvinceService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} provinces`);
       return result.rows as ProvinceDto[];
     } catch (error) {
@@ -68,8 +68,10 @@ export class ProvinceService {
         WHERE PROVINSI_CODE = :1
       `;
 
-      const result = await this.oracleService.executeQuery(query, [provinsiCode]);
-      
+      const result = await this.oracleService.executeQuery(query, [
+        provinsiCode,
+      ]);
+
       if (result.rows.length === 0) {
         this.logger.warn(`Province not found for code: ${provinsiCode}`);
         return null;
@@ -78,7 +80,10 @@ export class ProvinceService {
       this.logger.log(`Found province: ${provinsiCode}`);
       return result.rows[0] as ProvinceDto;
     } catch (error) {
-      this.logger.error(`Error finding province by code ${provinsiCode}:`, error);
+      this.logger.error(
+        `Error finding province by code ${provinsiCode}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -86,7 +91,7 @@ export class ProvinceService {
   async getProvinceCount(queryDto: ProvinceQueryDto = {}): Promise<number> {
     try {
       const { provinsiCode, provinsiName } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) as TOTAL_COUNT
         FROM APPS.XTD_FND_PROVINSI_V
@@ -110,7 +115,7 @@ export class ProvinceService {
 
       const result = await this.oracleService.executeQuery(query, params);
       const count = result.rows[0]?.TOTAL_COUNT || 0;
-      
+
       this.logger.log(`Total provinces count: ${count}`);
       return count;
     } catch (error) {

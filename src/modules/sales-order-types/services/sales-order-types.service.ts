@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { SalesOrderTypesDto, SalesOrderTypesQueryDto } from '../dtos/sales-order-types.dtos';
+import {
+  SalesOrderTypesDto,
+  SalesOrderTypesQueryDto,
+} from '../dtos/sales-order-types.dtos';
 
 @Injectable()
 export class SalesOrderTypesService {
@@ -12,14 +15,14 @@ export class SalesOrderTypesService {
     queryDto: SalesOrderTypesQueryDto = {},
   ): Promise<SalesOrderTypesDto[]> {
     try {
-      const { 
-        TRANSACTION_TYPE_ID, 
-        TRANSACTION_TYPE_NAME, 
-        ORDER_CATEGORY_CODE, 
-        page = 1, 
-        limit = 10 
+      const {
+        TRANSACTION_TYPE_ID,
+        TRANSACTION_TYPE_NAME,
+        ORDER_CATEGORY_CODE,
+        page = 1,
+        limit = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           TRANSACTION_TYPE_ID,
@@ -64,7 +67,7 @@ export class SalesOrderTypesService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} sales order types`);
       return result.rows;
     } catch (error) {
@@ -93,27 +96,32 @@ export class SalesOrderTypesService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-      
+
       if (!result.rows.length) {
         throw new Error(`Sales order type with ID ${id} not found`);
       }
-      
+
       this.logger.log(`Found sales order type with ID: ${id}`);
       return result.rows[0];
     } catch (error) {
-      this.logger.error(`Error fetching sales order type with ID ${id}:`, error);
+      this.logger.error(
+        `Error fetching sales order type with ID ${id}:`,
+        error,
+      );
       throw error;
     }
   }
 
-  async countSalesOrderTypes(queryDto: SalesOrderTypesQueryDto = {}): Promise<number> {
+  async countSalesOrderTypes(
+    queryDto: SalesOrderTypesQueryDto = {},
+  ): Promise<number> {
     try {
-      const { 
-        TRANSACTION_TYPE_ID, 
-        TRANSACTION_TYPE_NAME, 
-        ORDER_CATEGORY_CODE 
+      const {
+        TRANSACTION_TYPE_ID,
+        TRANSACTION_TYPE_NAME,
+        ORDER_CATEGORY_CODE,
       } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_ONT_SALES_ORDER_TYPES_V
@@ -142,7 +150,7 @@ export class SalesOrderTypesService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting sales order types:', error);

@@ -1,10 +1,12 @@
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { Transport } from '@nestjs/microservices';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from './app/app.module';
 import { setupSwagger } from './swagger';
+import { AuthGuard } from './common/guards/auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 import express, { Request, Response } from 'express';
 import helmet from 'helmet';
@@ -77,8 +79,29 @@ async function bootstrap() {
       prefix: versioningPrefix,
     });
   }
-  // Microservices configuration
+  // Set up global pipes and guards
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
+  // Set up global auth guard
+  const reflector = app.get(Reflector);
+  const jwtService = app.get(JwtService);
+  app.useGlobalGuards(new AuthGuard(reflector, jwtService));
+
+  // Microservices configuration for internal WMS access
   const microservices = [
+    {
+      name: 'META_SERVICE_MAIN',
+      queue: configService.get('rmq.metaService') || 'meta_service_queue',
+    },
     {
       name: 'AUTH_SERVICE',
       queue: configService.get('rmq.auth'),
@@ -102,6 +125,80 @@ async function bootstrap() {
     {
       name: 'GEOTREE_SERVICE',
       queue: configService.get('rmq.geotree'),
+    },
+    {
+      name: 'SALES_ORDER_SERVICE',
+      queue: configService.get('rmq.salesOrder') || 'sales_order_queue',
+    },
+    {
+      name: 'PURCHASE_ORDER_SERVICE',
+      queue: configService.get('rmq.purchaseOrder') || 'purchase_order_queue',
+    },
+    {
+      name: 'WAREHOUSE_SERVICE',
+      queue: configService.get('rmq.warehouse') || 'warehouse_queue',
+    },
+    {
+      name: 'SALES_ITEM_SERVICE',
+      queue: configService.get('rmq.salesItem') || 'sales_item_queue',
+    },
+    {
+      name: 'SALESMAN_SERVICE',
+      queue: configService.get('rmq.salesman') || 'salesman_queue',
+    },
+    {
+      name: 'PROVINCE_SERVICE',
+      queue: configService.get('rmq.province') || 'province_queue',
+    },
+    {
+      name: 'CITY_SERVICE',
+      queue: configService.get('rmq.city') || 'city_queue',
+    },
+    {
+      name: 'DISTRICT_SERVICE',
+      queue: configService.get('rmq.district') || 'district_queue',
+    },
+    {
+      name: 'SUB_DISTRICT_SERVICE',
+      queue: configService.get('rmq.subDistrict') || 'sub_district_queue',
+    },
+    {
+      name: 'ORGANIZATION_SERVICE',
+      queue: configService.get('rmq.organization') || 'organization_queue',
+    },
+    {
+      name: 'POSITION_SERVICE',
+      queue: configService.get('rmq.position') || 'position_queue',
+    },
+    {
+      name: 'SUPPLIER_SERVICE',
+      queue: configService.get('rmq.supplier') || 'supplier_queue',
+    },
+    {
+      name: 'SALES_ITEM_CONVERSION_SERVICE',
+      queue:
+        configService.get('rmq.salesItemConversion') ||
+        'sales_item_conversion_queue',
+    },
+    {
+      name: 'RECEIPT_METHOD_SERVICE',
+      queue: configService.get('rmq.receiptMethod') || 'receipt_method_queue',
+    },
+    {
+      name: 'SALES_ACTIVITY_SERVICE',
+      queue: configService.get('rmq.salesActivity') || 'sales_activity_queue',
+    },
+    {
+      name: 'USER_DMS_SERVICE',
+      queue: configService.get('rmq.userDms') || 'user_dms_queue',
+    },
+    {
+      name: 'PRICE_LIST_SERVICE',
+      queue: configService.get('rmq.priceList') || 'price_list_queue',
+    },
+    {
+      name: 'ITEM_LIST_SERVICE',
+      queue: configService.get('rmq.itemList') || 'item_list_queue',
     },
   ];
 

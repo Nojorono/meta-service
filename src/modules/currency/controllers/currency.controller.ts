@@ -1,5 +1,11 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { CurrencyService } from '../services/currency.service';
 import { CurrencyDto, CurrencyQueryDto } from '../dtos/currency.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
@@ -16,9 +22,21 @@ export class CurrencyController {
     description: 'Return all currencies',
     type: [CurrencyDto],
   })
-  @ApiQuery({ name: 'CURRENCY_CODE', required: false, description: 'Filter by currency code' })
-  @ApiQuery({ name: 'NAME', required: false, description: 'Filter by currency name' })
-  @ApiQuery({ name: 'ENABLED_FLAG', required: false, description: 'Filter by enabled flag' })
+  @ApiQuery({
+    name: 'CURRENCY_CODE',
+    required: false,
+    description: 'Filter by currency code',
+  })
+  @ApiQuery({
+    name: 'NAME',
+    required: false,
+    description: 'Filter by currency name',
+  })
+  @ApiQuery({
+    name: 'ENABLED_FLAG',
+    required: false,
+    description: 'Filter by enabled flag',
+  })
   @ApiQuery({ name: 'PAGE', required: false, description: 'Page number' })
   @ApiQuery({ name: 'LIMIT', required: false, description: 'Records per page' })
   async findAll(@Query() query: CurrencyQueryDto): Promise<any> {
@@ -64,7 +82,9 @@ export class CurrencyController {
     description: 'Return currencies with the specified enabled flag',
     type: [CurrencyDto],
   })
-  async findByEnabledFlag(@Param('ENABLED_FLAG') ENABLED_FLAG: string): Promise<any> {
+  async findByEnabledFlag(
+    @Param('ENABLED_FLAG') ENABLED_FLAG: string,
+  ): Promise<any> {
     const data = await this.currencyService.findAllCurrencies({ ENABLED_FLAG });
     return {
       success: true,
@@ -104,12 +124,16 @@ export class CurrencyController {
   }
 
   @MessagePattern('currency.findByName')
-  async findByNameMicroservice(@Payload() name: string): Promise<CurrencyDto[]> {
-    return await this.currencyService.findAllCurrencies({ NAME : name });
+  async findByNameMicroservice(
+    @Payload() name: string,
+  ): Promise<CurrencyDto[]> {
+    return await this.currencyService.findAllCurrencies({ NAME: name });
   }
 
   @MessagePattern('currency.findByEnabledFlag')
-  async findByEnabledFlagMicroservice(@Payload() ENABLED_FLAG: string): Promise<CurrencyDto[]> {
+  async findByEnabledFlagMicroservice(
+    @Payload() ENABLED_FLAG: string,
+  ): Promise<CurrencyDto[]> {
     return await this.currencyService.findAllCurrencies({ ENABLED_FLAG });
   }
 }

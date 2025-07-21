@@ -12,8 +12,14 @@ export class DistrictService {
     queryDto: DistrictQueryDto = {},
   ): Promise<DistrictDto[]> {
     try {
-      const { kotamadyaCode, kecamatanCode, kecamatanName, page = 1, limit = 10 } = queryDto;
-      
+      const {
+        kotamadyaCode,
+        kecamatanCode,
+        kecamatanName,
+        page = 1,
+        limit = 10,
+      } = queryDto;
+
       let query = `
         SELECT 
           KOTAMADYA_CODE,
@@ -54,7 +60,7 @@ export class DistrictService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} districts`);
       return result.rows as DistrictDto[];
     } catch (error) {
@@ -78,8 +84,10 @@ export class DistrictService {
         WHERE KECAMATAN_CODE = :1
       `;
 
-      const result = await this.oracleService.executeQuery(query, [kecamatanCode]);
-      
+      const result = await this.oracleService.executeQuery(query, [
+        kecamatanCode,
+      ]);
+
       if (result.rows.length === 0) {
         this.logger.warn(`District not found for code: ${kecamatanCode}`);
         return null;
@@ -88,7 +96,10 @@ export class DistrictService {
       this.logger.log(`Found district: ${kecamatanCode}`);
       return result.rows[0] as DistrictDto;
     } catch (error) {
-      this.logger.error(`Error finding district by code ${kecamatanCode}:`, error);
+      this.logger.error(
+        `Error finding district by code ${kecamatanCode}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -109,12 +120,19 @@ export class DistrictService {
         ORDER BY KECAMATAN_CODE
       `;
 
-      const result = await this.oracleService.executeQuery(query, [kotamadyaCode]);
-      
-      this.logger.log(`Found ${result.rows.length} districts for city: ${kotamadyaCode}`);
+      const result = await this.oracleService.executeQuery(query, [
+        kotamadyaCode,
+      ]);
+
+      this.logger.log(
+        `Found ${result.rows.length} districts for city: ${kotamadyaCode}`,
+      );
       return result.rows as DistrictDto[];
     } catch (error) {
-      this.logger.error(`Error finding districts by city code ${kotamadyaCode}:`, error);
+      this.logger.error(
+        `Error finding districts by city code ${kotamadyaCode}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -122,7 +140,7 @@ export class DistrictService {
   async getDistrictCount(queryDto: DistrictQueryDto = {}): Promise<number> {
     try {
       const { kotamadyaCode, kecamatanCode, kecamatanName } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) as TOTAL_COUNT
         FROM APPS.XTD_FND_KECAMATAN_V
@@ -152,7 +170,7 @@ export class DistrictService {
 
       const result = await this.oracleService.executeQuery(query, params);
       const count = result.rows[0]?.TOTAL_COUNT || 0;
-      
+
       this.logger.log(`Total districts count: ${count}`);
       return count;
     } catch (error) {

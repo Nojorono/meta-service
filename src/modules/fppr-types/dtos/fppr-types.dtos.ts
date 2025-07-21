@@ -7,34 +7,46 @@ export class FpprTypesDto {
   @IsString()
   @IsOptional()
   FPPR_TYPE_CODE?: string;
-  
-  @ApiProperty({ description: 'Description of the FPPR type', example: 'Standard FPPR Type' })
+
+  @ApiProperty({
+    description: 'Description of the FPPR type',
+    example: 'Standard FPPR Type',
+  })
   @IsString()
   @IsOptional()
   DESCRIPTION?: string;
-  
+
   @ApiProperty({ description: 'Enabled Flag', example: 'Y' })
   @IsString()
   @IsOptional()
   ENABLED_FLAG?: string;
 
-  @ApiProperty({ description: 'Start date when the FPPR type is active', example: '2023-01-01' })
+  @ApiProperty({
+    description: 'Start date when the FPPR type is active',
+    example: '2023-01-01',
+  })
   @IsDate()
   @IsOptional()
   @Type(() => Date)
   START_DATE_ACTIVE?: Date;
-  
-  @ApiProperty({ description: 'End date when the FPPR type is no longer active', example: '2023-12-31' })
+
+  @ApiProperty({
+    description: 'End date when the FPPR type is no longer active',
+    example: '2023-12-31',
+  })
   @IsDate()
   @IsOptional()
   @Type(() => Date)
   END_DATE_ACTIVE?: Date;
-  
-  @ApiProperty({ description: 'Last update date of the FPPR type', example: '2023-10-01' })
+
+  @ApiProperty({
+    description: 'Last update date of the FPPR type',
+    example: '2023-10-01',
+  })
   @IsDate()
   @IsOptional()
   @Type(() => Date)
-  LAST_UPDATE_DATE: Date; 
+  LAST_UPDATE_DATE: Date;
 }
 
 export class FpprTypesQueryDto {
@@ -42,12 +54,15 @@ export class FpprTypesQueryDto {
   @IsString()
   @IsOptional()
   FPPR_TYPE_CODE?: string;
-  
-  @ApiProperty({ description: 'Description of the FPPR type', example: 'Standard FPPR Type' })
+
+  @ApiProperty({
+    description: 'Description of the FPPR type',
+    example: 'Standard FPPR Type',
+  })
   @IsString()
   @IsOptional()
   DESCRIPTION?: string;
-  
+
   @ApiProperty({ description: 'Enabled Flag', example: 'Y' })
   @IsString()
   @IsOptional()

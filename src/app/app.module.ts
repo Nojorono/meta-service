@@ -47,6 +47,7 @@ import { SummaryFpprModule } from '../modules/summary-fppr/summary-fppr.module';
 import { PurchaseOrderModule } from 'src/modules/purchase-order/purchase-order.module';
 import { ItemListMetaModule } from '../modules/item-list/item-list.module';
 import { SalesOrderModule } from 'src/modules/sales-order/sales-order.module';
+import { AuthModule } from '../modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -89,6 +90,7 @@ import { SalesOrderModule } from 'src/modules/sales-order/sales-order.module';
     PurchaseOrderModule,
     ItemListMetaModule,
     SalesOrderModule,
+    AuthModule,
     // Other modules can be added here
 
     PassportModule.register({ defaultStrategy: 'jwt' }),

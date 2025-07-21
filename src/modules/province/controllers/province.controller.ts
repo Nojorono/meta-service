@@ -27,33 +27,34 @@ export class ProvinceController {
   constructor(private readonly provinceService: ProvinceService) {}
 
   @Get()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get all provinces',
-    description: 'Retrieve a list of all provinces from XTD_FND_PROVINSI_V view'
+    description:
+      'Retrieve a list of all provinces from XTD_FND_PROVINSI_V view',
   })
   @ApiQuery({
     name: 'provinsiCode',
     required: false,
     description: 'Filter by province code',
-    example: 'JKT'
+    example: 'JKT',
   })
   @ApiQuery({
     name: 'provinsiName',
     required: false,
     description: 'Filter by province name',
-    example: 'Jakarta'
+    example: 'Jakarta',
   })
   @ApiQuery({
     name: 'page',
     required: false,
     description: 'Page number for pagination',
-    example: 1
+    example: 1,
   })
   @ApiQuery({
     name: 'limit',
     required: false,
     description: 'Number of records per page',
-    example: 10
+    example: 10,
   })
   @ApiResponse({
     status: 200,
@@ -64,7 +65,9 @@ export class ProvinceController {
     status: 500,
     description: 'Internal server error',
   })
-  async findAllProvinces(@Query() queryDto: ProvinceQueryDto): Promise<ProvinceDto[]> {
+  async findAllProvinces(
+    @Query() queryDto: ProvinceQueryDto,
+  ): Promise<ProvinceDto[]> {
     try {
       this.logger.log('Fetching all provinces with filters:', queryDto);
       return await this.provinceService.findAllProvinces(queryDto);
@@ -78,21 +81,22 @@ export class ProvinceController {
   }
 
   @Get('count')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get province count',
-    description: 'Get the total count of provinces matching the filter criteria'
+    description:
+      'Get the total count of provinces matching the filter criteria',
   })
   @ApiQuery({
     name: 'provinsiCode',
     required: false,
     description: 'Filter by province code',
-    example: 'JKT'
+    example: 'JKT',
   })
   @ApiQuery({
     name: 'provinsiName',
     required: false,
     description: 'Filter by province name',
-    example: 'Jakarta'
+    example: 'Jakarta',
   })
   @ApiResponse({
     status: 200,
@@ -100,15 +104,17 @@ export class ProvinceController {
     schema: {
       type: 'object',
       properties: {
-        count: { type: 'number', example: 34 }
-      }
-    }
+        count: { type: 'number', example: 34 },
+      },
+    },
   })
   @ApiResponse({
     status: 500,
     description: 'Internal server error',
   })
-  async getProvinceCount(@Query() queryDto: ProvinceQueryDto): Promise<{ count: number }> {
+  async getProvinceCount(
+    @Query() queryDto: ProvinceQueryDto,
+  ): Promise<{ count: number }> {
     try {
       this.logger.log('Getting province count with filters:', queryDto);
       const count = await this.provinceService.getProvinceCount(queryDto);
@@ -123,9 +129,10 @@ export class ProvinceController {
   }
 
   @Get(':code')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get province by code',
-    description: 'Retrieve a specific province by its code from XTD_FND_PROVINSI_V view'
+    description:
+      'Retrieve a specific province by its code from XTD_FND_PROVINSI_V view',
   })
   @ApiParam({
     name: 'code',
@@ -149,7 +156,7 @@ export class ProvinceController {
     try {
       this.logger.log(`Fetching province by code: ${code}`);
       const province = await this.provinceService.findProvinceByCode(code);
-      
+
       if (!province) {
         throw new HttpException(
           `Province with code ${code} not found`,
@@ -160,11 +167,11 @@ export class ProvinceController {
       return province;
     } catch (error) {
       this.logger.error(`Error fetching province by code ${code}:`, error);
-      
+
       if (error instanceof HttpException) {
         throw error;
       }
-      
+
       throw new HttpException(
         'Failed to fetch province',
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -8,20 +8,18 @@ export class ZxTaxService {
 
   constructor(private readonly oracleService: OracleService) {}
 
-  async findAllZxTax(
-    queryDto: ZxTaxQueryDto = {},
-  ): Promise<ZxTaxDto[]> {
+  async findAllZxTax(queryDto: ZxTaxQueryDto = {}): Promise<ZxTaxDto[]> {
     try {
-      const { 
-        TAX_ID, 
-        TAX_NAME, 
-        TAX_TYPE_CODE, 
-        TAX_REGIME_CODE, 
-        ACTIVE_FLAG, 
-        page = 1, 
-        limit = 10 
+      const {
+        TAX_ID,
+        TAX_NAME,
+        TAX_TYPE_CODE,
+        TAX_REGIME_CODE,
+        ACTIVE_FLAG,
+        page = 1,
+        limit = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           TAX_ID,
@@ -105,7 +103,7 @@ export class ZxTaxService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} ZX tax records`);
       return result.rows;
     } catch (error) {
@@ -161,11 +159,11 @@ export class ZxTaxService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-      
+
       if (!result.rows.length) {
         throw new Error(`ZX tax with ID ${id} not found`);
       }
-      
+
       this.logger.log(`Found ZX tax with ID: ${id}`);
       return result.rows[0];
     } catch (error) {
@@ -176,14 +174,9 @@ export class ZxTaxService {
 
   async countZxTax(queryDto: ZxTaxQueryDto = {}): Promise<number> {
     try {
-      const { 
-        TAX_ID, 
-        TAX_NAME, 
-        TAX_TYPE_CODE, 
-        TAX_REGIME_CODE, 
-        ACTIVE_FLAG 
-      } = queryDto;
-      
+      const { TAX_ID, TAX_NAME, TAX_TYPE_CODE, TAX_REGIME_CODE, ACTIVE_FLAG } =
+        queryDto;
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_ZX_TAX_V
@@ -224,7 +217,7 @@ export class ZxTaxService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting ZX tax records:', error);

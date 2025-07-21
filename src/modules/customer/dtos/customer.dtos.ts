@@ -158,13 +158,21 @@ export class PaginationParamsDto {
   @Type(() => Number)
   page?: number;
 
-  @ApiPropertyOptional({ description: 'Items per page', type: Number, example: 10 })
+  @ApiPropertyOptional({
+    description: 'Items per page',
+    type: Number,
+    example: 10,
+  })
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
   limit?: number;
 
-  @ApiPropertyOptional({ description: 'Search term', type: String, example: 'PT. ABCD' })
+  @ApiPropertyOptional({
+    description: 'Search term',
+    type: String,
+    example: 'PT. ABCD',
+  })
   @IsString()
   @IsOptional()
   @Type(() => String)

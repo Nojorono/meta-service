@@ -12,16 +12,16 @@ export class PriceListService {
     queryDto: PriceListQueryDto = {},
   ): Promise<PriceListDto[]> {
     try {
-      const { 
-        priceName, 
-        itemCode, 
-        itemDescription, 
-        productUomCode, 
+      const {
+        priceName,
+        itemCode,
+        itemDescription,
+        productUomCode,
         customerNumber,
-        page = 1, 
-        limit = 10 
+        page = 1,
+        limit = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           PRICE_NAME,
@@ -83,7 +83,7 @@ export class PriceListService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} price lists`);
       return result.rows;
     } catch (error) {
@@ -117,11 +117,11 @@ export class PriceListService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-      
+
       if (!result.rows.length) {
         throw new Error(`Price list with ID ${id} not found`);
       }
-      
+
       this.logger.log(`Found price list with ID: ${id}`);
       return result.rows[0];
     } catch (error) {
@@ -132,14 +132,14 @@ export class PriceListService {
 
   async countPriceLists(queryDto: PriceListQueryDto = {}): Promise<number> {
     try {
-      const { 
-        priceName, 
-        itemCode, 
-        itemDescription, 
-        productUomCode, 
-        customerNumber 
+      const {
+        priceName,
+        itemCode,
+        itemDescription,
+        productUomCode,
+        customerNumber,
       } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_QP_PRICE_LIST_V
@@ -180,7 +180,7 @@ export class PriceListService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting price lists:', error);

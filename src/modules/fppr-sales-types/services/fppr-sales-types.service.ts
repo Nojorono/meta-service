@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { FpprSalesTypesDto, FpprSalesTypesQueryDto } from '../dtos/fppr-sales-types.dtos';
+import {
+  FpprSalesTypesDto,
+  FpprSalesTypesQueryDto,
+} from '../dtos/fppr-sales-types.dtos';
 
 @Injectable()
 export class FpprSalesTypesService {
@@ -12,14 +15,14 @@ export class FpprSalesTypesService {
     queryDto: FpprSalesTypesQueryDto = {},
   ): Promise<FpprSalesTypesDto[]> {
     try {
-      const { 
+      const {
         FPPR_SALES_TYPE_CODE,
         DESCRIPTION,
         ENABLED_FLAG,
-        page = 1, 
-        limit = 10 
+        page = 1,
+        limit = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           FPPR_SALES_TYPE_CODE,
@@ -59,7 +62,7 @@ export class FpprSalesTypesService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} FPPR sales types`);
       return result.rows;
     } catch (error) {
@@ -68,7 +71,9 @@ export class FpprSalesTypesService {
     }
   }
 
-  async findFpprSalesTypeByCode(lookupCode: string): Promise<FpprSalesTypesDto> {
+  async findFpprSalesTypeByCode(
+    lookupCode: string,
+  ): Promise<FpprSalesTypesDto> {
     try {
       const query = `
         SELECT 
@@ -83,27 +88,28 @@ export class FpprSalesTypesService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [lookupCode]);
-      
+
       if (!result.rows.length) {
         throw new Error(`FPPR sales type with code ${lookupCode} not found`);
       }
-      
+
       this.logger.log(`Found FPPR sales type with code: ${lookupCode}`);
       return result.rows[0];
     } catch (error) {
-      this.logger.error(`Error fetching FPPR sales type with code ${lookupCode}:`, error);
+      this.logger.error(
+        `Error fetching FPPR sales type with code ${lookupCode}:`,
+        error,
+      );
       throw error;
     }
   }
 
-  async countFpprSalesTypes(queryDto: FpprSalesTypesQueryDto = {}): Promise<number> {
+  async countFpprSalesTypes(
+    queryDto: FpprSalesTypesQueryDto = {},
+  ): Promise<number> {
     try {
-      const { 
-        FPPR_SALES_TYPE_CODE,
-        DESCRIPTION,
-        ENABLED_FLAG
-      } = queryDto;
-      
+      const { FPPR_SALES_TYPE_CODE, DESCRIPTION, ENABLED_FLAG } = queryDto;
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_ONT_FPPR_SALES_TYPES_V
@@ -132,7 +138,7 @@ export class FpprSalesTypesService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting FPPR sales types:', error);

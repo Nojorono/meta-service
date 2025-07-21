@@ -12,8 +12,16 @@ export class PositionService {
     queryDto: PositionQueryDto = {},
   ): Promise<PositionDto[]> {
     try {
-      const { positionCode, positionName, positionLevel, positionGroup, organizationId, page = 1, limit = 10 } = queryDto;
-      
+      const {
+        positionCode,
+        positionName,
+        positionLevel,
+        positionGroup,
+        organizationId,
+        page = 1,
+        limit = 10,
+      } = queryDto;
+
       let query = `
         SELECT 
           POSITION_ID,
@@ -70,7 +78,7 @@ export class PositionService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} positions`);
       return result.rows as PositionDto[];
     } catch (error) {
@@ -99,7 +107,7 @@ export class PositionService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [positionId]);
-      
+
       if (result.rows.length === 0) {
         this.logger.warn(`Position not found for ID: ${positionId}`);
         return null;
@@ -132,8 +140,10 @@ export class PositionService {
         WHERE POSITION_CODE = :1
       `;
 
-      const result = await this.oracleService.executeQuery(query, [positionCode]);
-      
+      const result = await this.oracleService.executeQuery(query, [
+        positionCode,
+      ]);
+
       if (result.rows.length === 0) {
         this.logger.warn(`Position not found for code: ${positionCode}`);
         return null;
@@ -142,12 +152,17 @@ export class PositionService {
       this.logger.log(`Found position: ${positionCode}`);
       return result.rows[0] as PositionDto;
     } catch (error) {
-      this.logger.error(`Error finding position by code ${positionCode}:`, error);
+      this.logger.error(
+        `Error finding position by code ${positionCode}:`,
+        error,
+      );
       throw error;
     }
   }
 
-  async findPositionsByOrganizationId(organizationId: number): Promise<PositionDto[]> {
+  async findPositionsByOrganizationId(
+    organizationId: number,
+  ): Promise<PositionDto[]> {
     try {
       const query = `
         SELECT 
@@ -167,20 +182,33 @@ export class PositionService {
         ORDER BY POSITION_CODE
       `;
 
-      const result = await this.oracleService.executeQuery(query, [organizationId]);
-      
-      this.logger.log(`Found ${result.rows.length} positions for organization: ${organizationId}`);
+      const result = await this.oracleService.executeQuery(query, [
+        organizationId,
+      ]);
+
+      this.logger.log(
+        `Found ${result.rows.length} positions for organization: ${organizationId}`,
+      );
       return result.rows as PositionDto[];
     } catch (error) {
-      this.logger.error(`Error finding positions by organization ID ${organizationId}:`, error);
+      this.logger.error(
+        `Error finding positions by organization ID ${organizationId}:`,
+        error,
+      );
       throw error;
     }
   }
 
   async getPositionCount(queryDto: PositionQueryDto = {}): Promise<number> {
     try {
-      const { positionCode, positionName, positionLevel, positionGroup, organizationId } = queryDto;
-      
+      const {
+        positionCode,
+        positionName,
+        positionLevel,
+        positionGroup,
+        organizationId,
+      } = queryDto;
+
       let query = `
         SELECT COUNT(*) as TOTAL_COUNT
         FROM APPS.XTD_HR_POSITIONS_V
@@ -222,7 +250,7 @@ export class PositionService {
 
       const result = await this.oracleService.executeQuery(query, params);
       const count = result.rows[0]?.TOTAL_COUNT || 0;
-      
+
       this.logger.log(`Total positions count: ${count}`);
       return count;
     } catch (error) {

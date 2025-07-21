@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { ApInvoiceTypesDto, ApInvoiceTypesQueryDto } from '../dtos/ap-invoice-types.dtos';
+import {
+  ApInvoiceTypesDto,
+  ApInvoiceTypesQueryDto,
+} from '../dtos/ap-invoice-types.dtos';
 
 @Injectable()
 export class ApInvoiceTypesService {
@@ -12,15 +15,15 @@ export class ApInvoiceTypesService {
     queryDto: ApInvoiceTypesQueryDto = {},
   ): Promise<ApInvoiceTypesDto[]> {
     try {
-      const { 
-        INVOICE_TYPE_CODE, 
-        INVOICE_TYPE_NAME, 
-        DESCRIPTION, 
-        ENABLED_FLAG, 
-        page = 1, 
-        limit = 10 
+      const {
+        INVOICE_TYPE_CODE,
+        INVOICE_TYPE_NAME,
+        DESCRIPTION,
+        ENABLED_FLAG,
+        page = 1,
+        limit = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           INVOICE_TYPE_CODE,
@@ -65,11 +68,11 @@ export class ApInvoiceTypesService {
       // Add pagination
       const offset = (page - 1) * limit;
       query += ` ORDER BY INVOICE_TYPE_CODE OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
-      params.push(offset);      // :paramIndex
-      params.push(limit);       // :paramIndex + 1
+      params.push(offset); // :paramIndex
+      params.push(limit); // :paramIndex + 1
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} AP invoice types`);
       return result.rows;
     } catch (error) {
@@ -95,28 +98,33 @@ export class ApInvoiceTypesService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [code]);
-      
+
       if (!result.rows.length) {
         throw new Error(`AP invoice type with code ${code} not found`);
       }
-      
+
       this.logger.log(`Found AP invoice type with code: ${code}`);
       return result.rows[0];
     } catch (error) {
-      this.logger.error(`Error fetching AP invoice type with code ${code}:`, error);
+      this.logger.error(
+        `Error fetching AP invoice type with code ${code}:`,
+        error,
+      );
       throw error;
     }
   }
 
-  async countApInvoiceTypes(queryDto: ApInvoiceTypesQueryDto = {}): Promise<number> {
+  async countApInvoiceTypes(
+    queryDto: ApInvoiceTypesQueryDto = {},
+  ): Promise<number> {
     try {
-      const { 
-        INVOICE_TYPE_CODE, 
-        INVOICE_TYPE_NAME, 
-        DESCRIPTION, 
-        ENABLED_FLAG 
+      const {
+        INVOICE_TYPE_CODE,
+        INVOICE_TYPE_NAME,
+        DESCRIPTION,
+        ENABLED_FLAG,
       } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_AP_INVOICE_TYPES_V
@@ -151,7 +159,7 @@ export class ApInvoiceTypesService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting AP invoice types:', error);

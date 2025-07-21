@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { MtlTrxListsDto, MtlTrxListsQueryDto } from '../dtos/mtl-trx-lists.dtos';
+import {
+  MtlTrxListsDto,
+  MtlTrxListsQueryDto,
+} from '../dtos/mtl-trx-lists.dtos';
 
 @Injectable()
 export class MtlTrxListsService {
@@ -8,7 +11,9 @@ export class MtlTrxListsService {
 
   constructor(private readonly oracleService: OracleService) {}
 
-  async findAll(query: MtlTrxListsQueryDto): Promise<{ data: MtlTrxListsDto[]; total: number }> {
+  async findAll(
+    query: MtlTrxListsQueryDto,
+  ): Promise<{ data: MtlTrxListsDto[]; total: number }> {
     const {
       TRANSACTION_ID,
       ORGANIZATION_ID,
@@ -113,7 +118,10 @@ export class MtlTrxListsService {
       countParams.push(SUBINVENTORY_CODE);
       countIndex++;
     }
-    const countResult = await this.oracleService.executeQuery(countSql, countParams);
+    const countResult = await this.oracleService.executeQuery(
+      countSql,
+      countParams,
+    );
     const total = countResult.rows[0]?.TOTAL || 0;
     return { data: result.rows, total };
   }

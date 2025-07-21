@@ -12,14 +12,14 @@ export class FpprTypesService {
     queryDto: FpprTypesQueryDto = {},
   ): Promise<FpprTypesDto[]> {
     try {
-      const { 
-        FPPR_TYPE_CODE, 
-        DESCRIPTION, 
-        ENABLED_FLAG, 
-        page = 1, 
-        limit = 10 
+      const {
+        FPPR_TYPE_CODE,
+        DESCRIPTION,
+        ENABLED_FLAG,
+        page = 1,
+        limit = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           FPPR_TYPE_CODE,
@@ -59,7 +59,7 @@ export class FpprTypesService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} FPPR types`);
       return result.rows;
     } catch (error) {
@@ -83,27 +83,26 @@ export class FpprTypesService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [lookupCode]);
-      
+
       if (!result.rows.length) {
         throw new Error(`FPPR type with code ${lookupCode} not found`);
       }
-      
+
       this.logger.log(`Found FPPR type with code: ${lookupCode}`);
       return result.rows[0];
     } catch (error) {
-      this.logger.error(`Error fetching FPPR type with code ${lookupCode}:`, error);
+      this.logger.error(
+        `Error fetching FPPR type with code ${lookupCode}:`,
+        error,
+      );
       throw error;
     }
   }
 
   async countFpprTypes(queryDto: FpprTypesQueryDto = {}): Promise<number> {
     try {
-      const { 
-        FPPR_TYPE_CODE, 
-        DESCRIPTION,
-        ENABLED_FLAG 
-      } = queryDto;
-      
+      const { FPPR_TYPE_CODE, DESCRIPTION, ENABLED_FLAG } = queryDto;
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_ONT_FPPR_TYPES_V
@@ -132,7 +131,7 @@ export class FpprTypesService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting FPPR types:', error);

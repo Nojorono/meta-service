@@ -1,13 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { SalesOrderDto, SalesOrderQueryDto } from '../dtos/sales-order.dtos';
+import { SalesOrderQueryDto } from '../dtos/sales-order.dtos';
 
 @Injectable()
 export class SalesOrderService {
   private readonly logger = new Logger(SalesOrderService.name);
   constructor(private readonly oracleService: OracleService) {}
 
-  async findAll(query: SalesOrderQueryDto = {}): Promise<{ data: any[]; total: number }> {
+  async findAll(
+    query: SalesOrderQueryDto = {},
+  ): Promise<{ data: any[]; total: number }> {
     const { order_number, page = 1, limit = 10 } = query;
     let sql = `
       SELECT so.HEADER_ID, so.SO_TYPE, so.ORG_ID, so.STATUS, so.ORGANIZATION_ID, so.TRANSACTION_TYPE, so.ORDER_NUMBER,
@@ -45,7 +47,10 @@ export class SalesOrderService {
       countParams.push(order_number);
       countIndex++;
     }
-    const countResult = await this.oracleService.executeQuery(countSql, countParams);
+    const countResult = await this.oracleService.executeQuery(
+      countSql,
+      countParams,
+    );
     const total = countResult.rows[0]?.TOTAL || 0;
 
     // Grouping and formatting response
@@ -103,7 +108,9 @@ export class SalesOrderService {
         SHIPPING_QUANTITY_UOM: row.SHIPPING_QUANTITY_UOM,
       });
     }
-    const data = Object.values(grouped).sort((a, b) => a.HEADER_ID - b.HEADER_ID);
+    const data = Object.values(grouped).sort(
+      (a, b) => a.HEADER_ID - b.HEADER_ID,
+    );
     return { data, total };
   }
 }

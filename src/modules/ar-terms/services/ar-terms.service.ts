@@ -8,19 +8,17 @@ export class ArTermsService {
 
   constructor(private readonly oracleService: OracleService) {}
 
-  async findAllArTerms(
-    queryDto: ArTermsQueryDto = {},
-  ): Promise<ArTermsDto[]> {
+  async findAllArTerms(queryDto: ArTermsQueryDto = {}): Promise<ArTermsDto[]> {
     try {
-      const { 
-        TERM_ID,  
-        TERM_NAME, 
-        DESCRIPTION, 
-        ENABLED_FLAG, 
-        page = 1, 
-        limit = 10 
+      const {
+        TERM_ID,
+        TERM_NAME,
+        DESCRIPTION,
+        ENABLED_FLAG,
+        page = 1,
+        limit = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           TERM_ID, 
@@ -68,7 +66,7 @@ export class ArTermsService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} AP terms`);
       return result.rows;
     } catch (error) {
@@ -94,11 +92,11 @@ export class ArTermsService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-      
+
       if (!result.rows.length) {
         throw new Error(`AP term with ID ${id} not found`);
       }
-      
+
       this.logger.log(`Found AP term with ID: ${id}`);
       return result.rows[0];
     } catch (error) {
@@ -109,13 +107,8 @@ export class ArTermsService {
 
   async countArTerms(queryDto: ArTermsQueryDto = {}): Promise<number> {
     try {
-      const { 
-        TERM_ID, 
-        TERM_NAME, 
-        DESCRIPTION,
-        ENABLED_FLAG 
-      } = queryDto;
-      
+      const { TERM_ID, TERM_NAME, DESCRIPTION, ENABLED_FLAG } = queryDto;
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_AR_TERMS_V
@@ -150,7 +143,7 @@ export class ArTermsService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting AP terms:', error);

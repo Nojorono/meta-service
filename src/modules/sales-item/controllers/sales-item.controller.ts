@@ -29,7 +29,8 @@ export class SalesItemMetaController {
     this.logger.log('==== REST API: Get all sales items ====');
 
     try {
-      const result = await this.salesItemMetaService.getSalesItemsFromOracleByDate();
+      const result =
+        await this.salesItemMetaService.getSalesItemsFromOracleByDate();
       this.logger.log(
         `REST API getSalesItems result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
       );
@@ -54,12 +55,12 @@ export class SalesItemMetaController {
     summary: 'Get sales items by date',
     description: 'Retrieve sales items filtered by last update date',
   })
-  @ApiQuery({ 
-    name: 'last_update_date', 
-    required: true, 
-    type: String, 
+  @ApiQuery({
+    name: 'last_update_date',
+    required: true,
+    type: String,
     description: 'Filter sales items by last update date (YYYY-MM-DD format)',
-    example: '2024-01-15'
+    example: '2024-01-15',
   })
   @ApiResponse({
     status: 200,
@@ -73,8 +74,11 @@ export class SalesItemMetaController {
     this.logger.log(`Date filter: ${lastUpdateDate}`);
 
     try {
-      const params: MetaSalesItemDtoByDate = { last_update_date: lastUpdateDate };
-      const result = await this.salesItemMetaService.getSalesItemsFromOracleByDate(params);
+      const params: MetaSalesItemDtoByDate = {
+        last_update_date: lastUpdateDate,
+      };
+      const result =
+        await this.salesItemMetaService.getSalesItemsFromOracleByDate(params);
       this.logger.log(
         `REST API getSalesItemsByDate result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
       );

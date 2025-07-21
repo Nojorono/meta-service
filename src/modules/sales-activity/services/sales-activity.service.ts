@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { SalesActivityDto, SalesActivityQueryDto } from '../dtos/sales-activity.dtos';
+import {
+  SalesActivityDto,
+  SalesActivityQueryDto,
+} from '../dtos/sales-activity.dtos';
 
 @Injectable()
 export class SalesActivityService {
@@ -12,15 +15,15 @@ export class SalesActivityService {
     queryDto: SalesActivityQueryDto = {},
   ): Promise<SalesActivityDto[]> {
     try {
-      const { 
-        activityName, 
-        receiptTypeDms, 
-        status, 
-        organizationCode, 
-        page = 1, 
-        limit = 10 
+      const {
+        activityName,
+        receiptTypeDms,
+        status,
+        organizationCode,
+        page = 1,
+        limit = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           SALES_ACTIVITY_ID,
@@ -68,7 +71,7 @@ export class SalesActivityService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} sales activities`);
       return result.rows;
     } catch (error) {
@@ -94,7 +97,7 @@ export class SalesActivityService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-      
+
       this.logger.log(`Found sales activity with ID: ${id}`);
       return result.rows[0];
     } catch (error) {
@@ -103,15 +106,13 @@ export class SalesActivityService {
     }
   }
 
-  async countSalesActivities(queryDto: SalesActivityQueryDto = {}): Promise<number> {
+  async countSalesActivities(
+    queryDto: SalesActivityQueryDto = {},
+  ): Promise<number> {
     try {
-      const { 
-        activityName, 
-        receiptTypeDms, 
-        status, 
-        organizationCode 
-      } = queryDto;
-      
+      const { activityName, receiptTypeDms, status, organizationCode } =
+        queryDto;
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_AR_SALES_ACTIVITIES_V
@@ -146,7 +147,7 @@ export class SalesActivityService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting sales activities:', error);

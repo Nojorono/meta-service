@@ -29,7 +29,8 @@ export class SalesmanMetaController {
     this.logger.log('==== REST API: Get all salesmen ====');
 
     try {
-      const result = await this.salesmanMetaService.getSalesmenFromOracleByDate();
+      const result =
+        await this.salesmanMetaService.getSalesmenFromOracleByDate();
       this.logger.log(
         `REST API getSalesmen result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
       );
@@ -54,12 +55,12 @@ export class SalesmanMetaController {
     summary: 'Get salesmen by date',
     description: 'Retrieve salesmen filtered by last update date',
   })
-  @ApiQuery({ 
-    name: 'last_update_date', 
-    required: true, 
-    type: String, 
+  @ApiQuery({
+    name: 'last_update_date',
+    required: true,
+    type: String,
     description: 'Filter salesmen by last update date (YYYY-MM-DD format)',
-    example: '2024-01-15'
+    example: '2024-01-15',
   })
   @ApiResponse({
     status: 200,
@@ -73,8 +74,11 @@ export class SalesmanMetaController {
     this.logger.log(`Date filter: ${lastUpdateDate}`);
 
     try {
-      const params: MetaSalesmanDtoByDate = { last_update_date: lastUpdateDate };
-      const result = await this.salesmanMetaService.getSalesmenFromOracleByDate(params);
+      const params: MetaSalesmanDtoByDate = {
+        last_update_date: lastUpdateDate,
+      };
+      const result =
+        await this.salesmanMetaService.getSalesmenFromOracleByDate(params);
       this.logger.log(
         `REST API getSalesmenByDate result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
       );

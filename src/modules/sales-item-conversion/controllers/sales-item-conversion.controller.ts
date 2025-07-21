@@ -1,13 +1,24 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { SalesItemConversionService } from '../services/sales-item-conversion.service';
-import { SalesItemConversionDto, SalesItemConversionQueryDto } from '../dtos/sales-item-conversion.dtos';
+import {
+  SalesItemConversionDto,
+  SalesItemConversionQueryDto,
+} from '../dtos/sales-item-conversion.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @ApiTags('Sales Item Conversion')
 @Controller('sales-item-conversion')
 export class SalesItemConversionController {
-  constructor(private readonly salesItemConversionService: SalesItemConversionService) {}
+  constructor(
+    private readonly salesItemConversionService: SalesItemConversionService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all sales item conversions' })
@@ -16,16 +27,38 @@ export class SalesItemConversionController {
     description: 'Return all sales item conversions',
     type: [SalesItemConversionDto],
   })
-  @ApiQuery({ name: 'itemCode', required: false, description: 'Filter by item code' })
-  @ApiQuery({ name: 'itemNumber', required: false, description: 'Filter by item number' })
-  @ApiQuery({ name: 'itemDescription', required: false, description: 'Filter by item description' })
-  @ApiQuery({ name: 'sourceUomCode', required: false, description: 'Filter by source UOM code' })
-  @ApiQuery({ name: 'baseUomCode', required: false, description: 'Filter by base UOM code' })
+  @ApiQuery({
+    name: 'itemCode',
+    required: false,
+    description: 'Filter by item code',
+  })
+  @ApiQuery({
+    name: 'itemNumber',
+    required: false,
+    description: 'Filter by item number',
+  })
+  @ApiQuery({
+    name: 'itemDescription',
+    required: false,
+    description: 'Filter by item description',
+  })
+  @ApiQuery({
+    name: 'sourceUomCode',
+    required: false,
+    description: 'Filter by source UOM code',
+  })
+  @ApiQuery({
+    name: 'baseUomCode',
+    required: false,
+    description: 'Filter by base UOM code',
+  })
   @ApiQuery({ name: 'page', required: false, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, description: 'Records per page' })
   async findAll(@Query() query: SalesItemConversionQueryDto): Promise<any> {
-    const data = await this.salesItemConversionService.findAllSalesItemConversions(query);
-    const total = await this.salesItemConversionService.countSalesItemConversions(query);
+    const data =
+      await this.salesItemConversionService.findAllSalesItemConversions(query);
+    const total =
+      await this.salesItemConversionService.countSalesItemConversions(query);
     return {
       success: true,
       statusCode: 200,
@@ -49,7 +82,10 @@ export class SalesItemConversionController {
     type: [SalesItemConversionDto],
   })
   async findByItemCode(@Param('itemCode') itemCode: string): Promise<any> {
-    const data = await this.salesItemConversionService.findAllSalesItemConversions({ itemCode });
+    const data =
+      await this.salesItemConversionService.findAllSalesItemConversions({
+        itemCode,
+      });
     return {
       success: true,
       statusCode: 200,
@@ -67,7 +103,8 @@ export class SalesItemConversionController {
     type: SalesItemConversionDto,
   })
   async findById(@Param('id') id: number): Promise<any> {
-    const data = await this.salesItemConversionService.findSalesItemConversionById(id);
+    const data =
+      await this.salesItemConversionService.findSalesItemConversionById(id);
     return {
       success: true,
       statusCode: 200,
@@ -83,12 +120,20 @@ export class SalesItemConversionController {
   }
 
   @MessagePattern('sales-item-conversion.findById')
-  async findByIdMicroservice(@Payload() id: number): Promise<SalesItemConversionDto> {
-    return await this.salesItemConversionService.findSalesItemConversionById(id);
+  async findByIdMicroservice(
+    @Payload() id: number,
+  ): Promise<SalesItemConversionDto> {
+    return await this.salesItemConversionService.findSalesItemConversionById(
+      id,
+    );
   }
 
   @MessagePattern('sales-item-conversion.findByItemCode')
-  async findByItemCodeMicroservice(@Payload() itemCode: string): Promise<SalesItemConversionDto[]> {
-    return await this.salesItemConversionService.findAllSalesItemConversions({ itemCode });
+  async findByItemCodeMicroservice(
+    @Payload() itemCode: string,
+  ): Promise<SalesItemConversionDto[]> {
+    return await this.salesItemConversionService.findAllSalesItemConversions({
+      itemCode,
+    });
   }
 }

@@ -1,7 +1,16 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { ReceiptMethodService } from '../services/receipt-method.service';
-import { ReceiptMethodDto, ReceiptMethodQueryDto } from '../dtos/receipt-method.dtos';
+import {
+  ReceiptMethodDto,
+  ReceiptMethodQueryDto,
+} from '../dtos/receipt-method.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @ApiTags('Receipt Method')
@@ -16,10 +25,26 @@ export class ReceiptMethodController {
     description: 'Return all receipt methods',
     type: [ReceiptMethodDto],
   })
-  @ApiQuery({ name: 'receiptMethodName', required: false, description: 'Filter by receipt method name' })
-  @ApiQuery({ name: 'receiptClasses', required: false, description: 'Filter by receipt classes' })
-  @ApiQuery({ name: 'organizationCode', required: false, description: 'Filter by organization code' })
-  @ApiQuery({ name: 'currencyCode', required: false, description: 'Filter by currency code' })
+  @ApiQuery({
+    name: 'receiptMethodName',
+    required: false,
+    description: 'Filter by receipt method name',
+  })
+  @ApiQuery({
+    name: 'receiptClasses',
+    required: false,
+    description: 'Filter by receipt classes',
+  })
+  @ApiQuery({
+    name: 'organizationCode',
+    required: false,
+    description: 'Filter by organization code',
+  })
+  @ApiQuery({
+    name: 'currencyCode',
+    required: false,
+    description: 'Filter by currency code',
+  })
   @ApiQuery({ name: 'page', required: false, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, description: 'Records per page' })
   async findAll(@Query() query: ReceiptMethodQueryDto): Promise<any> {
@@ -48,7 +73,9 @@ export class ReceiptMethodController {
     type: [ReceiptMethodDto],
   })
   async findByName(@Param('name') name: string): Promise<any> {
-    const data = await this.receiptMethodService.findAllReceiptMethods({ receiptMethodName: name });
+    const data = await this.receiptMethodService.findAllReceiptMethods({
+      receiptMethodName: name,
+    });
     return {
       success: true,
       statusCode: 200,
@@ -65,8 +92,12 @@ export class ReceiptMethodController {
     description: 'Return receipt methods with the specified receipt classes',
     type: [ReceiptMethodDto],
   })
-  async findByReceiptClasses(@Param('receiptClasses') receiptClasses: string): Promise<any> {
-    const data = await this.receiptMethodService.findAllReceiptMethods({ receiptClasses });
+  async findByReceiptClasses(
+    @Param('receiptClasses') receiptClasses: string,
+  ): Promise<any> {
+    const data = await this.receiptMethodService.findAllReceiptMethods({
+      receiptClasses,
+    });
     return {
       success: true,
       statusCode: 200,
@@ -105,12 +136,20 @@ export class ReceiptMethodController {
   }
 
   @MessagePattern('receipt-method.findByName')
-  async findByNameMicroservice(@Payload() name: string): Promise<ReceiptMethodDto[]> {
-    return await this.receiptMethodService.findAllReceiptMethods({ receiptMethodName: name });
+  async findByNameMicroservice(
+    @Payload() name: string,
+  ): Promise<ReceiptMethodDto[]> {
+    return await this.receiptMethodService.findAllReceiptMethods({
+      receiptMethodName: name,
+    });
   }
 
   @MessagePattern('receipt-method.findByReceiptClasses')
-  async findByReceiptClassesMicroservice(@Payload() receiptClasses: string): Promise<ReceiptMethodDto[]> {
-    return await this.receiptMethodService.findAllReceiptMethods({ receiptClasses });
+  async findByReceiptClassesMicroservice(
+    @Payload() receiptClasses: string,
+  ): Promise<ReceiptMethodDto[]> {
+    return await this.receiptMethodService.findAllReceiptMethods({
+      receiptClasses,
+    });
   }
 }

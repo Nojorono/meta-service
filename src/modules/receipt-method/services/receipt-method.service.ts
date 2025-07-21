@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { ReceiptMethodDto, ReceiptMethodQueryDto } from '../dtos/receipt-method.dtos';
+import {
+  ReceiptMethodDto,
+  ReceiptMethodQueryDto,
+} from '../dtos/receipt-method.dtos';
 
 @Injectable()
 export class ReceiptMethodService {
@@ -12,15 +15,15 @@ export class ReceiptMethodService {
     queryDto: ReceiptMethodQueryDto = {},
   ): Promise<ReceiptMethodDto[]> {
     try {
-      const { 
-        receiptMethodName, 
-        receiptClasses, 
-        organizationCode, 
-        currencyCode, 
-        page = 1, 
-        limit = 10 
+      const {
+        receiptMethodName,
+        receiptClasses,
+        organizationCode,
+        currencyCode,
+        page = 1,
+        limit = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           RECEIPT_METHOD_ID,
@@ -67,7 +70,7 @@ export class ReceiptMethodService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} receipt methods`);
       return result.rows;
     } catch (error) {
@@ -92,7 +95,7 @@ export class ReceiptMethodService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-      
+
       this.logger.log(`Found receipt method with ID: ${id}`);
       return result.rows[0];
     } catch (error) {
@@ -101,15 +104,17 @@ export class ReceiptMethodService {
     }
   }
 
-  async countReceiptMethods(queryDto: ReceiptMethodQueryDto = {}): Promise<number> {
+  async countReceiptMethods(
+    queryDto: ReceiptMethodQueryDto = {},
+  ): Promise<number> {
     try {
-      const { 
-        receiptMethodName, 
-        receiptClasses, 
-        organizationCode, 
-        currencyCode 
+      const {
+        receiptMethodName,
+        receiptClasses,
+        organizationCode,
+        currencyCode,
       } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_AR_RECEIPT_METHODS_V
@@ -144,7 +149,7 @@ export class ReceiptMethodService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting receipt methods:', error);

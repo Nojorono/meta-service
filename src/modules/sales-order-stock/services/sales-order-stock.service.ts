@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { SalesOrderStockDto, SalesOrderStockQueryDto } from '../dtos/sales-order-stock.dtos';
+import {
+  SalesOrderStockDto,
+  SalesOrderStockQueryDto,
+} from '../dtos/sales-order-stock.dtos';
 
 @Injectable()
 export class SalesOrderStockService {
@@ -8,7 +11,9 @@ export class SalesOrderStockService {
 
   constructor(private readonly oracleService: OracleService) {}
 
-  async findAll(query: SalesOrderStockQueryDto): Promise<{ data: SalesOrderStockDto[]; total: number }> {
+  async findAll(
+    query: SalesOrderStockQueryDto,
+  ): Promise<{ data: SalesOrderStockDto[]; total: number }> {
     const {
       HEADER_ID,
       ORDER_NUMBER,
@@ -115,7 +120,10 @@ export class SalesOrderStockService {
       countParams.push(OPEN_FLAG);
       countIndex++;
     }
-    const countResult = await this.oracleService.executeQuery(countSql, countParams);
+    const countResult = await this.oracleService.executeQuery(
+      countSql,
+      countParams,
+    );
     const total = countResult.rows[0]?.TOTAL || 0;
     return { data: result.rows, total };
   }

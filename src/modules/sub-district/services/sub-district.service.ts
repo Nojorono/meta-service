@@ -12,8 +12,14 @@ export class SubDistrictService {
     queryDto: SubDistrictQueryDto = {},
   ): Promise<SubDistrictDto[]> {
     try {
-      const { kecamatanCode, kelurahanCode, kelurahanName, page = 1, limit = 10 } = queryDto;
-      
+      const {
+        kecamatanCode,
+        kelurahanCode,
+        kelurahanName,
+        page = 1,
+        limit = 10,
+      } = queryDto;
+
       let query = `
         SELECT 
           KECAMATAN_CODE,
@@ -53,7 +59,7 @@ export class SubDistrictService {
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} sub-districts`);
       return result.rows as SubDistrictDto[];
     } catch (error) {
@@ -62,7 +68,9 @@ export class SubDistrictService {
     }
   }
 
-  async findSubDistrictByCode(kelurahanCode: string): Promise<SubDistrictDto | null> {
+  async findSubDistrictByCode(
+    kelurahanCode: string,
+  ): Promise<SubDistrictDto | null> {
     try {
       const query = `
         SELECT 
@@ -76,8 +84,10 @@ export class SubDistrictService {
         WHERE KELURAHAN_CODE = :1
       `;
 
-      const result = await this.oracleService.executeQuery(query, [kelurahanCode]);
-      
+      const result = await this.oracleService.executeQuery(query, [
+        kelurahanCode,
+      ]);
+
       if (result.rows.length === 0) {
         this.logger.warn(`Sub-district not found for code: ${kelurahanCode}`);
         return null;
@@ -86,12 +96,17 @@ export class SubDistrictService {
       this.logger.log(`Found sub-district: ${kelurahanCode}`);
       return result.rows[0] as SubDistrictDto;
     } catch (error) {
-      this.logger.error(`Error finding sub-district by code ${kelurahanCode}:`, error);
+      this.logger.error(
+        `Error finding sub-district by code ${kelurahanCode}:`,
+        error,
+      );
       throw error;
     }
   }
 
-  async findSubDistrictsByDistrictCode(kecamatanCode: string): Promise<SubDistrictDto[]> {
+  async findSubDistrictsByDistrictCode(
+    kecamatanCode: string,
+  ): Promise<SubDistrictDto[]> {
     try {
       const query = `
         SELECT 
@@ -106,20 +121,29 @@ export class SubDistrictService {
         ORDER BY KELURAHAN_CODE
       `;
 
-      const result = await this.oracleService.executeQuery(query, [kecamatanCode]);
-      
-      this.logger.log(`Found ${result.rows.length} sub-districts for district: ${kecamatanCode}`);
+      const result = await this.oracleService.executeQuery(query, [
+        kecamatanCode,
+      ]);
+
+      this.logger.log(
+        `Found ${result.rows.length} sub-districts for district: ${kecamatanCode}`,
+      );
       return result.rows as SubDistrictDto[];
     } catch (error) {
-      this.logger.error(`Error finding sub-districts by district code ${kecamatanCode}:`, error);
+      this.logger.error(
+        `Error finding sub-districts by district code ${kecamatanCode}:`,
+        error,
+      );
       throw error;
     }
   }
 
-  async getSubDistrictCount(queryDto: SubDistrictQueryDto = {}): Promise<number> {
+  async getSubDistrictCount(
+    queryDto: SubDistrictQueryDto = {},
+  ): Promise<number> {
     try {
       const { kecamatanCode, kelurahanCode, kelurahanName } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) as TOTAL_COUNT
         FROM APPS.XTD_FND_KELURAHAN_V
@@ -149,7 +173,7 @@ export class SubDistrictService {
 
       const result = await this.oracleService.executeQuery(query, params);
       const count = result.rows[0]?.TOTAL_COUNT || 0;
-      
+
       this.logger.log(`Total sub-districts count: ${count}`);
       return count;
     } catch (error) {

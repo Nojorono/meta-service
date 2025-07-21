@@ -8,12 +8,18 @@ export class ApInvoiceTypesDto {
   @IsString()
   INVOICE_TYPE_CODE?: string;
 
-  @ApiProperty({ description: 'Invoice type name', example: 'Standard Invoice' })
+  @ApiProperty({
+    description: 'Invoice type name',
+    example: 'Standard Invoice',
+  })
   @IsOptional()
   @IsString()
   INVOICE_TYPE_NAME?: string;
-  
-  @ApiProperty({ description: 'Invoice Description', example: 'Adjusment document' })
+
+  @ApiProperty({
+    description: 'Invoice Description',
+    example: 'Adjusment document',
+  })
   @IsOptional()
   @IsString()
   DESCRIPTION?: string;
@@ -35,7 +41,10 @@ export class ApInvoiceTypesDto {
   @Type(() => Date)
   END_DATE_ACTIVE?: Date;
 
-  @ApiProperty({ description: 'Last update date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Last update date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)

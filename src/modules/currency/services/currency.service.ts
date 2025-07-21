@@ -12,8 +12,14 @@ export class CurrencyService {
     queryDto: CurrencyQueryDto = {},
   ): Promise<CurrencyDto[]> {
     try {
-      const { CURRENCY_CODE, NAME, ENABLED_FLAG, PAGE = 1, LIMIT = 10 } = queryDto;
-      
+      const {
+        CURRENCY_CODE,
+        NAME,
+        ENABLED_FLAG,
+        PAGE = 1,
+        LIMIT = 10,
+      } = queryDto;
+
       let query = `
         SELECT 
           CURRENCY_CODE,
@@ -53,7 +59,7 @@ export class CurrencyService {
       params.push(offset, LIMIT);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} currencies`);
       return result.rows;
     } catch (error) {
@@ -77,7 +83,7 @@ export class CurrencyService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [code]);
-      
+
       this.logger.log(`Found currency with code: ${code}`);
       return result.rows[0];
     } catch (error) {
@@ -89,7 +95,7 @@ export class CurrencyService {
   async countCurrencies(queryDto: CurrencyQueryDto = {}): Promise<number> {
     try {
       const { CURRENCY_CODE, NAME, ENABLED_FLAG } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_FND_CURRENCIES_V
@@ -118,7 +124,7 @@ export class CurrencyService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting currencies:', error);

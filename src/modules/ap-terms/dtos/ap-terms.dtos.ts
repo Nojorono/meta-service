@@ -35,7 +35,10 @@ export class ApTermsDto {
   @Type(() => Date)
   END_DATE_ACTIVE?: Date;
 
-  @ApiProperty({ description: 'Last update date', example: '2023-01-01T00:00:00Z' })
+  @ApiProperty({
+    description: 'Last update date',
+    example: '2023-01-01T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   @Type(() => Date)
@@ -48,7 +51,7 @@ export class ApTermsDto {
   DAY_OF_TERMS?: number;
 }
 
-export class ApTermsQueryDto {  
+export class ApTermsQueryDto {
   @ApiProperty({ description: 'Name', required: false })
   @IsOptional()
   @IsString()

@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { ArOutstandingsDto, ArOutstandingsQueryDto } from '../dtos/ar-outstandings.dtos';
+import {
+  ArOutstandingsDto,
+  ArOutstandingsQueryDto,
+} from '../dtos/ar-outstandings.dtos';
 
 @Injectable()
 export class ArOutstandingsService {
@@ -8,7 +11,9 @@ export class ArOutstandingsService {
 
   constructor(private readonly oracleService: OracleService) {}
 
-  async findAllArOutstandings(queryDto: ArOutstandingsQueryDto = {}): Promise<ArOutstandingsDto[]> {
+  async findAllArOutstandings(
+    queryDto: ArOutstandingsQueryDto = {},
+  ): Promise<ArOutstandingsDto[]> {
     try {
       const {
         CALL_PLAN_NUMBER,
@@ -163,7 +168,9 @@ export class ArOutstandingsService {
     }
   }
 
-  async countArOutstandings(queryDto: ArOutstandingsQueryDto = {}): Promise<number> {
+  async countArOutstandings(
+    queryDto: ArOutstandingsQueryDto = {},
+  ): Promise<number> {
     try {
       const {
         CALL_PLAN_NUMBER,
@@ -243,7 +250,9 @@ export class ArOutstandingsService {
   }
 
   // Compatibility alias for controller
-  async findAll(query: ArOutstandingsQueryDto = {}): Promise<ArOutstandingsDto[]> {
+  async findAll(
+    query: ArOutstandingsQueryDto = {},
+  ): Promise<ArOutstandingsDto[]> {
     return this.findAllArOutstandings(query);
   }
 

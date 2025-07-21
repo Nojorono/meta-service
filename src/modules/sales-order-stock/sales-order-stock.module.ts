@@ -4,9 +4,7 @@ import { SalesOrderStockService } from './services/sales-order-stock.service';
 import { SalesOrderStockMicroserviceController } from './controllers/sales-order-stock.microservice.controllers';
 
 @Module({
-  imports: [
-    CommonModule,
-  ],
+  imports: [CommonModule],
   controllers: [SalesOrderStockMicroserviceController],
   providers: [SalesOrderStockService],
   exports: [SalesOrderStockService],

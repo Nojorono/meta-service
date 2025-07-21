@@ -12,16 +12,16 @@ export class CoaExpenseService {
     queryDto: CoaExpenseQueryDto = {},
   ): Promise<CoaExpenseDto[]> {
     try {
-      const { 
-        EXPENSE_NAME, 
-        COA_COMBINATIONS, 
-        FPPR_TYPE_CODE, 
-        ORGANIZATION_CODE, 
-        ENABLED_FLAG, 
-        PAGE = 1, 
-        LIMIT = 10 
+      const {
+        EXPENSE_NAME,
+        COA_COMBINATIONS,
+        FPPR_TYPE_CODE,
+        ORGANIZATION_CODE,
+        ENABLED_FLAG,
+        PAGE = 1,
+        LIMIT = 10,
       } = queryDto;
-      
+
       let query = `
         SELECT 
           EXPENSE_NAME,
@@ -81,7 +81,7 @@ export class CoaExpenseService {
       params.push(offset, LIMIT);
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       this.logger.log(`Found ${result.rows.length} COA expenses`);
       return result.rows;
     } catch (error) {
@@ -113,11 +113,11 @@ export class CoaExpenseService {
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-      
+
       if (!result.rows.length) {
         throw new Error(`COA expense with ID ${id} not found`);
       }
-      
+
       this.logger.log(`Found COA expense with ID: ${id}`);
       return result.rows[0];
     } catch (error) {
@@ -128,14 +128,14 @@ export class CoaExpenseService {
 
   async countCoaExpenses(queryDto: CoaExpenseQueryDto = {}): Promise<number> {
     try {
-      const { 
-        EXPENSE_NAME, 
-        COA_COMBINATIONS, 
-        FPPR_TYPE_CODE, 
-        ORGANIZATION_CODE, 
-        ENABLED_FLAG 
+      const {
+        EXPENSE_NAME,
+        COA_COMBINATIONS,
+        FPPR_TYPE_CODE,
+        ORGANIZATION_CODE,
+        ENABLED_FLAG,
       } = queryDto;
-      
+
       let query = `
         SELECT COUNT(*) AS TOTAL
         FROM APPS.XTD_AP_COA_EXPENSES_V
@@ -176,7 +176,7 @@ export class CoaExpenseService {
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-      
+
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting COA expenses:', error);
