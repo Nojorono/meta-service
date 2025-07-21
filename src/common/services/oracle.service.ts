@@ -56,6 +56,9 @@ export class OracleService implements OnModuleInit, OnModuleDestroy {
       const dbHost = this.configService.get<string>('ORACLE_DATABASE_HOST');
       const dbPort = this.configService.get<string>('ORACLE_DATABASE_PORT');
       const dbSid = this.configService.get<string>('ORACLE_DATABASE_SID');
+      const dbPassword = this.configService.get<string>(
+        'ORACLE_DATABASE_PASSWORD',
+      );
 
       this.logger.log(
         `Creating Oracle connection pool to ${dbHost}:${dbPort}/${dbSid} as ${dbUser}`,
@@ -63,7 +66,7 @@ export class OracleService implements OnModuleInit, OnModuleDestroy {
 
       this.pool = await oracledb.createPool({
         user: dbUser,
-        password: this.configService.get<string>('ORACLE_DATABASE_PASSWORD'),
+        password: dbPassword,
         connectString: `(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=${dbHost})(PORT=${dbPort}))(CONNECT_DATA=(SID=${dbSid})))`,
         poolIncrement: 5,
         poolMax: 20,

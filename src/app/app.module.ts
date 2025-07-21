@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { join } from 'path';
 import { TerminusModule } from '@nestjs/terminus';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
@@ -9,6 +10,7 @@ import { ResponseInterceptor } from 'src/interceptors/response.interceptor';
 import { GlobalExceptionFilter } from 'src/interceptors/exception.interceptor';
 import { LoggingMiddleware } from '../middlewares/logging.middleware';
 import { CommonModule } from '../common/common.module';
+import { typeOrmConfig } from '../config/typeorm.config';
 import { CustomerMetaModule } from '../modules/customer/customer.module';
 import { BranchMetaModule } from '../modules/branch/branch.module';
 import { RegionMetaModule } from '../modules/region/region.module';
@@ -51,6 +53,7 @@ import { AuthModule } from '../modules/auth/auth.module';
 
 @Module({
   imports: [
+    TypeOrmModule.forRoot(typeOrmConfig),
     CommonModule,
     CustomerMetaModule,
     BranchMetaModule,

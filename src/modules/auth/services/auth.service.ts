@@ -1,9 +1,18 @@
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { PostgreSQLService } from '../../../common/services/postgresql.service';
 import { RedisService } from '../../../common/services/redis.service';
 import { LoginDto, AuthResponseDto, UserProfileDto } from '../dtos/auth.dtos';
+import {
+  AuthUser,
+  AuthApplication,
+  AuthUserApplication,
+  UserStatus,
+  ApplicationStatus,
+  UserApplicationStatus,
+} from '../entities';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +20,12 @@ export class AuthService {
 
   constructor(
     private readonly jwtService: JwtService,
-    private readonly postgresService: PostgreSQLService,
+    @InjectRepository(AuthUser)
+    private readonly userRepository: Repository<AuthUser>,
+    @InjectRepository(AuthApplication)
+    private readonly applicationRepository: Repository<AuthApplication>,
+    @InjectRepository(AuthUserApplication)
+    private readonly userApplicationRepository: Repository<AuthUserApplication>,
     private readonly redisService: RedisService,
   ) {}
 
@@ -129,24 +143,19 @@ export class AuthService {
     appCode?: string,
   ): Promise<any> {
     try {
-      // First, get user basic info
-      const userQuery = `
-        SELECT u.user_id, u.username, u.email, u.password_hash, u.full_name, u.status,
-               u.created_date, u.last_login_date
-        FROM auth_users u
-        WHERE u.username = ? AND u.status = 'ACTIVE'
-      `;
+      // First, get user basic info with applications
+      const user = await this.userRepository.findOne({
+        where: {
+          username,
+          status: UserStatus.ACTIVE,
+        },
+        relations: ['userApplications', 'userApplications.application'],
+      });
 
-      const userQueryResult = await this.postgresService.executeQuery(
-        userQuery,
-        [username],
-      );
-
-      if (!userQueryResult.rows || userQueryResult.rows.length === 0) {
+      if (!user) {
         return null;
       }
 
-      const user = userQueryResult.rows[0];
       const isPasswordValid = await bcrypt.compare(
         password,
         user.password_hash,
@@ -156,45 +165,40 @@ export class AuthService {
         return null;
       }
 
-      // Get all applications for this user
-      let appsQuery = `
-        SELECT a.app_code, a.app_name, ua.role, ua.permissions, a.app_description
-        FROM auth_user_applications ua
-        JOIN auth_applications a ON ua.app_id = a.app_id
-        WHERE ua.user_id = ? AND ua.status = 'ACTIVE' AND a.status = 'ACTIVE'
-      `;
-      const appsParams = [user.user_id];
+      // Filter active applications
+      const activeApplications = user.userApplications.filter(
+        (ua) =>
+          ua.status === UserApplicationStatus.ACTIVE &&
+          ua.application.status === ApplicationStatus.ACTIVE,
+      );
 
       // If specific app requested, check access
       if (appCode) {
-        appsQuery += ` AND a.app_code = ?`;
-        appsParams.push(appCode);
-      }
-
-      const appsResult = await this.postgresService.executeQuery(
-        appsQuery,
-        appsParams,
-      );
-
-      // If specific app requested but user has no access, deny
-      if (appCode && (!appsResult.rows || appsResult.rows.length === 0)) {
-        return null;
+        const hasAccess = activeApplications.some(
+          (ua) => ua.application.app_code === appCode,
+        );
+        if (!hasAccess) {
+          return null;
+        }
       }
 
       // Update last login
-      const updateQuery = `
-        UPDATE auth_users 
-        SET last_login_date = CURRENT_TIMESTAMP 
-        WHERE user_id = $1
-      `;
-      await this.postgresService.executeQuery(updateQuery, [user.user_id]);
+      await this.userRepository.update(user.user_id, {
+        last_login_date: new Date(),
+      });
 
       // Return user without password but with applications
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password_hash, ...sanitizedUser } = user;
+      const { password_hash, userApplications, ...userResult } = user;
       return {
-        ...sanitizedUser,
-        applications: appsResult.rows || [],
+        ...userResult,
+        applications: activeApplications.map((ua) => ({
+          app_code: ua.application.app_code,
+          app_name: ua.application.app_name,
+          app_description: ua.application.app_description,
+          role: ua.role,
+          permissions: ua.permissions,
+        })),
       };
     } catch (error) {
       this.logger.error('Error validating user:', error);
@@ -204,38 +208,37 @@ export class AuthService {
 
   async validateUserById(userId: number): Promise<any> {
     try {
-      const userQuery = `
-        SELECT u.user_id, u.username, u.email, u.full_name, u.status,
-               u.created_date, u.last_login_date
-        FROM auth_users u 
-        WHERE u.user_id = ? AND u.status = 'ACTIVE'
-      `;
+      const user = await this.userRepository.findOne({
+        where: {
+          user_id: userId,
+          status: UserStatus.ACTIVE,
+        },
+        relations: ['userApplications', 'userApplications.application'],
+      });
 
-      const userResult = await this.postgresService.executeQuery(userQuery, [
-        userId,
-      ]);
-
-      if (!userResult.rows || userResult.rows.length === 0) {
+      if (!user) {
         return null;
       }
 
-      const user = userResult.rows[0];
+      // Filter active applications
+      const activeApplications = user.userApplications.filter(
+        (ua) =>
+          ua.status === UserApplicationStatus.ACTIVE &&
+          ua.application.status === ApplicationStatus.ACTIVE,
+      );
 
-      // Get user applications
-      const appsQuery = `
-        SELECT a.app_code, a.app_name, ua.role, ua.permissions, a.app_description
-        FROM auth_user_applications ua
-        JOIN auth_applications a ON ua.app_id = a.app_id
-        WHERE ua.user_id = ? AND ua.status = 'ACTIVE' AND a.status = 'ACTIVE'
-      `;
-
-      const appsResult = await this.postgresService.executeQuery(appsQuery, [
-        userId,
-      ]);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password_hash, userApplications, ...userResult } = user;
 
       return {
-        ...user,
-        applications: appsResult.rows || [],
+        ...userResult,
+        applications: activeApplications.map((ua) => ({
+          app_code: ua.application.app_code,
+          app_name: ua.application.app_name,
+          app_description: ua.application.app_description,
+          role: ua.role,
+          permissions: ua.permissions,
+        })),
       };
     } catch (error) {
       this.logger.error('User validation by ID failed:', error);
@@ -326,21 +329,25 @@ export class AuthService {
 
   async checkApplicationAccess(userId: number, appCode: string): Promise<any> {
     try {
-      const query = `
-        SELECT ua.role, ua.permissions, ua.status, a.app_name
-        FROM auth_user_applications ua
-        JOIN auth_applications a ON ua.app_id = a.app_id
-        WHERE ua.user_id = ? AND a.app_code = ? 
-        AND ua.status = 'ACTIVE' AND a.status = 'ACTIVE'
-      `;
+      const userApplication = await this.userApplicationRepository.findOne({
+        where: {
+          user_id: userId,
+          status: UserApplicationStatus.ACTIVE,
+          application: {
+            app_code: appCode,
+            status: ApplicationStatus.ACTIVE,
+          },
+        },
+        relations: ['application'],
+      });
 
-      const result = await this.postgresService.executeQuery(query, [
-        userId,
-        appCode,
-      ]);
-
-      if (result.rows && result.rows.length > 0) {
-        return result.rows[0];
+      if (userApplication) {
+        return {
+          role: userApplication.role,
+          permissions: userApplication.permissions,
+          status: userApplication.status,
+          app_name: userApplication.application.app_name,
+        };
       }
 
       return null;

@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './controllers/auth.controller';
 import { AuthService } from './services/auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { CommonModule } from '../../common/common.module';
-import { PostgreSQLService } from '../../common/services/postgresql.service';
+import { AuthUser, AuthApplication, AuthUserApplication } from './entities';
 
 @Module({
   imports: [
@@ -18,10 +19,11 @@ import { PostgreSQLService } from '../../common/services/postgresql.service';
         },
       }),
     }),
+    TypeOrmModule.forFeature([AuthUser, AuthApplication, AuthUserApplication]),
     CommonModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PostgreSQLService],
-  exports: [AuthService, JwtModule],
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService, JwtModule, TypeOrmModule],
 })
 export class AuthModule {}
