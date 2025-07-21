@@ -97,7 +97,7 @@ import { AuthModule } from '../modules/auth/auth.module';
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
-        path: join(__dirname, '../i18n/'),
+        path: join(__dirname, '../../i18n/'),
         watch: true,
       },
       resolvers: [
