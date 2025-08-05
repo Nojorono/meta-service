@@ -15,6 +15,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { Public } from 'src/decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 import { ProvinceService } from '../services/province.service';
 import { ProvinceDto, ProvinceQueryDto } from '../dtos/province.dtos';
 
@@ -27,6 +28,7 @@ export class ProvinceController {
   constructor(private readonly provinceService: ProvinceService) {}
 
   @Get()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all provinces',
     description:
@@ -81,6 +83,7 @@ export class ProvinceController {
   }
 
   @Get('count')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get province count',
     description:
@@ -129,6 +132,7 @@ export class ProvinceController {
   }
 
   @Get(':code')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get province by code',
     description:

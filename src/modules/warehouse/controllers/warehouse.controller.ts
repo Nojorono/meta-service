@@ -6,7 +6,7 @@ import {
   MetaWarehouseDtoByDate,
   MetaWarehouseDtoByOrganizationCode,
 } from '../dtos/warehouse.dtos';
-import { Public } from '../../../decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Warehouse Meta')
 @Controller('warehouse')
@@ -16,7 +16,7 @@ export class WarehouseMetaController {
   constructor(private readonly warehouseMetaService: WarehouseMetaService) {}
 
   @Get()
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all warehouses',
     description: 'Retrieve all warehouses from Oracle database',
@@ -55,7 +55,7 @@ export class WarehouseMetaController {
   }
 
   @Get('by-date')
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get warehouses by date',
     description: 'Retrieve warehouses filtered by last update date',
@@ -111,7 +111,7 @@ export class WarehouseMetaController {
   }
 
   @Get('organization-code')
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get warehouses by organization code',
     description: 'Retrieve warehouses filtered by organization code',

@@ -3,7 +3,6 @@ import {
   Get,
   Query,
   Param,
-  ParseIntPipe,
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
@@ -100,17 +99,18 @@ export class ArOutstandingsMicroserviceController {
     }
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get AR outstanding by ID' })
+  @Get(':call_plan_number')
+  @ApiOperation({ summary: 'Get AR outstanding by CALL_PLAN_NUMBER' })
   @ApiResponse({
     status: 200,
     description: 'AR outstanding retrieved successfully',
     type: ArOutstandingsDto,
   })
   @ApiResponse({ status: 404, description: 'AR outstanding not found' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param('call_plan_number') callPlanNumber: string) {
     try {
-      const result = await this.arOutstandingsService.findOne(id);
+      const result =
+        await this.arOutstandingsService.findArOutstandingsById(callPlanNumber);
       return {
         success: true,
         data: result,
@@ -154,9 +154,9 @@ export class ArOutstandingsMicroserviceController {
   }
 
   @MessagePattern('ar_outstandings.findOne')
-  async findOneMicroservice(@Payload() data: { id: number }) {
+  async findOneMicroservice(@Payload() data: { call_plan_number: string }) {
     try {
-      return await this.arOutstandingsService.findOne(data.id);
+      return await this.arOutstandingsService.findOne(data.call_plan_number);
     } catch (error) {
       throw new HttpException(
         {

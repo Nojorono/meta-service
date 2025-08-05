@@ -15,6 +15,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { Public } from 'src/decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 import { DistrictService } from '../services/district.service';
 import { DistrictDto, DistrictQueryDto } from '../dtos/district.dtos';
 
@@ -27,6 +28,7 @@ export class DistrictController {
   constructor(private readonly districtService: DistrictService) {}
 
   @Get()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all districts',
     description:
@@ -87,6 +89,7 @@ export class DistrictController {
   }
 
   @Get('count')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get district count',
     description:
@@ -141,6 +144,7 @@ export class DistrictController {
   }
 
   @Get('city/:cityCode')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get districts by city code',
     description:
@@ -179,6 +183,7 @@ export class DistrictController {
   }
 
   @Get(':code')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get district by code',
     description:

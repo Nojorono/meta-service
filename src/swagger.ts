@@ -25,9 +25,7 @@ export const setupSwagger = async (app: INestApplication) => {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        name: 'Authorization',
-        description: 'Enter JWT token only (without Bearer prefix)',
-        in: 'header',
+        description: 'Enter JWT token (without Bearer prefix)',
       },
       'JWT-auth',
     )
@@ -46,19 +44,6 @@ export const setupSwagger = async (app: INestApplication) => {
       tagsSorter: 'alpha',
       tryItOutEnabled: true,
       filter: true,
-      authAction: {
-        'JWT-auth': {
-          name: 'JWT-auth',
-          schema: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-            description:
-              'Just paste your JWT token here - no need to add "Bearer"',
-          },
-          value: '',
-        },
-      },
     },
     customCss: `
       .swagger-ui .auth-btn-wrapper .btn-auth {

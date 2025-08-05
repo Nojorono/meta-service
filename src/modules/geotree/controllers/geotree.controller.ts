@@ -5,7 +5,7 @@ import {
   MetaGeoTreeResponseDto,
   MetaGeoTreeDtoByDate,
 } from '../dtos/geotree.dtos';
-import { Public } from '../../../decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('GeoTree Meta')
 @Controller('geotree')
@@ -15,7 +15,7 @@ export class GeoTreeMetaController {
   constructor(private readonly geoTreeMetaService: GeoTreeMetaService) {}
 
   @Get()
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all geo trees',
     description: 'Retrieve all geographic tree data from Oracle database',
@@ -53,7 +53,7 @@ export class GeoTreeMetaController {
   }
 
   @Get('by-date')
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get geo trees by date',
     description: 'Retrieve geographic tree data filtered by last update date',

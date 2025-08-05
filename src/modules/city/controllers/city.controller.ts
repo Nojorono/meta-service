@@ -15,6 +15,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { Public } from 'src/decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 import { CityService } from '../services/city.service';
 import { CityDto, CityQueryDto } from '../dtos/city.dtos';
 
@@ -27,6 +28,7 @@ export class CityController {
   constructor(private readonly cityService: CityService) {}
 
   @Get()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all cities',
     description: 'Retrieve a list of all cities from XTD_FND_KOTAMADYA_V view',
@@ -84,6 +86,7 @@ export class CityController {
   }
 
   @Get('count')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get city count',
     description: 'Get the total count of cities matching the filter criteria',
@@ -137,6 +140,7 @@ export class CityController {
   }
 
   @Get('province/:PROVINSI_CODE')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get cities by province code',
     description:
@@ -175,6 +179,7 @@ export class CityController {
   }
 
   @Get(':code')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get city by code',
     description:

@@ -15,19 +15,20 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Public } from 'src/decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 import { SupplierService } from '../services/supplier.service';
 import { SupplierDto, SupplierQueryDto } from '../dtos/supplier.dtos';
 
 @ApiTags('Supplier')
 @Controller('supplier')
-@Public()
+@AuthSwagger()
 export class SupplierController {
   private readonly logger = new Logger(SupplierController.name);
 
   constructor(private readonly supplierService: SupplierService) {}
 
   @Get()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all suppliers',
     description:
@@ -100,6 +101,7 @@ export class SupplierController {
   }
 
   @Get('count')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get supplier count',
     description:
@@ -166,6 +168,7 @@ export class SupplierController {
   }
 
   @Get('number/:number')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get supplier by number',
     description:
@@ -219,6 +222,7 @@ export class SupplierController {
   }
 
   @Get(':id')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get supplier by ID',
     description:

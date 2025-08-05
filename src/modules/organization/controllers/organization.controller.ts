@@ -15,7 +15,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Public } from 'src/decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 import { OrganizationService } from '../services/organization.service';
 import {
   OrganizationDto,
@@ -24,13 +24,14 @@ import {
 
 @ApiTags('Organization')
 @Controller('organization')
-@Public()
+@AuthSwagger()
 export class OrganizationController {
   private readonly logger = new Logger(OrganizationController.name);
 
   constructor(private readonly organizationService: OrganizationService) {}
 
   @Get()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all organizations',
     description:
@@ -97,6 +98,7 @@ export class OrganizationController {
   }
 
   @Get('count')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get organization count',
     description:
@@ -158,6 +160,7 @@ export class OrganizationController {
   }
 
   @Get('code/:code')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get organization by code',
     description:
@@ -212,6 +215,7 @@ export class OrganizationController {
   }
 
   @Get(':id')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get organization by ID',
     description:

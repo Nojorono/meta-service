@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AcceptLanguageResolver, I18nModule, QueryResolver } from 'nestjs-i18n';
 import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from 'src/interceptors/response.interceptor';
 import { GlobalExceptionFilter } from 'src/interceptors/exception.interceptor';
 import { LoggingMiddleware } from '../middlewares/logging.middleware';
@@ -50,6 +50,7 @@ import { PurchaseOrderModule } from 'src/modules/purchase-order/purchase-order.m
 import { ItemListMetaModule } from '../modules/item-list/item-list.module';
 import { SalesOrderModule } from 'src/modules/sales-order/sales-order.module';
 import { AuthModule } from '../modules/auth/auth.module';
+import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -112,6 +113,10 @@ import { AuthModule } from '../modules/auth/auth.module';
   ],
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,

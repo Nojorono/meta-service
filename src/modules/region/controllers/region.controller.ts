@@ -11,7 +11,7 @@ import {
   MetaRegionResponseDto,
   MetaRegionDtoByDate,
 } from '../dtos/region.dtos';
-import { Public } from '../../../decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Region Meta')
 @Controller('region')
@@ -21,7 +21,7 @@ export class RegionMetaController {
   constructor(private readonly regionMetaService: RegionMetaService) {}
 
   @Get()
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all regions',
     description: 'Retrieve all regions from Oracle database',
@@ -59,7 +59,7 @@ export class RegionMetaController {
   }
 
   @Get('by-date')
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get regions by date',
     description: 'Retrieve regions filtered by last update date',
@@ -113,7 +113,7 @@ export class RegionMetaController {
   }
 
   @Get(':code')
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get region by code',
     description: 'Retrieve a specific region by its code',

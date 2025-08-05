@@ -14,7 +14,6 @@ import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiBearerAuth,
   ApiBody,
   ApiHeader,
 } from '@nestjs/swagger';
@@ -28,6 +27,7 @@ import {
 } from '../dtos/auth.dtos';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { Public } from '../../../decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -82,7 +82,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'User logout',
     description: 'Logout user and blacklist tokens',
@@ -117,7 +117,7 @@ export class AuthController {
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get user profile',
     description:

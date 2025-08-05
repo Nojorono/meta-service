@@ -14,19 +14,20 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Public } from 'src/decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 import { SubDistrictService } from '../services/sub-district.service';
 import { SubDistrictDto, SubDistrictQueryDto } from '../dtos/sub-district.dtos';
 
 @ApiTags('Sub-District')
 @Controller('sub-district')
-@Public()
+@AuthSwagger()
 export class SubDistrictController {
   private readonly logger = new Logger(SubDistrictController.name);
 
   constructor(private readonly subDistrictService: SubDistrictService) {}
 
   @Get()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all sub-districts',
     description:
@@ -87,6 +88,7 @@ export class SubDistrictController {
   }
 
   @Get('count')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get sub-district count',
     description:
@@ -141,6 +143,7 @@ export class SubDistrictController {
   }
 
   @Get('district/:districtCode')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get sub-districts by district code',
     description:
@@ -183,6 +186,7 @@ export class SubDistrictController {
   }
 
   @Get(':code')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get sub-district by code',
     description:

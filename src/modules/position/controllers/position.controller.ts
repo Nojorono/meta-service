@@ -15,19 +15,20 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Public } from 'src/decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 import { PositionService } from '../services/position.service';
 import { PositionDto, PositionQueryDto } from '../dtos/position.dtos';
 
 @ApiTags('Position')
 @Controller('position')
-@Public()
+@AuthSwagger()
 export class PositionController {
   private readonly logger = new Logger(PositionController.name);
 
   constructor(private readonly positionService: PositionService) {}
 
   @Get()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all positions',
     description:
@@ -100,6 +101,7 @@ export class PositionController {
   }
 
   @Get('count')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get position count',
     description:
@@ -166,6 +168,7 @@ export class PositionController {
   }
 
   @Get('organization/:orgId')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get positions by organization ID',
     description:
@@ -204,6 +207,7 @@ export class PositionController {
   }
 
   @Get('code/:code')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get position by code',
     description:
@@ -255,6 +259,7 @@ export class PositionController {
   }
 
   @Get(':id')
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get position by ID',
     description:

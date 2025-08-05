@@ -5,7 +5,7 @@ import {
   MetaSalesItemResponseDto,
   MetaSalesItemDtoByDate,
 } from '../dtos/sales-item.dtos';
-import { Public } from '../../../decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Sales Item Meta')
 @Controller('sales-item')
@@ -15,7 +15,7 @@ export class SalesItemMetaController {
   constructor(private readonly salesItemMetaService: SalesItemMetaService) {}
 
   @Get()
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all sales items',
     description: 'Retrieve all sales items from Oracle database',
@@ -50,7 +50,7 @@ export class SalesItemMetaController {
   }
 
   @Get('by-date')
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get sales items by date',
     description: 'Retrieve sales items filtered by last update date',

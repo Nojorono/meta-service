@@ -12,7 +12,7 @@ import {
   PaginationParamsDto,
   MetaCustomerDtoByDate,
 } from '../dtos/customer.dtos';
-import { Public } from '../../../decorators/public.decorator';
+import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Customer Meta')
 @Controller('customer')
@@ -22,7 +22,7 @@ export class CustomerMetaController {
   constructor(private readonly customerMetaService: CustomerMetaService) {}
 
   @Get()
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all customers',
     description:
@@ -83,7 +83,7 @@ export class CustomerMetaController {
   }
 
   @Get('by-date')
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get customers by date',
     description: 'Retrieve customers filtered by last update date',
@@ -139,7 +139,7 @@ export class CustomerMetaController {
   }
 
   @Get(':id')
-  @Public()
+  @AuthSwagger()
   @ApiOperation({
     summary: 'Get customer by ID',
     description: 'Retrieve a specific customer by their account ID',

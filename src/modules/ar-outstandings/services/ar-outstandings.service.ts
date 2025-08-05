@@ -66,11 +66,6 @@ export class ArOutstandingsService {
         params.push(CALL_PLAN_NUMBER);
         paramIndex++;
       }
-      if (CALL_PLAN_NUMBER) {
-        query += ` AND CALL_PLAN_NUMBER = :${paramIndex}`;
-        params.push(CALL_PLAN_NUMBER);
-        paramIndex++;
-      }
       if (SFA_DOCUMENT_NUMBER) {
         query += ` AND UPPER(SFA_DOCUMENT_NUMBER) LIKE UPPER(:${paramIndex})`;
         params.push(SFA_DOCUMENT_NUMBER);
@@ -126,7 +121,9 @@ export class ArOutstandingsService {
     }
   }
 
-  async findArOutstandingsById(id: number): Promise<ArOutstandingsDto> {
+  async findArOutstandingsById(
+    call_plan_number: string,
+  ): Promise<ArOutstandingsDto> {
     try {
       const query = `
         SELECT
@@ -154,16 +151,25 @@ export class ArOutstandingsService {
           ORG_NAME,
           ORG_ID
         FROM APPS.XTD_AR_OUTSTANDINGS_V
-        WHERE PAYMENT_SCHEDULE_ID = :1
+        WHERE CALL_PLAN_NUMBER = :1
       `;
-      const result = await this.oracleService.executeQuery(query, [id]);
+      const result = await this.oracleService.executeQuery(query, [
+        call_plan_number,
+      ]);
       if (!result.rows.length) {
-        throw new Error(`AR outstanding with ID ${id} not found`);
+        throw new Error(
+          `AR outstanding with CALL_PLAN_NUMBER ${call_plan_number} not found`,
+        );
       }
-      this.logger.log(`Found AR outstanding with ID: ${id}`);
+      this.logger.log(
+        `Found AR outstanding with CALL_PLAN_NUMBER: ${call_plan_number}`,
+      );
       return result.rows[0];
     } catch (error) {
-      this.logger.error(`Error fetching AR outstanding with ID ${id}:`, error);
+      this.logger.error(
+        `Error fetching AR outstanding with CALL_PLAN_NUMBER ${call_plan_number}:`,
+        error,
+      );
       throw error;
     }
   }
@@ -257,7 +263,7 @@ export class ArOutstandingsService {
   }
 
   // Compatibility alias for controller
-  async findOne(id: number): Promise<ArOutstandingsDto> {
-    return this.findArOutstandingsById(id);
+  async findOne(call_plan_number: string): Promise<ArOutstandingsDto> {
+    return this.findArOutstandingsById(call_plan_number);
   }
 }
