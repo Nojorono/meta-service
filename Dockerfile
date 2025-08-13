@@ -70,15 +70,18 @@ RUN yarn install --frozen-lockfile --production=true && \
 # Copy built application from builder stage
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 
+# Copy i18n assets
+COPY --from=builder --chown=nestjs:nodejs /app/src/i18n ./i18n
+
 # Switch to non-root user
 USER nestjs
 
 # Expose port
 EXPOSE 9003
 
-# Health check
+# Health check - use root endpoint instead of /health
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:9003/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
+    CMD node -e "require('http').get('http://localhost:9003/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
