@@ -39,8 +39,6 @@ RUN yarn install --frozen-lockfile
 # Copy source code
 COPY . .
 
-COPY .env
-
 # Build the application
 RUN yarn build
 
