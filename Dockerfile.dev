@@ -1,14 +1,68 @@
-FROM node:18 AS builder
+# Multi-stage build for production
+FROM node:20-alpine AS base
 
+# Install dependencies for Oracle Instant Client
+RUN apk add --no-cache libaio wget unzip
+
+# Download and install Oracle Instant Client
+WORKDIR /opt/oracle
+RUN wget https://download.oracle.com/otn_software/linux/instantclient/2310000/instantclient-basiclite-linux.x64-23.1.0.0.0dbru.zip \
+    && unzip instantclient-basiclite-linux.x64-23.1.0.0.0dbru.zip \
+    && rm instantclient-basiclite-linux.x64-23.1.0.0.0dbru.zip
+
+# Set working directory for app
 WORKDIR /app
 
-COPY package.json yarn.lock ./
-COPY prisma ./prisma/
+# Install dependencies only when needed
+FROM base AS deps
 
+RUN apk add --no-cache python3 make g++ libc6-compat
+
+COPY package*.json ./
+RUN yarn install --frozen-lockfile --production=false
+
+# Build stage
+FROM base AS builder
+
+RUN apk add --no-cache python3 make g++ libc6-compat
+
+COPY package*.json ./
+COPY yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 COPY . .
+RUN yarn build
 
-EXPOSE 9001
+# Production stage
+FROM node:20-alpine AS production
 
-CMD [ "yarn", "dev" ]
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+
+WORKDIR /app
+
+RUN apk add --no-cache dumb-init libaio
+
+COPY package*.json ./
+COPY yarn.lock ./
+RUN yarn install --frozen-lockfile --production=true && yarn cache clean
+
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY --from=builder --chown=nestjs:nodejs /app/src/i18n ./i18n
+
+# Copy Oracle Instant Client from base image
+COPY --from=base /opt/oracle/instantclient_23_1 /opt/oracle/instantclient_23_1
+
+# Set Oracle Instant Client environment variables
+ENV LD_LIBRARY_PATH=/opt/oracle/instantclient_23_1
+ENV PATH=$LD_LIBRARY_PATH:$PATH
+
+USER nestjs
+
+EXPOSE 9003
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:9003/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
+
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "dist/main"]
