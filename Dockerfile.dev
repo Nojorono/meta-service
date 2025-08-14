@@ -6,9 +6,9 @@ RUN apk add --no-cache libaio wget unzip
 
 # Download and install Oracle Instant Client
 WORKDIR /opt/oracle
-RUN wget https://download.oracle.com/otn_software/linux/instantclient/2310000/instantclient-basiclite-linux.x64-23.1.0.0.0dbru.zip \
-    && unzip instantclient-basiclite-linux.x64-23.1.0.0.0dbru.zip \
-    && rm instantclient-basiclite-linux.x64-23.1.0.0.0dbru.zip
+RUN wget https://download.oracle.com/otn_software/linux/instantclient/2390000/instantclient-basiclite-linux.x64-23.9.0.25.07.zip \
+    && unzip instantclient-basiclite-linux.x64-23.9.0.25.07.zip \
+    && rm instantclient-basiclite-linux.x64-23.9.0.25.07.zip
 
 # Set working directory for app
 WORKDIR /app
