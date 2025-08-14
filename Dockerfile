@@ -39,7 +39,7 @@ RUN yarn install --frozen-lockfile
 # Copy source code
 COPY . .
 
-COPY .env.docker .env
+COPY .env
 
 # Build the application
 RUN yarn build
