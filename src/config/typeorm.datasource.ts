@@ -7,7 +7,7 @@ import {
 } from '../modules/auth/entities';
 
 // Load environment variables
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
 export default new DataSource({
   type: 'postgres',

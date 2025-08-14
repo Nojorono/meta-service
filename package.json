@@ -6,7 +6,7 @@
     "prebuild": "rimraf dist",
     "postinstall": "npx typesync",
     "build": "nest build",
-    "dev": "dotenv -e .env.local -- nest start --watch",
+    "dev": "dotenv -e .env -- nest start --watch",
     "debug": "nest start --debug --watch",
     "start": "node dist/main",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
