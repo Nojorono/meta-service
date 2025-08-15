@@ -6,9 +6,9 @@ RUN apk add --no-cache libaio wget unzip
 
 # Download and install Oracle Instant Client
 WORKDIR /opt/oracle
-RUN wget https://download.oracle.com/otn_software/linux/instantclient/2390000/instantclient-basiclite-linux.x64-23.9.0.25.07.zip \
-    && unzip instantclient-basiclite-linux.x64-23.9.0.25.07.zip \
-    && rm instantclient-basiclite-linux.x64-23.9.0.25.07.zip
+COPY /opt/oracle/instantclient-basic-linux.x64-23.9.0.25.07.zip .
+RUN unzip instantclient-basic-linux.x64-23.9.0.25.07.zip \
+    && rm instantclient-basic-linux.x64-23.9.0.25.07.zip
 
 # Set working directory for app
 WORKDIR /app
@@ -51,10 +51,10 @@ COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/src/i18n ./i18n
 
 # Copy Oracle Instant Client from base image
-COPY --from=base /opt/oracle/instantclient_23_1 /opt/oracle/instantclient_23_1
+COPY --from=base /opt/oracle/instantclient_23_9 /opt/oracle/instantclient_23_9
 
 # Set Oracle Instant Client environment variables
-ENV LD_LIBRARY_PATH=/opt/oracle/instantclient_23_1
+ENV LD_LIBRARY_PATH=/opt/oracle/instantclient_23_9
 ENV PATH=$LD_LIBRARY_PATH:$PATH
 
 USER nestjs
