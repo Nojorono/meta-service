@@ -41,3 +41,4 @@ yarn.lock
 !.env.example
 junit.xml
 firebase.config.json
+tsconfig.build.tsbuildinfo

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as oracledb from 'oracledb';
+import { oracleClientSingleton } from './oracle-client.singleton';
 
 @Injectable()
 export class OracleService implements OnModuleInit, OnModuleDestroy {
@@ -15,83 +16,137 @@ export class OracleService implements OnModuleInit, OnModuleDestroy {
   constructor(private configService: ConfigService) {}
 
   async onModuleInit() {
-    this.logger.log('Initializing Oracle Service...');
-    // Initialize Oracle client
+    this.logger.log('Initializing Oracle Service with hybrid mode...');
+
+    // Set timezone to avoid issues
+    process.env.ORA_SDTZ = 'UTC';
+
+    await this.initializeWithHybridMode();
+  }
+
+  private async initializeWithHybridMode() {
+    const dbUser = this.configService.get<string>('ORACLE_DATABASE_USERNAME');
+    const dbHost = this.configService.get<string>('ORACLE_DATABASE_HOST');
+    const dbPort = this.configService.get<string>('ORACLE_DATABASE_PORT');
+    const dbSid = this.configService.get<string>('ORACLE_DATABASE_SID');
+    const dbPassword = this.configService.get<string>(
+      'ORACLE_DATABASE_PASSWORD',
+    );
+
+    // Validate credentials
+    if (!dbPassword || dbPassword.length > 128) {
+      this.logger.error(`Invalid password: length=${dbPassword?.length}`);
+      return;
+    }
+
+    const connectString = `${dbHost}:${dbPort}/${dbSid}`;
+    this.logger.log(`Connecting to Oracle: ${connectString} as ${dbUser}`);
+
+    // Strategy 1: Try Thin mode first (faster, no library dependencies)
     try {
-      // Try to initialize without libDir first (using PATH)
-      oracledb.initOracleClient();
-      this.logger.log('Oracle client initialized successfully using PATH');
-    } catch (err) {
-      // If PATH doesn't work, try with explicit libDir from environment variable
-      const oracleLibDir = this.configService.get<string>(
-        'ORACLE_INSTANT_CLIENT_PATH',
-      );
-      if (oracleLibDir) {
+      this.logger.log('Attempting Thin mode connection...');
+      await this.createPoolWithMode('thin', {
+        user: dbUser,
+        password: dbPassword,
+        connectString,
+      });
+      this.logger.log('✅ Thin mode connection successful');
+      return;
+    } catch (thinError) {
+      this.logger.warn(`❌ Thin mode failed: ${thinError.message}`);
+
+      // Check if it's the password verifier issue
+      if (
+        thinError.message.includes('NJS-116') ||
+        thinError.message.includes('password verifier')
+      ) {
+        this.logger.log(
+          'Password verifier type not supported in Thin mode, trying Thick mode...',
+        );
+
+        // Strategy 2: Fallback to Thick mode for password compatibility
         try {
-          oracledb.initOracleClient({ libDir: oracleLibDir });
-          this.logger.log(
-            `Oracle client initialized successfully using libDir: ${oracleLibDir}`,
-          );
-        } catch (libDirErr) {
-          this.logger.warn(
-            `Oracle client initialization failed with libDir: ${libDirErr.message}`,
-          );
-          this.logger.warn(
-            'Please ensure Oracle Instant Client is in PATH or ORACLE_INSTANT_CLIENT_PATH is set correctly',
+          this.logger.log('Initializing Thick mode...');
+          await oracleClientSingleton.initialize();
+
+          await this.createPoolWithMode('thick', {
+            user: dbUser,
+            password: dbPassword,
+            connectString,
+          });
+          this.logger.log('✅ Thick mode connection successful');
+          return;
+        } catch (thickError) {
+          this.logger.error(`❌ Thick mode also failed: ${thickError.message}`);
+
+          // Strategy 3: Try alternative connection approaches
+          await this.tryAlternativeConnections(
+            dbUser,
+            dbPassword,
+            dbHost,
+            dbPort,
+            dbSid,
           );
         }
       } else {
-        this.logger.warn(`Oracle client initialization note: ${err.message}`);
-        this.logger.warn(
-          'Consider adding Oracle Instant Client to PATH or set ORACLE_INSTANT_CLIENT_PATH environment variable',
+        this.logger.error(
+          `❌ Thin mode failed with non-verifier error: ${thinError.message}`,
         );
       }
     }
+  }
 
-    // We'll set autoCommit in the executeQuery method directly
+  private async createPoolWithMode(
+    mode: 'thin' | 'thick' | 'fallback',
+    config: any,
+  ) {
+    const poolConfig = {
+      ...config,
+      poolIncrement: 1,
+      poolMax: 5,
+      poolMin: 1,
+      poolTimeout: 60,
+      connectTimeout: 30,
+      queueMax: 50,
+      queueTimeout: 10000,
+    };
 
-    // Create a connection pool
-    try {
-      const dbUser = this.configService.get<string>('ORACLE_DATABASE_USERNAME');
-      const dbHost = this.configService.get<string>('ORACLE_DATABASE_HOST');
-      const dbPort = this.configService.get<string>('ORACLE_DATABASE_PORT');
-      const dbSid = this.configService.get<string>('ORACLE_DATABASE_SID');
-      const dbPassword = this.configService.get<string>(
-        'ORACLE_DATABASE_PASSWORD',
-      );
+    this.pool = await oracledb.createPool(poolConfig);
+    this.logger.log(`Oracle pool created in ${mode} mode`);
+  }
 
-      this.logger.log(
-        `Creating Oracle connection pool to ${dbHost}:${dbPort}/${dbSid} as ${dbUser}`,
-      );
+  private async tryAlternativeConnections(
+    user: string,
+    password: string,
+    host: string,
+    port: string,
+    sid: string,
+  ) {
+    const alternatives = [
+      `(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=${host})(PORT=${port}))(CONNECT_DATA=(SID=${sid})))`,
+      `${host}:${port}:${sid}`,
+      `//${host}:${port}/${sid}`,
+    ];
 
-      this.pool = await oracledb.createPool({
-        user: dbUser,
-        password: dbPassword,
-        connectString: `(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=${dbHost})(PORT=${dbPort}))(CONNECT_DATA=(SID=${dbSid})))`,
-        poolIncrement: 5,
-        poolMax: 20,
-        poolMin: 5,
-        poolTimeout: 300,
-        connectTimeout: 60, // 60 seconds timeout
-        enableStatistics: true,
-        queueMax: 500,
-        queueTimeout: 30000, // 30 seconds queue timeout
-      });
-      this.logger.log('Oracle connection pool created successfully');
-    } catch (error) {
-      this.logger.error(
-        `Error creating Oracle connection pool: ${error.message}`,
-        error.stack,
-      );
-      this.logger.warn(
-        'Oracle connection failed. Service will start without database connection.',
-      );
-      this.logger.warn(
-        'Please check: 1) Database host/port accessibility, 2) Oracle Instant Client installation, 3) Network connectivity',
-      );
-      // Don't throw error, allow service to start without DB connection
-      // throw error;
+    for (const connectString of alternatives) {
+      try {
+        this.logger.log(
+          `Trying alternative connection string: ${connectString.substring(0, 50)}...`,
+        );
+        await this.createPoolWithMode('fallback', {
+          user,
+          password,
+          connectString,
+        });
+        this.logger.log('✅ Alternative connection successful');
+        return;
+      } catch (error) {
+        this.logger.warn(`❌ Alternative failed: ${error.message}`);
+      }
     }
+
+    this.logger.error('❌ All connection strategies failed');
+    this.logger.warn('Service will start without Oracle connection');
   }
 
   async onModuleDestroy() {

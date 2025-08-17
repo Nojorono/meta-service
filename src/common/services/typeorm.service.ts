@@ -2,7 +2,7 @@ import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { HealthIndicatorResult } from '@nestjs/terminus';
 import { DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import * as oracledb from 'oracledb';
+import { oracleClientSingleton } from './oracle-client.singleton';
 
 @Injectable()
 export class TypeormService implements OnModuleInit {
@@ -13,8 +13,6 @@ export class TypeormService implements OnModuleInit {
   constructor(private readonly configService: ConfigService) {
     this.databaseType =
       this.configService.get<string>('DATABASE_TYPE') || 'oracle';
-
-    // Defer DataSource creation to onModuleInit to handle errors properly
   }
 
   async onModuleInit() {
@@ -46,7 +44,11 @@ export class TypeormService implements OnModuleInit {
       // Initialize Oracle client
       if (this.databaseType === 'oracle') {
         try {
-          oracledb.initOracleClient();
+          const oracleLibDir = this.configService.get<string>(
+            'ORACLE_INSTANT_CLIENT_PATH',
+          );
+          await oracleClientSingleton.initialize(oracleLibDir);
+
           this.logger.log(
             'Oracle client initialized successfully in TypeORM service',
           );
@@ -67,7 +69,6 @@ export class TypeormService implements OnModuleInit {
         password: dbPassword,
         sid: dbSid,
         schema: dbSchema,
-        // Add entities and other TypeORM options as needed
       });
 
       // Initialize connection

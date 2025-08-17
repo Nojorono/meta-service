@@ -1,88 +1,102 @@
 # Multi-stage build for production
 FROM node:20-alpine AS base
 
-# Set working directory
+# Install Oracle Instant Client for hybrid mode (fallback when Thin fails)
+RUN apk add --no-cache \
+    libc6-compat \
+    ca-certificates \
+    libaio \
+    libxml2 \
+    krb5-libs \
+    curl \
+    unzip
+
+# Download and install Oracle Instant Client 21.19 (more stable for Alpine)
+WORKDIR /opt/oracle
+RUN curl -o instantclient-basic-linux.x64-21.19.0.0.0dbru.zip \
+    https://download.oracle.com/otn_software/linux/instantclient/2119000/instantclient-basic-linux.x64-21.19.0.0.0dbru.zip && \
+    unzip instantclient-basic-linux.x64-21.19.0.0.0dbru.zip && \
+    rm instantclient-basic-linux.x64-21.19.0.0.0dbru.zip && \
+    mv instantclient_21_19 instantclient && \
+    mkdir -p /etc/ld.so.conf.d && \
+    echo "/opt/oracle/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf
+
+# Set Oracle environment variables for hybrid mode
+ENV LD_LIBRARY_PATH=/opt/oracle/instantclient:$LD_LIBRARY_PATH
+ENV ORACLE_HOME=/opt/oracle/instantclient
+
+# Set working directory for app
 WORKDIR /app
 
 # Install dependencies only when needed
 FROM base AS deps
 
-# Install system dependencies for native modules
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    libc6-compat
+RUN apk add --no-cache python3 make g++ libc6-compat
 
-# Copy package files
 COPY package*.json ./
-# Install dependencies with frozen lockfile for reproducible builds
 RUN yarn install --frozen-lockfile --production=false
 
 # Build stage
 FROM base AS builder
 
-# Install system dependencies for native modules
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    libc6-compat
+RUN apk add --no-cache python3 make g++ libc6-compat
 
-# Copy package files
 COPY package*.json ./
 COPY yarn.lock ./
-
-# Install all dependencies (including dev dependencies for build)
 RUN yarn install --frozen-lockfile
 
-# Copy source code
 COPY . .
-
-# Build the application
 RUN yarn build
 
 # Production stage
 FROM node:20-alpine AS production
 
-# Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
-# Set working directory
+# Install Oracle Instant Client for production (hybrid mode support)
+RUN apk add --no-cache \
+    libc6-compat \
+    ca-certificates \
+    libaio \
+    libxml2 \
+    krb5-libs \
+    curl \
+    unzip \
+    dumb-init
+
+# Download and install Oracle Instant Client 21.19
+WORKDIR /opt/oracle
+RUN curl -o instantclient-basic-linux.x64-21.19.0.0.0dbru.zip \
+    https://download.oracle.com/otn_software/linux/instantclient/2119000/instantclient-basic-linux.x64-21.19.0.0.0dbru.zip && \
+    unzip instantclient-basic-linux.x64-21.19.0.0.0dbru.zip && \
+    rm instantclient-basic-linux.x64-21.19.0.0.0dbru.zip && \
+    mv instantclient_21_19 instantclient && \
+    mkdir -p /etc/ld.so.conf.d && \
+    echo "/opt/oracle/instantclient" > /etc/ld.so.conf.d/oracle-instantclient.conf
+
+# Set Oracle environment variables for hybrid mode
+ENV LD_LIBRARY_PATH=/opt/oracle/instantclient:$LD_LIBRARY_PATH
+ENV ORACLE_HOME=/opt/oracle/instantclient
+
 WORKDIR /app
 
-# Install system dependencies for runtime
-RUN apk add --no-cache \
-    dumb-init \
-    && rm -rf /var/cache/apk/*
-
-# Copy package files
 COPY package*.json ./
 COPY yarn.lock ./
+RUN yarn install --frozen-lockfile --production=true && yarn cache clean
 
-# Install only production dependencies
-RUN yarn install --frozen-lockfile --production=true && \
-    yarn cache clean
-
-# Copy built application from builder stage
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
-
-# Copy i18n assets
 COPY --from=builder --chown=nestjs:nodejs /app/src/i18n ./i18n
 
-# Switch to non-root user
+# Hybrid mode: Try Thin first, fallback to Thick if password verifier not supported
+# This solves both NJS-116 (verifier type) and ORA-24960 (library issues)
+
 USER nestjs
 
-# Expose port
 EXPOSE 9003
 
-# Health check - use root endpoint instead of /health
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD node -e "require('http').get('http://localhost:9003/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })" || exit 1
 
-# Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
-
-# Start the application
 CMD ["node", "dist/main"]

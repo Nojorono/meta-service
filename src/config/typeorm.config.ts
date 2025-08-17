@@ -15,7 +15,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   entities: [AuthUser, AuthApplication, AuthUserApplication],
   migrations: ['dist/src/database/migrations/*.js'],
   migrationsTableName: 'typeorm_migrations',
-  synchronize: process.env.NODE_ENV === 'development',
+  synchronize: process.env.NODE_ENV === 'development', // Auto-sync only in dev
   logging: process.env.NODE_ENV === 'development',
   ssl: false,
 };
