@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class PaymentMethodDto {
+export class ApPaymentMethodDto {
   @ApiProperty({
     description: 'Payment method code',
     example: 'Tunai',
@@ -154,27 +154,27 @@ export class PaymentMethodDto {
   LAST_UPDATE_DATE?: string;
 }
 
-export class PaymentMethodQueryDto {
+export class ApPaymentMethodQueryDto {
   @ApiProperty({
     description: 'Payment method name to filter by',
     example: 'Tunai',
     required: false,
   })
-  paymentMethodName?: string;
+  apPaymentMethodName?: string;
 
   @ApiProperty({
     description: 'Payment method code to filter by',
     example: 'Tunai',
     required: false,
   })
-  paymentMethodCode?: string;
+  apPaymentMethodCode?: string;
 
   @ApiProperty({
-    description: 'Currency code to filter by',
-    example: 'IDR',
+    description: 'Payment type lookup code to filter by',
+    example: 'CHECK',
     required: false,
   })
-  currencyCode?: string;
+  apPaymentTypeLookupCode?: string;
 
   @ApiProperty({
     description: 'Organization code to filter by',
@@ -182,6 +182,13 @@ export class PaymentMethodQueryDto {
     required: false,
   })
   organizationCode?: string;
+
+  @ApiProperty({
+    description: 'Enabled flag to filter by',
+    example: 'Y',
+    required: false,
+  })
+  enabledFlag?: string;
 
   @ApiProperty({
     description: 'Page number for pagination',

@@ -26,21 +26,7 @@ export class TransactionTypeService {
 
       let query = `
         SELECT 
-          TRANSACTION_TYPE_NAME,
-          TRANSACTION_TYPE_ID,
-          DESCRIPTION,
-          STATUS,
-          STATUS_DESCRIPTION,
-          TRANSACTION_TYPE_DMS,
-          MOVE_ORDER_TYPE,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
-          TRANSACTION_SOURCE_TYPE_ID,
-          ORGANIZATION_CODE,
-          ORGANIZATION_NAME,
-          ORGANIZATION_ID,
-          ORG_NAME,
-          ORG_ID,
-          CODE_COMBINATION_ID
+          *
         FROM APPS.XTD_INV_TRANSACTION_TYPES_V
         WHERE 1=1
       `;

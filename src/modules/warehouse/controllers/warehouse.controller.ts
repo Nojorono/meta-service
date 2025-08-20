@@ -10,13 +10,13 @@ import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Warehouse Meta')
 @Controller('warehouse')
+@AuthSwagger()
 export class WarehouseMetaController {
   private readonly logger = new Logger(WarehouseMetaController.name);
 
   constructor(private readonly warehouseMetaService: WarehouseMetaService) {}
 
   @Get()
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all warehouses',
     description: 'Retrieve all warehouses from Oracle database',
@@ -55,7 +55,6 @@ export class WarehouseMetaController {
   }
 
   @Get('by-date')
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get warehouses by date',
     description: 'Retrieve warehouses filtered by last update date',
@@ -111,7 +110,6 @@ export class WarehouseMetaController {
   }
 
   @Get('organization-code')
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get warehouses by organization code',
     description: 'Retrieve warehouses filtered by organization code',

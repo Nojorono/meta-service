@@ -13,13 +13,13 @@ export class PriceListService {
   ): Promise<PriceListDto[]> {
     try {
       const {
-        priceName,
-        itemCode,
-        itemDescription,
-        productUomCode,
-        customerNumber,
+        PRICE_NAME,
+        ITEM_CODE,
+        CUSTOMER_NAME,
+        CUSTOMER_NUMBER,
+        LOCATION,
         page = 1,
-        limit = 10,
+        limit = 50,
       } = queryDto;
 
       let query = `
@@ -29,51 +29,51 @@ export class PriceListService {
           ITEM_DESCRIPTION,
           PRODUCT_UOM_CODE,
           LIST_PRICE,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
           PRICE_LIST_ID,
           PRICE_LIST_LINE_ID,
           CUSTOMER_NAME,
           CUSTOMER_NUMBER,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
+          LAST_UPDATE_DATE,
           SITE_USE_CODE,
           LOCATION,
           CUST_ACCOUNT_ID,
           SITE_USE_ID
-        FROM APPS.XTD_QP_PRICE_LIST_V
+        FROM XTD_ONT_PRICE_LISTS_V
         WHERE 1=1
       `;
 
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (priceName) {
+      if (PRICE_NAME) {
         query += ` AND UPPER(PRICE_NAME) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${priceName}%`);
+        params.push(`%${PRICE_NAME}%`);
         paramIndex++;
       }
 
-      if (itemCode) {
+      if (ITEM_CODE) {
         query += ` AND UPPER(ITEM_CODE) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${itemCode}%`);
+        params.push(`%${ITEM_CODE}%`);
         paramIndex++;
       }
 
-      if (itemDescription) {
-        query += ` AND UPPER(ITEM_DESCRIPTION) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${itemDescription}%`);
+      if (CUSTOMER_NAME) {
+        query += ` AND UPPER(CUSTOMER_NAME) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${CUSTOMER_NAME}%`);
         paramIndex++;
       }
 
-      if (productUomCode) {
-        query += ` AND UPPER(PRODUCT_UOM_CODE) = UPPER(:${paramIndex})`;
-        params.push(productUomCode);
-        paramIndex++;
-      }
-
-      if (customerNumber) {
+      if (CUSTOMER_NUMBER) {
         query += ` AND UPPER(CUSTOMER_NUMBER) = UPPER(:${paramIndex})`;
-        params.push(customerNumber);
+        params.push(CUSTOMER_NUMBER);
+        paramIndex++;
+      }
+
+      if (LOCATION) {
+        query += ` AND UPPER(LOCATION) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${LOCATION}%`);
         paramIndex++;
       }
 
@@ -92,7 +92,10 @@ export class PriceListService {
     }
   }
 
-  async findPriceListById(id: number): Promise<PriceListDto> {
+  async findPriceListById(
+    priceListId: number,
+    priceListLineId: number,
+  ): Promise<PriceListDto | null> {
     try {
       const query = `
         SELECT 
@@ -101,31 +104,66 @@ export class PriceListService {
           ITEM_DESCRIPTION,
           PRODUCT_UOM_CODE,
           LIST_PRICE,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
           PRICE_LIST_ID,
           PRICE_LIST_LINE_ID,
           CUSTOMER_NAME,
           CUSTOMER_NUMBER,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
+          LAST_UPDATE_DATE,
           SITE_USE_CODE,
           LOCATION,
           CUST_ACCOUNT_ID,
           SITE_USE_ID
-        FROM APPS.XTD_QP_PRICE_LIST_V
-        WHERE PRICE_LIST_ID = :1
+        FROM XTD_ONT_PRICE_LISTS_V
+        WHERE PRICE_LIST_ID = :1 AND PRICE_LIST_LINE_ID = :2
       `;
 
-      const result = await this.oracleService.executeQuery(query, [id]);
-
-      if (!result.rows.length) {
-        throw new Error(`Price list with ID ${id} not found`);
-      }
-
-      this.logger.log(`Found price list with ID: ${id}`);
-      return result.rows[0];
+      const result = await this.oracleService.executeQuery(query, [
+        priceListId,
+        priceListLineId,
+      ]);
+      return result.rows.length > 0 ? result.rows[0] : null;
     } catch (error) {
-      this.logger.error(`Error fetching price list with ID ${id}:`, error);
+      this.logger.error('Error fetching price list item:', error);
+      throw error;
+    }
+  }
+
+  async findByPriceListId(priceListId: number): Promise<PriceListDto[]> {
+    try {
+      const query = `
+        SELECT 
+          PRICE_NAME,
+          ITEM_CODE,
+          ITEM_DESCRIPTION,
+          PRODUCT_UOM_CODE,
+          LIST_PRICE,
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          PRICE_LIST_ID,
+          PRICE_LIST_LINE_ID,
+          CUSTOMER_NAME,
+          CUSTOMER_NUMBER,
+          LAST_UPDATE_DATE,
+          SITE_USE_CODE,
+          LOCATION,
+          CUST_ACCOUNT_ID,
+          SITE_USE_ID
+        FROM XTD_ONT_PRICE_LISTS_V
+        WHERE PRICE_LIST_ID = :1
+        ORDER BY ITEM_CODE
+      `;
+
+      const result = await this.oracleService.executeQuery(query, [
+        priceListId,
+      ]);
+      return result.rows;
+    } catch (error) {
+      this.logger.error(
+        'Error fetching price list items by price list ID:',
+        error,
+      );
       throw error;
     }
   }
@@ -133,54 +171,53 @@ export class PriceListService {
   async countPriceLists(queryDto: PriceListQueryDto = {}): Promise<number> {
     try {
       const {
-        priceName,
-        itemCode,
-        itemDescription,
-        productUomCode,
-        customerNumber,
+        PRICE_NAME,
+        ITEM_CODE,
+        CUSTOMER_NAME,
+        CUSTOMER_NUMBER,
+        LOCATION,
       } = queryDto;
 
       let query = `
-        SELECT COUNT(*) AS TOTAL
-        FROM APPS.XTD_QP_PRICE_LIST_V
+        SELECT COUNT(*) as TOTAL
+        FROM XTD_ONT_PRICE_LISTS_V
         WHERE 1=1
       `;
 
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (priceName) {
+      if (PRICE_NAME) {
         query += ` AND UPPER(PRICE_NAME) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${priceName}%`);
+        params.push(`%${PRICE_NAME}%`);
         paramIndex++;
       }
 
-      if (itemCode) {
+      if (ITEM_CODE) {
         query += ` AND UPPER(ITEM_CODE) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${itemCode}%`);
+        params.push(`%${ITEM_CODE}%`);
         paramIndex++;
       }
 
-      if (itemDescription) {
-        query += ` AND UPPER(ITEM_DESCRIPTION) LIKE UPPER(:${paramIndex})`;
-        params.push(`%${itemDescription}%`);
+      if (CUSTOMER_NAME) {
+        query += ` AND UPPER(CUSTOMER_NAME) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${CUSTOMER_NAME}%`);
         paramIndex++;
       }
 
-      if (productUomCode) {
-        query += ` AND UPPER(PRODUCT_UOM_CODE) = UPPER(:${paramIndex})`;
-        params.push(productUomCode);
-        paramIndex++;
-      }
-
-      if (customerNumber) {
+      if (CUSTOMER_NUMBER) {
         query += ` AND UPPER(CUSTOMER_NUMBER) = UPPER(:${paramIndex})`;
-        params.push(customerNumber);
+        params.push(CUSTOMER_NUMBER);
+        paramIndex++;
+      }
+
+      if (LOCATION) {
+        query += ` AND UPPER(LOCATION) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${LOCATION}%`);
         paramIndex++;
       }
 
       const result = await this.oracleService.executeQuery(query, params);
-
       return result.rows[0].TOTAL;
     } catch (error) {
       this.logger.error('Error counting price lists:', error);

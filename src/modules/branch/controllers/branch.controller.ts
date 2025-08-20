@@ -22,13 +22,13 @@ import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Branch Meta')
 @Controller('branch')
+@AuthSwagger()
 export class BranchMetaController {
   private readonly logger = new Logger(BranchMetaController.name);
 
   constructor(private readonly branchMetaService: BranchMetaService) {}
 
   @Get('search')
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Search branches',
     description:

@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { FpprTypesService } from '../services/fppr-types.service';
@@ -13,6 +14,7 @@ import { FpprTypesDto, FpprTypesQueryDto } from '../dtos/fppr-types.dtos';
 
 @ApiTags('FPPR Types')
 @Controller('fppr-types')
+@AuthSwagger()
 export class FpprTypesMicroserviceController {
   constructor(private readonly fpprTypesService: FpprTypesService) {}
 

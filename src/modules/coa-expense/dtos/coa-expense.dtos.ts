@@ -55,7 +55,7 @@ export class CoaExpenseDto {
 
   @ApiProperty({
     description: 'Organization code',
-    example: 'SKB',
+    example: 'SMD',
     required: false,
   })
   ORGANIZATION_CODE?: string;

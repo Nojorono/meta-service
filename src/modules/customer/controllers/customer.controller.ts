@@ -16,13 +16,13 @@ import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Customer Meta')
 @Controller('customer')
+@AuthSwagger()
 export class CustomerMetaController {
   private readonly logger = new Logger(CustomerMetaController.name);
 
   constructor(private readonly customerMetaService: CustomerMetaService) {}
 
   @Get()
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all customers',
     description:

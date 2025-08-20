@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class PriceListDto {
   @ApiProperty({
@@ -9,13 +11,13 @@ export class PriceListDto {
 
   @ApiProperty({
     description: 'Item code',
-    example: '25_AST16',
+    example: 'ABC12',
   })
   ITEM_CODE: string;
 
   @ApiProperty({
     description: 'Item description',
-    example: '25_AROMA ROYAL TEA 16',
+    example: 'AROMA BOLD COFFEE 12',
   })
   ITEM_DESCRIPTION: string;
 
@@ -27,20 +29,21 @@ export class PriceListDto {
 
   @ApiProperty({
     description: 'List price',
-    example: 1330000,
+    example: 1650000,
   })
+  @Type(() => Number)
   LIST_PRICE: number;
 
   @ApiProperty({
     description: 'Start date active',
-    example: '2024-06-24 00:00:00.000',
+    example: '2025-04-28 00:00:00.000',
     required: false,
   })
   START_DATE_ACTIVE?: string;
 
   @ApiProperty({
     description: 'End date active',
-    example: '2030-12-31',
+    example: '2025-12-31 23:59:59.000',
     required: false,
   })
   END_DATE_ACTIVE?: string;
@@ -49,17 +52,19 @@ export class PriceListDto {
     description: 'Price list ID',
     example: 7010,
   })
+  @Type(() => Number)
   PRICE_LIST_ID: number;
 
   @ApiProperty({
     description: 'Price list line ID',
-    example: 73386,
+    example: 128016,
   })
+  @Type(() => Number)
   PRICE_LIST_LINE_ID: number;
 
   @ApiProperty({
     description: 'Customer name',
-    example: 'PT. CUSTOMER ABC',
+    example: 'PT. EXAMPLE COMPANY',
     required: false,
   })
   CUSTOMER_NAME?: string;
@@ -73,7 +78,7 @@ export class PriceListDto {
 
   @ApiProperty({
     description: 'Last update date',
-    example: '2024-12-05 16:12:13.000',
+    example: '2025-06-05 08:01:21.000',
     required: false,
   })
   LAST_UPDATE_DATE?: string;
@@ -87,7 +92,7 @@ export class PriceListDto {
 
   @ApiProperty({
     description: 'Location',
-    example: 'JAKARTA',
+    example: 'Jakarta',
     required: false,
   })
   LOCATION?: string;
@@ -97,6 +102,7 @@ export class PriceListDto {
     example: 12345,
     required: false,
   })
+  @Type(() => Number)
   CUST_ACCOUNT_ID?: number;
 
   @ApiProperty({
@@ -104,6 +110,7 @@ export class PriceListDto {
     example: 67890,
     required: false,
   })
+  @Type(() => Number)
   SITE_USE_ID?: number;
 }
 
@@ -113,47 +120,63 @@ export class PriceListQueryDto {
     example: 'PL - RRO Nasional / SPO',
     required: false,
   })
-  priceName?: string;
+  @IsOptional()
+  @IsString()
+  PRICE_NAME?: string;
 
   @ApiProperty({
     description: 'Item code to filter by',
-    example: '25_AST16',
+    example: 'ABC12',
     required: false,
   })
-  itemCode?: string;
+  @IsOptional()
+  @IsString()
+  ITEM_CODE?: string;
 
   @ApiProperty({
-    description: 'Item description to filter by',
-    example: '25_AROMA ROYAL TEA 16',
+    description: 'Customer name to filter by',
+    example: 'PT. EXAMPLE COMPANY',
     required: false,
   })
-  itemDescription?: string;
-
-  @ApiProperty({
-    description: 'Product UOM code to filter by',
-    example: 'BAL',
-    required: false,
-  })
-  productUomCode?: string;
+  @IsOptional()
+  @IsString()
+  CUSTOMER_NAME?: string;
 
   @ApiProperty({
     description: 'Customer number to filter by',
     example: 'CUST001',
     required: false,
   })
-  customerNumber?: string;
+  @IsOptional()
+  @IsString()
+  CUSTOMER_NUMBER?: string;
+
+  @ApiProperty({
+    description: 'Location to filter by',
+    example: 'Jakarta',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  LOCATION?: string;
 
   @ApiProperty({
     description: 'Page number for pagination',
     example: 1,
     required: false,
   })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   page?: number;
 
   @ApiProperty({
-    description: 'Number of records per page',
+    description: 'Number of items per page',
     example: 10,
     required: false,
   })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   limit?: number;
 }

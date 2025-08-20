@@ -12,9 +12,11 @@ import {
   TransactionTypeQueryDto,
 } from '../dtos/transaction-type.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 
 @ApiTags('Transaction Type')
 @Controller('transaction-type')
+@AuthSwagger()
 export class TransactionTypeController {
   constructor(
     private readonly transactionTypeService: TransactionTypeService,

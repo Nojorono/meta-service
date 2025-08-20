@@ -14,12 +14,7 @@ export class UserDmsService {
 
       let query = `
         SELECT 
-          USER_NAME,
-          USER_ID,
-          TO_CHAR(START_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS START_DATE,
-          TO_CHAR(END_DATE, 'YYYY-MM-DD') AS END_DATE,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
-          DESCRIPTION
+          *
         FROM APPS.XTD_FND_USER_DMS_V
         WHERE 1=1
       `;

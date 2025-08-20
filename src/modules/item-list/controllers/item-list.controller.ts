@@ -5,17 +5,17 @@ import {
   MetaItemListDtoByItemCode,
   MetaItemListResponseDto,
 } from '../dtos/item-list.dtos';
-import { Public } from '../../../decorators/public.decorator';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 
 @ApiTags('Item List Meta')
 @Controller('item-list')
+@AuthSwagger()
 export class ItemListMetaController {
   private readonly logger = new Logger(ItemListMetaController.name);
 
   constructor(private readonly itemListMetaService: ItemListMetaService) {}
 
   @Get()
-  @Public()
   @ApiOperation({
     summary: 'Get all sales items',
     description: 'Retrieve all sales items from Oracle database',
@@ -50,7 +50,6 @@ export class ItemListMetaController {
   }
 
   @Get('by-item-code')
-  @Public()
   @ApiOperation({
     summary: 'Get item list by item code',
     description: 'Retrieve item list filtered by item code',

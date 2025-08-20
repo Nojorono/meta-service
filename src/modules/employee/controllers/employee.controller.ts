@@ -16,13 +16,13 @@ import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Employee Meta')
 @Controller('employee')
+@AuthSwagger()
 export class EmployeeMetaController {
   private readonly logger = new Logger(EmployeeMetaController.name);
 
   constructor(private readonly employeeMetaService: EmployeeMetaService) {}
 
   @Get()
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all employees',
     description: 'Retrieve all employees from Oracle database',
@@ -61,7 +61,6 @@ export class EmployeeMetaController {
   }
 
   @Get('by-date')
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get employees by date',
     description: 'Retrieve employees filtered by last update date',
@@ -117,7 +116,6 @@ export class EmployeeMetaController {
   }
 
   @Get(':employeeNumber')
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get employee by number',
     description: 'Retrieve a specific employee by their employee number',

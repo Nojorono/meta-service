@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Logger } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -6,13 +6,16 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 import { CurrencyService } from '../services/currency.service';
 import { CurrencyDto, CurrencyQueryDto } from '../dtos/currency.dtos';
-import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @ApiTags('Currency')
 @Controller('currency')
+@AuthSwagger()
 export class CurrencyController {
+  private readonly logger = new Logger(CurrencyController.name);
+
   constructor(private readonly currencyService: CurrencyService) {}
 
   @Get()
@@ -40,18 +43,24 @@ export class CurrencyController {
   @ApiQuery({ name: 'PAGE', required: false, description: 'Page number' })
   @ApiQuery({ name: 'LIMIT', required: false, description: 'Records per page' })
   async findAll(@Query() query: CurrencyQueryDto): Promise<any> {
-    const data = await this.currencyService.findAllCurrencies(query);
-    const total = await this.currencyService.countCurrencies(query);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { PAGE = 1, LIMIT = 10, ..._filters } = query;
+
+    const [data, total] = await Promise.all([
+      this.currencyService.findAllCurrencies(query),
+      this.currencyService.countCurrencies(query),
+    ]);
+
     return {
       success: true,
       statusCode: 200,
       message: 'Currencies retrieved successfully',
       data,
       pagination: {
-        page: query.PAGE || 1,
-        limit: query.LIMIT || 10,
+        page: Number(PAGE),
+        limit: Number(LIMIT),
         total,
-        totalPages: Math.ceil(total / (query.LIMIT || 10)),
+        totalPages: Math.ceil(total / Number(LIMIT)),
       },
     };
   }
@@ -110,30 +119,5 @@ export class CurrencyController {
       message: 'Currency retrieved successfully',
       data,
     };
-  }
-
-  // Microservice endpoints
-  @MessagePattern('currency.findAll')
-  async findAllMicroservice(): Promise<CurrencyDto[]> {
-    return await this.currencyService.findAllCurrencies();
-  }
-
-  @MessagePattern('currency.findByCode')
-  async findByCodeMicroservice(@Payload() code: string): Promise<CurrencyDto> {
-    return await this.currencyService.findCurrencyByCode(code);
-  }
-
-  @MessagePattern('currency.findByName')
-  async findByNameMicroservice(
-    @Payload() name: string,
-  ): Promise<CurrencyDto[]> {
-    return await this.currencyService.findAllCurrencies({ NAME: name });
-  }
-
-  @MessagePattern('currency.findByEnabledFlag')
-  async findByEnabledFlagMicroservice(
-    @Payload() ENABLED_FLAG: string,
-  ): Promise<CurrencyDto[]> {
-    return await this.currencyService.findAllCurrencies({ ENABLED_FLAG });
   }
 }

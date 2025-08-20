@@ -26,14 +26,7 @@ export class SalesActivityService {
 
       let query = `
         SELECT 
-          SALES_ACTIVITY_ID,
-          NAME,
-          SALES_ACTIVITY_CODE,
-          SALES_ACTIVITY_TYPE,
-          ENABLED_FLAG,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
+          *
         FROM APPS.XTD_AR_SALES_ACTIVITIES_V
         WHERE 1=1
       `;
@@ -42,19 +35,19 @@ export class SalesActivityService {
       let paramIndex = 1;
 
       if (activityName) {
-        query += ` AND UPPER(NAME) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ACTIVITY_NAME) LIKE UPPER(:${paramIndex})`;
         params.push(`%${activityName}%`);
         paramIndex++;
       }
 
       if (receiptTypeDms) {
-        query += ` AND UPPER(SALES_ACTIVITY_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(RECEIPT_TYPE_DMS) LIKE UPPER(:${paramIndex})`;
         params.push(`%${receiptTypeDms}%`);
         paramIndex++;
       }
 
       if (status) {
-        query += ` AND UPPER(ENABLED_FLAG) = UPPER(:${paramIndex})`;
+        query += ` AND UPPER(STATUS) = UPPER(:${paramIndex})`;
         params.push(status);
         paramIndex++;
       }
@@ -67,7 +60,7 @@ export class SalesActivityService {
 
       // Add pagination
       const offset = (page - 1) * limit;
-      query += ` ORDER BY SALES_ACTIVITY_ID OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
+      query += ` ORDER BY ACTIVITY_NAME OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);

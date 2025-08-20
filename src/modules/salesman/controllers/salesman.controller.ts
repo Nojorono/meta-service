@@ -9,13 +9,13 @@ import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Salesman Meta')
 @Controller('salesman')
+@AuthSwagger()
 export class SalesmanMetaController {
   private readonly logger = new Logger(SalesmanMetaController.name);
 
   constructor(private readonly salesmanMetaService: SalesmanMetaService) {}
 
   @Get()
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all salesmen',
     description: 'Retrieve all salesmen from Oracle database',
@@ -50,7 +50,6 @@ export class SalesmanMetaController {
   }
 
   @Get('by-date')
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get salesmen by date',
     description: 'Retrieve salesmen filtered by last update date',

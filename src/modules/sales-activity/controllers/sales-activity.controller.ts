@@ -12,9 +12,11 @@ import {
   SalesActivityQueryDto,
 } from '../dtos/sales-activity.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 
 @ApiTags('Sales Activity')
 @Controller('sales-activity')
+@AuthSwagger()
 export class SalesActivityController {
   constructor(private readonly salesActivityService: SalesActivityService) {}
 

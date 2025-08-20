@@ -12,9 +12,11 @@ import {
   SalesItemConversionQueryDto,
 } from '../dtos/sales-item-conversion.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 
 @ApiTags('Sales Item Conversion')
 @Controller('sales-item-conversion')
+@AuthSwagger()
 export class SalesItemConversionController {
   constructor(
     private readonly salesItemConversionService: SalesItemConversionService,

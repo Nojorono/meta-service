@@ -9,13 +9,13 @@ import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('GeoTree Meta')
 @Controller('geotree')
+@AuthSwagger()
 export class GeoTreeMetaController {
   private readonly logger = new Logger(GeoTreeMetaController.name);
 
   constructor(private readonly geoTreeMetaService: GeoTreeMetaService) {}
 
   @Get()
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all geo trees',
     description: 'Retrieve all geographic tree data from Oracle database',
@@ -53,7 +53,6 @@ export class GeoTreeMetaController {
   }
 
   @Get('by-date')
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get geo trees by date',
     description: 'Retrieve geographic tree data filtered by last update date',

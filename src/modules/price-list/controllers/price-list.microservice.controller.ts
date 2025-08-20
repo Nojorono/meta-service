@@ -15,8 +15,13 @@ export class PriceListMicroserviceController {
   }
 
   @MessagePattern('price-list.findById')
-  async findById(@Payload() dto: { id: number }) {
-    return this.priceListService.findPriceListById(dto.id);
+  async findById(
+    @Payload() dto: { priceListId: number; priceListLineId: number },
+  ) {
+    return this.priceListService.findPriceListById(
+      dto.priceListId,
+      dto.priceListLineId,
+    );
   }
 
   @MessagePattern('price-list.getCount')

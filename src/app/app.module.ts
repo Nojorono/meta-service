@@ -27,10 +27,11 @@ import { OrganizationMetaModule } from '../modules/organization/organization.mod
 import { PositionMetaModule } from '../modules/position/position.module';
 import { SupplierMetaModule } from '../modules/supplier/supplier.module';
 import { SalesItemConversionModule } from '../modules/sales-item-conversion/sales-item-conversion.module';
-import { ReceiptMethodModule } from '../modules/receipt-method/receipt-method.module';
+import { ArReceiptMethodModule } from '../modules/ar-receipt-method/ar-receipt-method.module';
+// import { ReceiptMethodModule } from '../modules/receipt-method/receipt-method.module';
 import { SalesActivityModule } from '../modules/sales-activity/sales-activity.module';
 import { CoaExpenseModule } from '../modules/coa-expense/coa-expense.module';
-import { PaymentMethodModule } from '../modules/payment-method/payment-method.module';
+import { ApPaymentMethodModule } from '../modules/ap-payment-method/ap-payment-method.module';
 import { TransactionTypeModule } from '../modules/transaction-type/transaction-type.module';
 import { UserDmsModule } from '../modules/user-dms/user-dms.module';
 import { CurrencyModule } from '../modules/currency/currency.module';
@@ -72,10 +73,10 @@ import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
     PositionMetaModule,
     SupplierMetaModule,
     SalesItemConversionModule,
-    ReceiptMethodModule,
+    ArReceiptMethodModule,
     SalesActivityModule,
     CoaExpenseModule,
-    PaymentMethodModule,
+    ApPaymentMethodModule,
     TransactionTypeModule,
     UserDmsModule,
     CurrencyModule,

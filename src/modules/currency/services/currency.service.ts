@@ -22,12 +22,7 @@ export class CurrencyService {
 
       let query = `
         SELECT 
-          CURRENCY_CODE,
-          NAME,
-          ENABLED_FLAG,
-          START_DATE_ACTIVE,
-          END_DATE_ACTIVE,
-          LAST_UPDATE_DATE
+          *
         FROM APPS.XTD_FND_CURRENCIES_V
         WHERE 1=1
       `;

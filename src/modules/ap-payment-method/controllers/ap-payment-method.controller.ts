@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Logger } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -6,37 +6,42 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { PaymentMethodService } from '../services/payment-method.service';
+import { ApPaymentMethodService } from '../services/ap-payment-method.service';
 import {
-  PaymentMethodDto,
-  PaymentMethodQueryDto,
-} from '../dtos/payment-method.dtos';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+  ApPaymentMethodDto,
+  ApPaymentMethodQueryDto,
+} from '../dtos/ap-payment-method.dtos';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 
-@ApiTags('Payment Method')
-@Controller('payment-method')
-export class PaymentMethodController {
-  constructor(private readonly paymentMethodService: PaymentMethodService) {}
+@ApiTags('AP Payment Method')
+@Controller('ap-payment-method')
+@AuthSwagger()
+export class ApPaymentMethodController {
+  private readonly logger = new Logger(ApPaymentMethodController.name);
+
+  constructor(
+    private readonly apPaymentMethodService: ApPaymentMethodService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all payment methods' })
   @ApiResponse({
     status: 200,
     description: 'Return all payment methods',
-    type: [PaymentMethodDto],
+    type: [ApPaymentMethodDto],
   })
   @ApiQuery({
-    name: 'paymentMethodName',
+    name: 'apPaymentMethodName',
     required: false,
     description: 'Filter by payment method name',
   })
   @ApiQuery({
-    name: 'paymentMethodCode',
+    name: 'apPaymentMethodCode',
     required: false,
     description: 'Filter by payment method code',
   })
   @ApiQuery({
-    name: 'paymentTypeLookupCode',
+    name: 'apPaymentTypeLookupCode',
     required: false,
     description: 'Filter by payment type lookup code',
   })
@@ -52,13 +57,13 @@ export class PaymentMethodController {
   })
   @ApiQuery({ name: 'page', required: false, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, description: 'Records per page' })
-  async findAll(@Query() query: PaymentMethodQueryDto): Promise<any> {
+  async findAll(@Query() query: ApPaymentMethodQueryDto): Promise<any> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { page = 1, limit = 10, ..._filters } = query;
 
     const [data, total] = await Promise.all([
-      this.paymentMethodService.findAllPaymentMethods(query),
-      this.paymentMethodService.countPaymentMethods(query),
+      this.apPaymentMethodService.findAllPaymentMethods(query),
+      this.apPaymentMethodService.countPaymentMethods(query),
     ]);
 
     return {
@@ -81,11 +86,11 @@ export class PaymentMethodController {
   @ApiResponse({
     status: 200,
     description: 'Return payment methods with the specified name',
-    type: [PaymentMethodDto],
+    type: [ApPaymentMethodDto],
   })
   async findByName(@Param('name') name: string): Promise<any> {
-    const data = await this.paymentMethodService.findAllPaymentMethods({
-      paymentMethodName: name,
+    const data = await this.apPaymentMethodService.findAllPaymentMethods({
+      apPaymentMethodName: name,
     });
     return {
       success: true,
@@ -101,11 +106,11 @@ export class PaymentMethodController {
   @ApiResponse({
     status: 200,
     description: 'Return payment methods with the specified code',
-    type: [PaymentMethodDto],
+    type: [ApPaymentMethodDto],
   })
   async findByCode(@Param('code') code: string): Promise<any> {
-    const data = await this.paymentMethodService.findAllPaymentMethods({
-      paymentMethodCode: code,
+    const data = await this.apPaymentMethodService.findAllPaymentMethods({
+      apPaymentMethodCode: code,
     });
     return {
       success: true,
@@ -113,47 +118,5 @@ export class PaymentMethodController {
       message: 'Payment methods retrieved successfully',
       data,
     };
-  }
-
-  // Microservice endpoints
-  @MessagePattern('payment-method.findAll')
-  async findAllMicroservice(
-    @Payload() query: PaymentMethodQueryDto,
-  ): Promise<any> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { page = 1, limit = 10, ..._filters } = query;
-
-    const [data, total] = await Promise.all([
-      this.paymentMethodService.findAllPaymentMethods(query),
-      this.paymentMethodService.countPaymentMethods(query),
-    ]);
-
-    return {
-      data,
-      pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total,
-        totalPages: Math.ceil(total / Number(limit)),
-      },
-    };
-  }
-
-  @MessagePattern('payment-method.findByName')
-  async findByNameMicroservice(
-    @Payload() name: string,
-  ): Promise<PaymentMethodDto[]> {
-    return await this.paymentMethodService.findAllPaymentMethods({
-      paymentMethodName: name,
-    });
-  }
-
-  @MessagePattern('payment-method.findByCode')
-  async findByCodeMicroservice(
-    @Payload() code: string,
-  ): Promise<PaymentMethodDto[]> {
-    return await this.paymentMethodService.findAllPaymentMethods({
-      paymentMethodCode: code,
-    });
   }
 }

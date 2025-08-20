@@ -1,57 +1,28 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { Controller, Get, Param, Query, Logger } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 import { PriceListService } from '../services/price-list.service';
 import { PriceListDto, PriceListQueryDto } from '../dtos/price-list.dtos';
-import { MessagePattern, Payload } from '@nestjs/microservices';
 
-@ApiTags('Price List')
-@Controller('price-list')
+@ApiTags('Price Lists')
+@AuthSwagger()
+@Controller('price-lists')
 export class PriceListController {
+  private readonly logger = new Logger(PriceListController.name);
+
   constructor(private readonly priceListService: PriceListService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all price lists' })
+  @ApiOperation({
+    summary: 'Get all price lists with filtering and pagination',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Return all price lists',
+    description: 'Price lists retrieved successfully',
     type: [PriceListDto],
   })
-  @ApiQuery({
-    name: 'priceName',
-    required: false,
-    description: 'Filter by price name',
-  })
-  @ApiQuery({
-    name: 'itemCode',
-    required: false,
-    description: 'Filter by item code',
-  })
-  @ApiQuery({
-    name: 'itemDescription',
-    required: false,
-    description: 'Filter by item description',
-  })
-  @ApiQuery({
-    name: 'productUomCode',
-    required: false,
-    description: 'Filter by product UOM code',
-  })
-  @ApiQuery({
-    name: 'customerNumber',
-    required: false,
-    description: 'Filter by customer number',
-  })
-  @ApiQuery({ name: 'page', required: false, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Records per page' })
   async findAll(@Query() query: PriceListQueryDto): Promise<any> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { page = 1, limit = 10, ..._filters } = query;
+    const { page = 1, limit = 10 } = query;
 
     const [data, total] = await Promise.all([
       this.priceListService.findAllPriceLists(query),
@@ -72,156 +43,84 @@ export class PriceListController {
     };
   }
 
-  @Get('price-name/:priceName')
-  @ApiOperation({ summary: 'Get price lists by price name' })
-  @ApiParam({ name: 'priceName', description: 'Price name' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return price lists with the specified price name',
-    type: [PriceListDto],
+  @Get(':priceListId/:priceListLineId')
+  @ApiOperation({
+    summary: 'Get a specific price list item by price list ID and line ID',
   })
-  async findByPriceName(@Param('priceName') priceName: string): Promise<any> {
-    const data = await this.priceListService.findAllPriceLists({ priceName });
-    return {
-      success: true,
-      statusCode: 200,
-      message: 'Price lists retrieved successfully',
-      data,
-    };
-  }
-
-  @Get('item-code/:itemCode')
-  @ApiOperation({ summary: 'Get price lists by item code' })
-  @ApiParam({ name: 'itemCode', description: 'Item code' })
+  @ApiParam({ name: 'priceListId', description: 'Price List ID' })
+  @ApiParam({ name: 'priceListLineId', description: 'Price List Line ID' })
   @ApiResponse({
     status: 200,
-    description: 'Return price lists with the specified item code',
-    type: [PriceListDto],
-  })
-  async findByItemCode(@Param('itemCode') itemCode: string): Promise<any> {
-    const data = await this.priceListService.findAllPriceLists({ itemCode });
-    return {
-      success: true,
-      statusCode: 200,
-      message: 'Price lists retrieved successfully',
-      data,
-    };
-  }
-
-  @Get('customer/:customerNumber')
-  @ApiOperation({ summary: 'Get price lists by customer number' })
-  @ApiParam({ name: 'customerNumber', description: 'Customer number' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return price lists with the specified customer number',
-    type: [PriceListDto],
-  })
-  async findByCustomerNumber(
-    @Param('customerNumber') customerNumber: string,
-  ): Promise<any> {
-    const data = await this.priceListService.findAllPriceLists({
-      customerNumber,
-    });
-    return {
-      success: true,
-      statusCode: 200,
-      message: 'Price lists retrieved successfully',
-      data,
-    };
-  }
-
-  @Get('uom/:productUomCode')
-  @ApiOperation({ summary: 'Get price lists by product UOM code' })
-  @ApiParam({ name: 'productUomCode', description: 'Product UOM code' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return price lists with the specified product UOM code',
-    type: [PriceListDto],
-  })
-  async findByProductUomCode(
-    @Param('productUomCode') productUomCode: string,
-  ): Promise<any> {
-    const data = await this.priceListService.findAllPriceLists({
-      productUomCode,
-    });
-    return {
-      success: true,
-      statusCode: 200,
-      message: 'Price lists retrieved successfully',
-      data,
-    };
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a price list by ID' })
-  @ApiParam({ name: 'id', description: 'Price list ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return the price list',
+    description: 'Price list item retrieved successfully',
     type: PriceListDto,
   })
-  async findById(@Param('id') id: number): Promise<any> {
-    const data = await this.priceListService.findPriceListById(id);
-    return {
-      success: true,
-      statusCode: 200,
-      message: 'Price list retrieved successfully',
-      data,
-    };
+  @ApiResponse({ status: 404, description: 'Price list item not found' })
+  async findOne(
+    @Param('priceListId') priceListId: string,
+    @Param('priceListLineId') priceListLineId: string,
+  ): Promise<any> {
+    try {
+      const result = await this.priceListService.findPriceListById(
+        parseInt(priceListId),
+        parseInt(priceListLineId),
+      );
+
+      if (!result) {
+        return {
+          success: false,
+          statusCode: 404,
+          message: 'Price list item not found',
+          data: null,
+        };
+      }
+
+      return {
+        success: true,
+        statusCode: 200,
+        message: 'Price list item retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      this.logger.error('Error fetching price list item:', error);
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Failed to retrieve price list item',
+        data: null,
+      };
+    }
   }
 
-  // Microservice endpoints
-  @MessagePattern('price-list.findAll')
-  async findAllMicroservice(@Payload() query: PriceListQueryDto): Promise<any> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { page = 1, limit = 10, ..._filters } = query;
+  @Get('by-price-list/:priceListId')
+  @ApiOperation({ summary: 'Get all items by price list ID' })
+  @ApiParam({ name: 'priceListId', description: 'Price List ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Price list items retrieved successfully',
+    type: [PriceListDto],
+  })
+  async findByPriceListId(
+    @Param('priceListId') priceListId: string,
+  ): Promise<any> {
+    try {
+      const data = await this.priceListService.findByPriceListId(
+        parseInt(priceListId),
+      );
 
-    const [data, total] = await Promise.all([
-      this.priceListService.findAllPriceLists(query),
-      this.priceListService.countPriceLists(query),
-    ]);
-
-    return {
-      data,
-      pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total,
-        totalPages: Math.ceil(total / Number(limit)),
-      },
-    };
-  }
-
-  @MessagePattern('price-list.findById')
-  async findByIdMicroservice(@Payload() id: number): Promise<PriceListDto> {
-    return await this.priceListService.findPriceListById(id);
-  }
-
-  @MessagePattern('price-list.findByPriceName')
-  async findByPriceNameMicroservice(
-    @Payload() priceName: string,
-  ): Promise<PriceListDto[]> {
-    return await this.priceListService.findAllPriceLists({ priceName });
-  }
-
-  @MessagePattern('price-list.findByItemCode')
-  async findByItemCodeMicroservice(
-    @Payload() itemCode: string,
-  ): Promise<PriceListDto[]> {
-    return await this.priceListService.findAllPriceLists({ itemCode });
-  }
-
-  @MessagePattern('price-list.findByCustomerNumber')
-  async findByCustomerNumberMicroservice(
-    @Payload() customerNumber: string,
-  ): Promise<PriceListDto[]> {
-    return await this.priceListService.findAllPriceLists({ customerNumber });
-  }
-
-  @MessagePattern('price-list.findByProductUomCode')
-  async findByProductUomCodeMicroservice(
-    @Payload() productUomCode: string,
-  ): Promise<PriceListDto[]> {
-    return await this.priceListService.findAllPriceLists({ productUomCode });
+      return {
+        success: true,
+        statusCode: 200,
+        message: 'Price list items retrieved successfully',
+        data,
+      };
+    } catch (error) {
+      this.logger.error('Error fetching price list items:', error);
+      return {
+        success: false,
+        statusCode: 500,
+        message: 'Failed to retrieve price list items',
+        data: null,
+      };
+    }
   }
 }

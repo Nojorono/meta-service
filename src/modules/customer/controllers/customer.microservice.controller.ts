@@ -9,6 +9,7 @@ import {
 import { Internal } from 'src/common/decorators/internal.decorator';
 
 @Controller()
+@Internal()
 export class CustomerMetaMicroserviceController {
   private readonly logger = new Logger(CustomerMetaMicroserviceController.name);
 

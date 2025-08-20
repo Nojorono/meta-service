@@ -26,12 +26,25 @@ export class ReceiptMethodService {
 
       let query = `
         SELECT 
+          RECEIPT_CLASSES,
+          PRINTED_NAME,
+          RECEIPT_METHOD_NAME,
           RECEIPT_METHOD_ID,
-          NAME,
-          RECEIPT_CLASS_LOOKUP_CODE,
-          ENABLED_FLAG,
-          TO_CHAR(START_DATE, 'YYYY-MM-DD') AS START_DATE,
-          TO_CHAR(END_DATE, 'YYYY-MM-DD') AS END_DATE,
+          BANK_NAME,
+          BANK_BRANCH_NAME,
+          BANK_ACCOUNT_NUMBER,
+          BANK_ACCOUNT_NAME,
+          BANK_ID,
+          BANK_BRANCH_ID,
+          BANK_ACCOUNT_ID,
+          CURRENCY_CODE,
+          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS START_DATE_ACTIVE,
+          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
+          SALES_FLAG,
+          ORGANIZATION_CODE,
+          ORGANIZATION_NAME,
+          ORG_NAME,
+          ORG_ID,
           TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
         FROM APPS.XTD_AR_RECEIPT_METHODS_V
         WHERE 1=1
@@ -41,13 +54,13 @@ export class ReceiptMethodService {
       let paramIndex = 1;
 
       if (receiptMethodName) {
-        query += ` AND UPPER(NAME) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(RECEIPT_METHOD_NAME) LIKE UPPER(:${paramIndex})`;
         params.push(`%${receiptMethodName}%`);
         paramIndex++;
       }
 
       if (receiptClasses) {
-        query += ` AND UPPER(RECEIPT_CLASS_LOOKUP_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(RECEIPT_CLASSES) LIKE UPPER(:${paramIndex})`;
         params.push(`%${receiptClasses}%`);
         paramIndex++;
       }
@@ -83,12 +96,25 @@ export class ReceiptMethodService {
     try {
       const query = `
         SELECT 
+          RECEIPT_CLASSES,
+          PRINTED_NAME,
+          RECEIPT_METHOD_NAME,
           RECEIPT_METHOD_ID,
-          NAME,
-          RECEIPT_CLASS_LOOKUP_CODE,
-          ENABLED_FLAG,
-          TO_CHAR(START_DATE, 'YYYY-MM-DD') AS START_DATE,
-          TO_CHAR(END_DATE, 'YYYY-MM-DD') AS END_DATE,
+          BANK_NAME,
+          BANK_BRANCH_NAME,
+          BANK_ACCOUNT_NUMBER,
+          BANK_ACCOUNT_NAME,
+          BANK_ID,
+          BANK_BRANCH_ID,
+          BANK_ACCOUNT_ID,
+          CURRENCY_CODE,
+          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS START_DATE_ACTIVE,
+          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
+          SALES_FLAG,
+          ORGANIZATION_CODE,
+          ORGANIZATION_NAME,
+          ORG_NAME,
+          ORG_ID,
           TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE
         FROM APPS.XTD_AR_RECEIPT_METHODS_V
         WHERE RECEIPT_METHOD_ID = :1
@@ -125,13 +151,13 @@ export class ReceiptMethodService {
       let paramIndex = 1;
 
       if (receiptMethodName) {
-        query += ` AND UPPER(NAME) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(RECEIPT_METHOD_NAME) LIKE UPPER(:${paramIndex})`;
         params.push(`%${receiptMethodName}%`);
         paramIndex++;
       }
 
       if (receiptClasses) {
-        query += ` AND UPPER(RECEIPT_CLASS_LOOKUP_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(RECEIPT_CLASSES) LIKE UPPER(:${paramIndex})`;
         params.push(`%${receiptClasses}%`);
         paramIndex++;
       }

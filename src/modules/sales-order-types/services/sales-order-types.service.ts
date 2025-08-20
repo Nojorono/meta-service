@@ -19,23 +19,38 @@ export class SalesOrderTypesService {
         TRANSACTION_TYPE_ID,
         TRANSACTION_TYPE_NAME,
         ORDER_CATEGORY_CODE,
+        ORGANIZATION_CODE,
+        TRANSACTION_TYPE_DMS,
         page = 1,
         limit = 10,
       } = queryDto;
 
       let query = `
         SELECT 
-          TRANSACTION_TYPE_ID,
-          TRANSACTION_TYPE_NAME,
-          DESCRIPTION,
           ORDER_CATEGORY_CODE,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          TO_CHAR(CREATION_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS CREATION_DATE,
-          CREATED_BY,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
-          LAST_UPDATED_BY,
-          LAST_UPDATE_LOGIN
+          TRANSACTION_TYPE_NAME,
+          TRANSACTION_TYPE_ID,
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          RETURN_TRANSACTION_TYPE_NAME,
+          RETURN_TRANSACTION_TYPE_ID,
+          RETURN_START_DATE_ACTIVE,
+          RETURN_END_DATE_ACTIVE,
+          LINE_TRANSACTION_TYPE_NAME,
+          LINE_TRANSACTION_TYPE_ID,
+          LINE_START_DATE_ACTIVE,
+          LINE_END_DATE_ACTIVE,
+          LINE_DISC_TRANSACTION_TYPE_NAME,
+          LINE_DISC_TRANSACTION_TYPE_ID,
+          LINE_DISC_START_DATE_ACTIVE,
+          LINE_DISC_END_DATE_ACTIVE,
+          TRANSACTION_TYPE_DMS,
+          ORGANIZATION_CODE,
+          ORGANIZATION_NAME,
+          ORGANIZATION_ID,
+          ORG_NAME,
+          ORG_ID,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_ONT_SALES_ORDER_TYPES_V
         WHERE 1=1
       `;
@@ -61,6 +76,18 @@ export class SalesOrderTypesService {
         paramIndex++;
       }
 
+      if (ORGANIZATION_CODE) {
+        query += ` AND UPPER(ORGANIZATION_CODE) = UPPER(:${paramIndex})`;
+        params.push(ORGANIZATION_CODE);
+        paramIndex++;
+      }
+
+      if (TRANSACTION_TYPE_DMS) {
+        query += ` AND UPPER(TRANSACTION_TYPE_DMS) = UPPER(:${paramIndex})`;
+        params.push(TRANSACTION_TYPE_DMS);
+        paramIndex++;
+      }
+
       // Add pagination
       const offset = (page - 1) * limit;
       query += ` ORDER BY TRANSACTION_TYPE_ID OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
@@ -76,33 +103,40 @@ export class SalesOrderTypesService {
     }
   }
 
-  async findSalesOrderTypeById(id: number): Promise<SalesOrderTypesDto> {
+  async findSalesOrderTypeById(id: number): Promise<SalesOrderTypesDto | null> {
     try {
       const query = `
         SELECT 
-          TRANSACTION_TYPE_ID,
-          TRANSACTION_TYPE_NAME,
-          DESCRIPTION,
           ORDER_CATEGORY_CODE,
-          TO_CHAR(START_DATE_ACTIVE, 'YYYY-MM-DD') AS START_DATE_ACTIVE,
-          TO_CHAR(END_DATE_ACTIVE, 'YYYY-MM-DD') AS END_DATE_ACTIVE,
-          TO_CHAR(CREATION_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS CREATION_DATE,
-          CREATED_BY,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
-          LAST_UPDATED_BY,
-          LAST_UPDATE_LOGIN
+          TRANSACTION_TYPE_NAME,
+          TRANSACTION_TYPE_ID,
+          START_DATE_ACTIVE,
+          END_DATE_ACTIVE,
+          RETURN_TRANSACTION_TYPE_NAME,
+          RETURN_TRANSACTION_TYPE_ID,
+          RETURN_START_DATE_ACTIVE,
+          RETURN_END_DATE_ACTIVE,
+          LINE_TRANSACTION_TYPE_NAME,
+          LINE_TRANSACTION_TYPE_ID,
+          LINE_START_DATE_ACTIVE,
+          LINE_END_DATE_ACTIVE,
+          LINE_DISC_TRANSACTION_TYPE_NAME,
+          LINE_DISC_TRANSACTION_TYPE_ID,
+          LINE_DISC_START_DATE_ACTIVE,
+          LINE_DISC_END_DATE_ACTIVE,
+          TRANSACTION_TYPE_DMS,
+          ORGANIZATION_CODE,
+          ORGANIZATION_NAME,
+          ORGANIZATION_ID,
+          ORG_NAME,
+          ORG_ID,
+          LAST_UPDATE_DATE
         FROM APPS.XTD_ONT_SALES_ORDER_TYPES_V
         WHERE TRANSACTION_TYPE_ID = :1
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
-
-      if (!result.rows.length) {
-        throw new Error(`Sales order type with ID ${id} not found`);
-      }
-
-      this.logger.log(`Found sales order type with ID: ${id}`);
-      return result.rows[0];
+      return result.rows.length > 0 ? result.rows[0] : null;
     } catch (error) {
       this.logger.error(
         `Error fetching sales order type with ID ${id}:`,
@@ -120,6 +154,8 @@ export class SalesOrderTypesService {
         TRANSACTION_TYPE_ID,
         TRANSACTION_TYPE_NAME,
         ORDER_CATEGORY_CODE,
+        ORGANIZATION_CODE,
+        TRANSACTION_TYPE_DMS,
       } = queryDto;
 
       let query = `
@@ -146,6 +182,18 @@ export class SalesOrderTypesService {
       if (ORDER_CATEGORY_CODE) {
         query += ` AND UPPER(ORDER_CATEGORY_CODE) = UPPER(:${paramIndex})`;
         params.push(ORDER_CATEGORY_CODE);
+        paramIndex++;
+      }
+
+      if (ORGANIZATION_CODE) {
+        query += ` AND UPPER(ORGANIZATION_CODE) = UPPER(:${paramIndex})`;
+        params.push(ORGANIZATION_CODE);
+        paramIndex++;
+      }
+
+      if (TRANSACTION_TYPE_DMS) {
+        query += ` AND UPPER(TRANSACTION_TYPE_DMS) = UPPER(:${paramIndex})`;
+        params.push(TRANSACTION_TYPE_DMS);
         paramIndex++;
       }
 

@@ -14,21 +14,19 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Public } from 'src/decorators/public.decorator';
 import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 import { CityService } from '../services/city.service';
 import { CityDto, CityQueryDto } from '../dtos/city.dtos';
 
 @ApiTags('City')
 @Controller('city')
-@Public()
+@AuthSwagger()
 export class CityController {
   private readonly logger = new Logger(CityController.name);
 
   constructor(private readonly cityService: CityService) {}
 
   @Get()
-  @AuthSwagger()
   @ApiOperation({
     summary: 'Get all cities',
     description: 'Retrieve a list of all cities from XTD_FND_KOTAMADYA_V view',

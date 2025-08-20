@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Logger } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -6,13 +6,17 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 import { CoaExpenseService } from '../services/coa-expense.service';
 import { CoaExpenseDto, CoaExpenseQueryDto } from '../dtos/coa-expense.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @ApiTags('COA Expense')
 @Controller('coa-expense')
+@AuthSwagger()
 export class CoaExpenseController {
+  private readonly logger = new Logger(CoaExpenseController.name);
+
   constructor(private readonly coaExpenseService: CoaExpenseService) {}
 
   @Get()

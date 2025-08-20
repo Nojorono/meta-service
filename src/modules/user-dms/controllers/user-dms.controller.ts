@@ -9,9 +9,11 @@ import {
 import { UserDmsService } from '../services/user-dms.service';
 import { UserDmsDto, UserDmsQueryDto } from '../dtos/user-dms.dtos';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 
 @ApiTags('User DMS')
 @Controller('user-dms')
+@AuthSwagger()
 export class UserDmsController {
   constructor(private readonly userDmsService: UserDmsService) {}
 

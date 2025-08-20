@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Logger } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -6,24 +6,29 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { ReceiptMethodService } from '../services/receipt-method.service';
+import { ArReceiptMethodService } from '../services/ar-receipt-method.service';
 import {
-  ReceiptMethodDto,
-  ReceiptMethodQueryDto,
-} from '../dtos/receipt-method.dtos';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+  ArReceiptMethodQueryDto,
+  ArReceiptMethodDto,
+} from '../dtos/ar-receipt-method.dtos';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 
-@ApiTags('Receipt Method')
-@Controller('receipt-method')
-export class ReceiptMethodController {
-  constructor(private readonly receiptMethodService: ReceiptMethodService) {}
+@ApiTags('AR Receipt Method')
+@Controller('ar-receipt-method')
+@AuthSwagger()
+export class ArReceiptMethodController {
+  private readonly logger = new Logger(ArReceiptMethodController.name);
+
+  constructor(
+    private readonly arReceiptMethodService: ArReceiptMethodService,
+  ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all receipt methods' })
   @ApiResponse({
     status: 200,
     description: 'Return all receipt methods',
-    type: [ReceiptMethodDto],
+    type: [ArReceiptMethodDto],
   })
   @ApiQuery({
     name: 'receiptMethodName',
@@ -47,19 +52,25 @@ export class ReceiptMethodController {
   })
   @ApiQuery({ name: 'page', required: false, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, description: 'Records per page' })
-  async findAll(@Query() query: ReceiptMethodQueryDto): Promise<any> {
-    const data = await this.receiptMethodService.findAllReceiptMethods(query);
-    const total = await this.receiptMethodService.countReceiptMethods(query);
+  async findAll(@Query() query: ArReceiptMethodQueryDto): Promise<any> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { page = 1, limit = 10, ..._filters } = query;
+
+    const [data, total] = await Promise.all([
+      this.arReceiptMethodService.findAllReceiptMethods(query),
+      this.arReceiptMethodService.countReceiptMethods(query),
+    ]);
+
     return {
       success: true,
       statusCode: 200,
       message: 'Receipt methods retrieved successfully',
       data,
       pagination: {
-        page: query.page || 1,
-        limit: query.limit || 10,
+        page: Number(page),
+        limit: Number(limit),
         total,
-        totalPages: Math.ceil(total / (query.limit || 10)),
+        totalPages: Math.ceil(total / Number(limit)),
       },
     };
   }
@@ -70,10 +81,10 @@ export class ReceiptMethodController {
   @ApiResponse({
     status: 200,
     description: 'Return receipt methods with the specified name',
-    type: [ReceiptMethodDto],
+    type: [ArReceiptMethodDto],
   })
   async findByName(@Param('name') name: string): Promise<any> {
-    const data = await this.receiptMethodService.findAllReceiptMethods({
+    const data = await this.arReceiptMethodService.findAllReceiptMethods({
       receiptMethodName: name,
     });
     return {
@@ -90,12 +101,12 @@ export class ReceiptMethodController {
   @ApiResponse({
     status: 200,
     description: 'Return receipt methods with the specified receipt classes',
-    type: [ReceiptMethodDto],
+    type: [ArReceiptMethodDto],
   })
   async findByReceiptClasses(
     @Param('receiptClasses') receiptClasses: string,
   ): Promise<any> {
-    const data = await this.receiptMethodService.findAllReceiptMethods({
+    const data = await this.arReceiptMethodService.findAllReceiptMethods({
       receiptClasses,
     });
     return {
@@ -112,44 +123,15 @@ export class ReceiptMethodController {
   @ApiResponse({
     status: 200,
     description: 'Return the receipt method',
-    type: ReceiptMethodDto,
+    type: ArReceiptMethodDto,
   })
   async findById(@Param('id') id: number): Promise<any> {
-    const data = await this.receiptMethodService.findReceiptMethodById(id);
+    const data = await this.arReceiptMethodService.findReceiptMethodById(id);
     return {
       success: true,
       statusCode: 200,
       message: 'Receipt method retrieved successfully',
       data,
     };
-  }
-
-  // Microservice endpoints
-  @MessagePattern('receipt-method.findAll')
-  async findAllMicroservice(): Promise<ReceiptMethodDto[]> {
-    return await this.receiptMethodService.findAllReceiptMethods();
-  }
-
-  @MessagePattern('receipt-method.findById')
-  async findByIdMicroservice(@Payload() id: number): Promise<ReceiptMethodDto> {
-    return await this.receiptMethodService.findReceiptMethodById(id);
-  }
-
-  @MessagePattern('receipt-method.findByName')
-  async findByNameMicroservice(
-    @Payload() name: string,
-  ): Promise<ReceiptMethodDto[]> {
-    return await this.receiptMethodService.findAllReceiptMethods({
-      receiptMethodName: name,
-    });
-  }
-
-  @MessagePattern('receipt-method.findByReceiptClasses')
-  async findByReceiptClassesMicroservice(
-    @Payload() receiptClasses: string,
-  ): Promise<ReceiptMethodDto[]> {
-    return await this.receiptMethodService.findAllReceiptMethods({
-      receiptClasses,
-    });
   }
 }

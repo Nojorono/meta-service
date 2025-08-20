@@ -8,31 +8,23 @@ export class SummaryFpprService {
 
   constructor(private readonly oracleService: OracleService) {}
 
-  async findAllSummaryFppr(
+  async findAllSummaryFpprs(
     queryDto: SummaryFpprQueryDto = {},
   ): Promise<SummaryFpprDto[]> {
     try {
       const {
-        HEADER_ID,
+        SUMMARY_ID,
+        FPPR_ID,
         FPPR_NUMBER,
-        FPPR_TYPE,
-        FPPR_SALES_TYPE,
+        DESCRIPTION,
+        SOURCE_SYSTEM,
         page = 1,
         limit = 10,
       } = queryDto;
 
       let query = `
         SELECT 
-          HEADER_ID,
-          FPPR_NUMBER,
-          FPPR_TYPE,
-          FPPR_SALES_TYPE,
-          SALES_TYPE_NAME,
-          TO_CHAR(FPPR_DATE, 'YYYY-MM-DD') AS FPPR_DATE,
-          TO_CHAR(CREATION_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS CREATION_DATE,
-          CREATED_BY,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
-          LAST_UPDATED_BY
+          *
         FROM APPS.XTD_ONT_SUMMARY_FPPR_V
         WHERE 1=1
       `;
@@ -40,9 +32,15 @@ export class SummaryFpprService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (HEADER_ID) {
-        query += ` AND HEADER_ID = :${paramIndex}`;
-        params.push(HEADER_ID);
+      if (SUMMARY_ID) {
+        query += ` AND SUMMARY_ID = :${paramIndex}`;
+        params.push(SUMMARY_ID);
+        paramIndex++;
+      }
+
+      if (FPPR_ID) {
+        query += ` AND FPPR_ID = :${paramIndex}`;
+        params.push(FPPR_ID);
         paramIndex++;
       }
 
@@ -52,20 +50,20 @@ export class SummaryFpprService {
         paramIndex++;
       }
 
-      if (FPPR_TYPE) {
-        query += ` AND UPPER(FPPR_TYPE) = UPPER(:${paramIndex})`;
-        params.push(FPPR_TYPE);
+      if (DESCRIPTION) {
+        query += ` AND UPPER(DESCRIPTION) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${DESCRIPTION}%`);
         paramIndex++;
       }
 
-      if (FPPR_SALES_TYPE) {
-        query += ` AND UPPER(FPPR_SALES_TYPE) = UPPER(:${paramIndex})`;
-        params.push(FPPR_SALES_TYPE);
+      if (SOURCE_SYSTEM) {
+        query += ` AND UPPER(SOURCE_SYSTEM) = UPPER(:${paramIndex})`;
+        params.push(SOURCE_SYSTEM);
         paramIndex++;
       }
 
       const offset = (page - 1) * limit;
-      query += ` ORDER BY HEADER_ID OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
+      query += ` ORDER BY SUMMARY_ID OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
       params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
@@ -82,18 +80,9 @@ export class SummaryFpprService {
     try {
       const query = `
         SELECT 
-          HEADER_ID,
-          FPPR_NUMBER,
-          FPPR_TYPE,
-          FPPR_SALES_TYPE,
-          SALES_TYPE_NAME,
-          TO_CHAR(FPPR_DATE, 'YYYY-MM-DD') AS FPPR_DATE,
-          TO_CHAR(CREATION_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS CREATION_DATE,
-          CREATED_BY,
-          TO_CHAR(LAST_UPDATE_DATE, 'YYYY-MM-DD HH24:MI:SS.FF3') AS LAST_UPDATE_DATE,
-          LAST_UPDATED_BY
+          *
         FROM APPS.XTD_ONT_SUMMARY_FPPR_V
-        WHERE HEADER_ID = :1
+        WHERE SUMMARY_ID = :1
       `;
 
       const result = await this.oracleService.executeQuery(query, [id]);
@@ -110,9 +99,10 @@ export class SummaryFpprService {
     }
   }
 
-  async countSummaryFppr(queryDto: SummaryFpprQueryDto = {}): Promise<number> {
+  async countSummaryFpprs(queryDto: SummaryFpprQueryDto = {}): Promise<number> {
     try {
-      const { HEADER_ID, FPPR_NUMBER, FPPR_TYPE, FPPR_SALES_TYPE } = queryDto;
+      const { SUMMARY_ID, FPPR_ID, FPPR_NUMBER, DESCRIPTION, SOURCE_SYSTEM } =
+        queryDto;
 
       let query = `
         SELECT COUNT(*) AS TOTAL
@@ -123,9 +113,15 @@ export class SummaryFpprService {
       const params: any[] = [];
       let paramIndex = 1;
 
-      if (HEADER_ID) {
-        query += ` AND HEADER_ID = :${paramIndex}`;
-        params.push(HEADER_ID);
+      if (SUMMARY_ID) {
+        query += ` AND SUMMARY_ID = :${paramIndex}`;
+        params.push(SUMMARY_ID);
+        paramIndex++;
+      }
+
+      if (FPPR_ID) {
+        query += ` AND FPPR_ID = :${paramIndex}`;
+        params.push(FPPR_ID);
         paramIndex++;
       }
 
@@ -135,15 +131,15 @@ export class SummaryFpprService {
         paramIndex++;
       }
 
-      if (FPPR_TYPE) {
-        query += ` AND UPPER(FPPR_TYPE) = UPPER(:${paramIndex})`;
-        params.push(FPPR_TYPE);
+      if (DESCRIPTION) {
+        query += ` AND UPPER(DESCRIPTION) LIKE UPPER(:${paramIndex})`;
+        params.push(`%${DESCRIPTION}%`);
         paramIndex++;
       }
 
-      if (FPPR_SALES_TYPE) {
-        query += ` AND UPPER(FPPR_SALES_TYPE) = UPPER(:${paramIndex})`;
-        params.push(FPPR_SALES_TYPE);
+      if (SOURCE_SYSTEM) {
+        query += ` AND UPPER(SOURCE_SYSTEM) = UPPER(:${paramIndex})`;
+        params.push(SOURCE_SYSTEM);
         paramIndex++;
       }
 

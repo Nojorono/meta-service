@@ -8,8 +8,10 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { SalesOrderService } from '../services/sales-order.service';
 import { SalesOrderDto, SalesOrderQueryDto } from '../dtos/sales-order.dtos';
+import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 
 @ApiTags('Sales Order')
+@AuthSwagger()
 @Controller('sales-order')
 export class SalesOrderController {
   constructor(private readonly salesOrderService: SalesOrderService) {}
