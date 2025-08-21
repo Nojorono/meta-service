@@ -53,6 +53,7 @@ import { ItemListMetaModule } from '../modules/item-list/item-list.module';
 import { SalesOrderModule } from 'src/modules/sales-order/sales-order.module';
 import { AuthModule } from '../modules/auth/auth.module';
 import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
+import { ArReceiptsModule } from 'src/modules/ar-receipts/ar-receipts.module';
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
     MtlTrxListsModule,
     SummaryFpprModule,
     ActualFpprModule,
+    ArReceiptsModule,
     PurchaseOrderModule,
     ItemListMetaModule,
     SalesOrderModule,

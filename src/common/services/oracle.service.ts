@@ -13,7 +13,7 @@ export class OracleService implements OnModuleInit, OnModuleDestroy {
   private pool: oracledb.Pool | undefined;
   private readonly logger = new Logger(OracleService.name);
 
-  constructor(private configService: ConfigService) {}
+  constructor(private configService: ConfigService) { }
 
   async onModuleInit() {
     this.logger.log('Initializing Oracle Service with hybrid mode...');

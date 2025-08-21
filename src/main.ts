@@ -204,6 +204,10 @@ async function bootstrap() {
       name: 'ACTUAL_FPPR_SERVICE',
       queue: configService.get('rmq.actualFppr') || 'actual_fppr_queue',
     },
+    {
+      name: 'AR_RECEIPTS_SERVICE',
+      queue: configService.get('rmq.arReceipts') || 'ar_receipts_queue',
+    },
   ];
 
   // Initialize all microservices
