@@ -208,6 +208,10 @@ async function bootstrap() {
       name: 'AR_RECEIPTS_SERVICE',
       queue: configService.get('rmq.arReceipts') || 'ar_receipts_queue',
     },
+    {
+      name: 'MOVE_ORDER_SERVICE',
+      queue: configService.get('rmq.moveOrder') || 'move_order_queue',
+    },
   ];
 
   // Initialize all microservices

@@ -54,6 +54,7 @@ import { SalesOrderModule } from 'src/modules/sales-order/sales-order.module';
 import { AuthModule } from '../modules/auth/auth.module';
 import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
 import { ArReceiptsModule } from 'src/modules/ar-receipts/ar-receipts.module';
+import { MoveOrderModule } from 'src/modules/move-order/move-order.module';
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { ArReceiptsModule } from 'src/modules/ar-receipts/ar-receipts.module';
     SummaryFpprModule,
     ActualFpprModule,
     ArReceiptsModule,
+    MoveOrderModule,
     PurchaseOrderModule,
     ItemListMetaModule,
     SalesOrderModule,
