@@ -2,6 +2,7 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { Internal } from '../../../common/decorators/internal.decorator';
 import { ZxTaxService } from '../services/zx-tax.service';
+import { ZxTaxQueryDto } from '../dtos/zx-tax.dtos';
 
 @Controller()
 @Internal()
