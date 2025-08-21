@@ -47,6 +47,7 @@ import { ArOutstandingsModule } from '../modules/ar-outstandings/ar-outstandings
 import { SalesOrderStockModule } from '../modules/sales-order-stock/sales-order-stock.module';
 import { MtlTrxListsModule } from '../modules/mtl-trx-lists/mtl-trx-lists.module';
 import { SummaryFpprModule } from '../modules/summary-fppr/summary-fppr.module';
+import { ActualFpprModule } from '../modules/actual-fppr/actual-fppr.module';
 import { PurchaseOrderModule } from 'src/modules/purchase-order/purchase-order.module';
 import { ItemListMetaModule } from '../modules/item-list/item-list.module';
 import { SalesOrderModule } from 'src/modules/sales-order/sales-order.module';
@@ -92,6 +93,7 @@ import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
     SalesOrderStockModule,
     MtlTrxListsModule,
     SummaryFpprModule,
+    ActualFpprModule,
     PurchaseOrderModule,
     ItemListMetaModule,
     SalesOrderModule,
