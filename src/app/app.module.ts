@@ -56,6 +56,7 @@ import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
 import { ArReceiptsModule } from 'src/modules/ar-receipts/ar-receipts.module';
 import { MoveOrderModule } from 'src/modules/move-order/move-order.module';
 import { SalesOrderModule as SalesOrderIfaceModule } from 'src/modules/salesorder/salesorder.module';
+import { ApInvoiceModule } from 'src/modules/ap-invoice/ap-invoice.module';
 
 @Module({
   imports: [
@@ -103,6 +104,7 @@ import { SalesOrderModule as SalesOrderIfaceModule } from 'src/modules/salesorde
     ItemListMetaModule,
     SalesOrderModule,
     SalesOrderIfaceModule,
+    ApInvoiceModule,
     AuthModule,
     // Other modules can be added here
 
