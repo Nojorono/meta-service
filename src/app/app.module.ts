@@ -57,6 +57,7 @@ import { ArReceiptsModule } from 'src/modules/ar-receipts/ar-receipts.module';
 import { MoveOrderModule } from 'src/modules/move-order/move-order.module';
 import { SalesOrderModule as SalesOrderIfaceModule } from 'src/modules/salesorder/salesorder.module';
 import { ApInvoiceModule } from 'src/modules/ap-invoice/ap-invoice.module';
+import { InvTransactionModule } from 'src/modules/inv-transaction/inv-transaction.module';
 
 @Module({
   imports: [
@@ -105,6 +106,7 @@ import { ApInvoiceModule } from 'src/modules/ap-invoice/ap-invoice.module';
     SalesOrderModule,
     SalesOrderIfaceModule,
     ApInvoiceModule,
+    InvTransactionModule,
     AuthModule,
     // Other modules can be added here
 
