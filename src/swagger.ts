@@ -20,6 +20,8 @@ export const setupSwagger = async (app: INestApplication) => {
     .setTitle(docName)
     .setDescription(docDesc)
     .setVersion(docVersion)
+    .addServer('https://api.kcsi.id/service-meta', 'Production (via Kong Gateway)')
+    .addServer('http://localhost:9003', 'Development (Direct)')
     .addBearerAuth(
       {
         type: 'http',
