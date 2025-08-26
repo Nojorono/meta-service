@@ -107,36 +107,6 @@ export class SupplierController {
     description:
       'Get the total count of suppliers matching the filter criteria',
   })
-  @ApiQuery({
-    name: 'supplierNumber',
-    required: false,
-    description: 'Filter by supplier number',
-    example: 'SUP001',
-  })
-  @ApiQuery({
-    name: 'supplierName',
-    required: false,
-    description: 'Filter by supplier name',
-    example: 'Supplier',
-  })
-  @ApiQuery({
-    name: 'supplierType',
-    required: false,
-    description: 'Filter by supplier type',
-    example: 'VENDOR',
-  })
-  @ApiQuery({
-    name: 'city',
-    required: false,
-    description: 'Filter by city',
-    example: 'Jakarta',
-  })
-  @ApiQuery({
-    name: 'country',
-    required: false,
-    description: 'Filter by country',
-    example: 'Indonesia',
-  })
   @ApiResponse({
     status: 200,
     description: 'Supplier count retrieved successfully',
@@ -197,7 +167,7 @@ export class SupplierController {
   ): Promise<SupplierDto> {
     try {
       this.logger.log(`Fetching supplier by number: ${number}`);
-      const supplier = await this.supplierService.findSupplierByNumber(number);
+      const supplier = await this.supplierService.findSupplierByName(number);
 
       if (!supplier) {
         throw new HttpException(
