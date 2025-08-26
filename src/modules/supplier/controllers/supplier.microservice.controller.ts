@@ -19,9 +19,9 @@ export class SupplierMicroserviceController {
     return this.supplierService.findSupplierById(dto.supplierId);
   }
 
-  @MessagePattern('supplier.findByNumber')
-  async findByNumber(@Payload() dto: { supplierNumber: string }) {
-    return this.supplierService.findSupplierByNumber(dto.supplierNumber);
+  @MessagePattern('supplier.findByName')
+  async findByName(@Payload() dto: { vendorName: string }) {
+    return this.supplierService.findSupplierByName(dto.vendorName);
   }
 
   @MessagePattern('supplier.getCount')

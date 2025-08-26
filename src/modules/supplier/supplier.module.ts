@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { SupplierController } from './controllers/supplier.controller';
-import { SupplierMicroserviceController } from './controllers/supplier.microservice.controller';
+import { SupplierController, SupplierMicroserviceController } from './controllers';
 import { SupplierService } from './services/supplier.service';
 import { CommonModule } from 'src/common/common.module';
 

@@ -1,141 +1,232 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class SupplierDto {
   @ApiProperty({
-    description: 'Supplier ID',
+    description: 'Vendor ID',
     example: 1001,
   })
-  SUPPLIER_ID: number;
+  @IsOptional()
+  @IsNumber()
+  VENDOR_ID?: number;
 
   @ApiProperty({
-    description: 'Supplier number',
-    example: 'SUP001',
-  })
-  SUPPLIER_NUMBER: string;
-
-  @ApiProperty({
-    description: 'Supplier name',
+    description: 'Vendor name',
     example: 'PT. Supplier Indonesia',
   })
-  SUPPLIER_NAME: string;
+  @IsOptional()
+  @IsString()
+  VENDOR_NAME?: string;
 
   @ApiProperty({
-    description: 'Supplier type',
-    example: 'VENDOR',
+    description: 'Vendor name alternative',
+    example: 'Supplier Indonesia',
   })
-  SUPPLIER_TYPE: string;
+  @IsOptional()
+  @IsString()
+  VENDOR_NAME_ALT?: string;
 
   @ApiProperty({
-    description: 'Supplier enabled flag',
+    description: 'Summary flag',
     example: 'Y',
   })
-  ENABLED_FLAG: string;
+  @IsOptional()
+  @IsString()
+  SUMMARY_FLAG?: string;
 
   @ApiProperty({
-    description: 'Supplier start date',
-    example: '2020-01-01',
-    required: false,
+    description: 'Enabled flag',
+    example: 'Y',
   })
-  START_DATE?: string;
+  @IsOptional()
+  @IsString()
+  ENABLED_FLAG?: string;
 
   @ApiProperty({
-    description: 'Supplier end date',
-    example: '2030-12-31',
-    required: false,
+    description: 'Last update login',
+    example: 12345,
   })
-  END_DATE?: string;
+  @IsOptional()
+  @IsNumber()
+  LAST_UPDATE_LOGIN?: number;
 
   @ApiProperty({
-    description: 'Supplier contact person',
-    example: 'John Doe',
-    required: false,
+    description: 'Vendor type lookup code',
+    example: 'VENDOR',
   })
-  CONTACT_PERSON?: string;
+  @IsOptional()
+  @IsString()
+  VENDOR_TYPE_LOOKUP_CODE?: string;
 
   @ApiProperty({
-    description: 'Supplier phone number',
-    example: '+62-21-1234567',
-    required: false,
+    description: 'One time flag',
+    example: 'N',
   })
-  PHONE_NUMBER?: string;
+  @IsOptional()
+  @IsString()
+  ONE_TIME_FLAG?: string;
 
   @ApiProperty({
-    description: 'Supplier email',
-    example: 'contact@supplier.com',
-    required: false,
+    description: 'VAT code',
+    example: 'VAT01',
   })
-  EMAIL?: string;
+  @IsOptional()
+  @IsString()
+  VAT_CODE?: string;
 
   @ApiProperty({
-    description: 'Supplier address',
-    example: 'Jalan Supplier No. 123',
-    required: false,
+    description: 'Terms date basis',
+    example: 'GOODS_RECEIVED',
   })
-  ADDRESS?: string;
+  @IsOptional()
+  @IsString()
+  TERMS_DATE_BASIS?: string;
 
   @ApiProperty({
-    description: 'Supplier city',
-    example: 'Jakarta',
-    required: false,
+    description: 'Attribute 5',
+    example: '',
   })
-  CITY?: string;
+  @IsOptional()
+  @IsString()
+  ATTRIBUTE5?: string;
 
   @ApiProperty({
-    description: 'Supplier country',
-    example: 'Indonesia',
-    required: false,
+    description: 'Attribute 6',
+    example: '',
   })
-  COUNTRY?: string;
+  @IsOptional()
+  @IsString()
+  ATTRIBUTE6?: string;
 
   @ApiProperty({
-    description: 'Supplier tax number',
-    example: '12.345.678.9-012.000',
-    required: false,
+    description: 'Attribute 7',
+    example: '',
   })
-  TAX_NUMBER?: string;
+  @IsOptional()
+  @IsString()
+  ATTRIBUTE7?: string;
+
+  @ApiProperty({
+    description: 'Attribute 8',
+    example: '',
+  })
+  @IsOptional()
+  @IsString()
+  ATTRIBUTE8?: string;
+
+  @ApiProperty({
+    description: 'Attribute 9',
+    example: '',
+  })
+  @IsOptional()
+  @IsString()
+  ATTRIBUTE9?: string;
+
+  @ApiProperty({
+    description: 'Attribute 10',
+    example: '',
+  })
+  @IsOptional()
+  @IsString()
+  ATTRIBUTE10?: string;
+
+  @ApiProperty({
+    description: 'Attribute 11',
+    example: '',
+  })
+  @IsOptional()
+  @IsString()
+  ATTRIBUTE11?: string;
+
+  @ApiProperty({
+    description: 'Attribute 12',
+    example: '',
+  })
+  @IsOptional()
+  @IsString()
+  ATTRIBUTE12?: string;
+
+  @ApiProperty({
+    description: 'Attribute 13',
+    example: '',
+  })
+  @IsOptional()
+  @IsString()
+  ATTRIBUTE13?: string;
+
+  @ApiProperty({
+    description: 'VAT registration number',
+    example: '123456789012345',
+  })
+  @IsOptional()
+  @IsString()
+  VAT_REGISTRATION_NUM?: string;
+
+  @ApiProperty({
+    description: 'Party ID',
+    example: 5001,
+  })
+  @IsOptional()
+  @IsNumber()
+  PARTY_ID?: number;
 }
 
 export class SupplierQueryDto {
   @ApiProperty({
-    description: 'Supplier number to filter by',
-    example: 'SUP001',
+    description: 'Vendor ID to filter by',
+    example: 1001,
     required: false,
   })
-  supplierNumber?: string;
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  VENDOR_ID?: number;
 
   @ApiProperty({
-    description: 'Supplier name to filter by',
+    description: 'Vendor name to filter by',
     example: 'Supplier',
     required: false,
   })
-  supplierName?: string;
+  @IsOptional()
+  @IsString()
+  VENDOR_NAME?: string;
 
   @ApiProperty({
-    description: 'Supplier type to filter by',
+    description: 'Vendor type lookup code to filter by',
     example: 'VENDOR',
     required: false,
   })
-  supplierType?: string;
+  @IsOptional()
+  @IsString()
+  VENDOR_TYPE_LOOKUP_CODE?: string;
 
   @ApiProperty({
-    description: 'City to filter by',
-    example: 'Jakarta',
+    description: 'Enabled flag to filter by',
+    example: 'Y',
     required: false,
   })
-  city?: string;
+  @IsOptional()
+  @IsString()
+  ENABLED_FLAG?: string;
 
   @ApiProperty({
-    description: 'Country to filter by',
-    example: 'Indonesia',
+    description: 'VAT code to filter by',
+    example: 'VAT01',
     required: false,
   })
-  country?: string;
+  @IsOptional()
+  @IsString()
+  VAT_CODE?: string;
 
   @ApiProperty({
     description: 'Page number for pagination',
     example: 1,
     required: false,
   })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   page?: number;
 
   @ApiProperty({
@@ -143,5 +234,8 @@ export class SupplierQueryDto {
     example: 10,
     required: false,
   })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
   limit?: number;
 }

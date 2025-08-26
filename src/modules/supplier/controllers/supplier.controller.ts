@@ -35,34 +35,34 @@ export class SupplierController {
       'Retrieve a list of all suppliers from XTD_AP_SUPPLIERS_V view',
   })
   @ApiQuery({
-    name: 'supplierNumber',
+    name: 'VENDOR_ID',
     required: false,
-    description: 'Filter by supplier number',
-    example: 'SUP001',
+    description: 'Filter by vendor ID',
+    example: 1001,
   })
   @ApiQuery({
-    name: 'supplierName',
+    name: 'VENDOR_NAME',
     required: false,
-    description: 'Filter by supplier name',
+    description: 'Filter by vendor name',
     example: 'Supplier',
   })
   @ApiQuery({
-    name: 'supplierType',
+    name: 'VENDOR_TYPE_LOOKUP_CODE',
     required: false,
-    description: 'Filter by supplier type',
+    description: 'Filter by vendor type lookup code',
     example: 'VENDOR',
   })
   @ApiQuery({
-    name: 'city',
+    name: 'ENABLED_FLAG',
     required: false,
-    description: 'Filter by city',
-    example: 'Jakarta',
+    description: 'Filter by enabled flag',
+    example: 'Y',
   })
   @ApiQuery({
-    name: 'country',
+    name: 'VAT_CODE',
     required: false,
-    description: 'Filter by country',
-    example: 'Indonesia',
+    description: 'Filter by VAT code',
+    example: 'VAT01',
   })
   @ApiQuery({
     name: 'page',
@@ -230,7 +230,7 @@ export class SupplierController {
   })
   @ApiParam({
     name: 'id',
-    description: 'Supplier ID',
+    description: 'Vendor ID',
     example: 1001,
   })
   @ApiResponse({
