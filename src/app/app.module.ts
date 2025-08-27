@@ -51,6 +51,7 @@ import { ActualFpprModule } from '../modules/actual-fppr/actual-fppr.module';
 import { PurchaseOrderModule } from 'src/modules/purchase-order/purchase-order.module';
 import { ItemListMetaModule } from '../modules/item-list/item-list.module';
 import { UomListModule } from '../modules/uom-list/uom-list.module';
+import { TruckUtilModule } from '../modules/truck-util/truck-util.module';
 import { SalesOrderModule } from 'src/modules/sales-order/sales-order.module';
 import { AuthModule } from '../modules/auth/auth.module';
 import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
@@ -105,6 +106,7 @@ import { InvTransactionModule } from 'src/modules/inv-transaction/inv-transactio
     PurchaseOrderModule,
     ItemListMetaModule,
     UomListModule,
+    TruckUtilModule,
     SalesOrderModule,
     SalesOrderIfaceModule,
     ApInvoiceModule,
