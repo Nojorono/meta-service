@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param, Logger } from '@nestjs/common';
+import { Controller, Get, Query, Param, Logger, Version } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -11,6 +11,7 @@ import {
   EmployeeMetaResponseDto,
   EmployeeMetaDtoByDate,
   EmployeeMetaDtoByEmployeeNumber,
+  EmployeeQueryDto,
 } from '../dtos/employee.dtos';
 import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
@@ -23,9 +24,45 @@ export class EmployeeMetaController {
   constructor(private readonly employeeMetaService: EmployeeMetaService) {}
 
   @Get()
+  @Version('1')
   @ApiOperation({
     summary: 'Get all employees',
-    description: 'Retrieve all employees from Oracle database',
+    description: 'Retrieve all employees from Oracle database. Add pagination parameters for paginated results.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number for pagination (default: all data)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Number of items per page (default: all data)',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search by employee name or number',
+    example: 'John',
+  })
+  @ApiQuery({
+    name: 'employee_number',
+    required: false,
+    type: String,
+    description: 'Filter by specific employee number',
+    example: 'EMP001',
+  })
+  @ApiQuery({
+    name: 'organization_code',
+    required: false,
+    type: String,
+    description: 'Filter by organization code',
+    example: 'ORG001',
   })
   @ApiResponse({
     status: 200,
@@ -36,16 +73,41 @@ export class EmployeeMetaController {
     status: 500,
     description: 'Internal server error',
   })
-  async getEmployees(): Promise<EmployeeMetaResponseDto> {
+  async getEmployees(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('search') search?: string,
+    @Query('employee_number') employee_number?: string,
+    @Query('organization_code') organization_code?: string,
+  ): Promise<EmployeeMetaResponseDto> {
     this.logger.log('==== REST API: Get all employees ====');
 
     try {
-      const result =
-        await this.employeeMetaService.getEmployeeFromOracleByDate();
-      this.logger.log(
-        `REST API getEmployees result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
-      );
-      return result;
+      // If pagination parameters are provided, use pagination logic
+      if (page || limit) {
+        this.logger.log('Using pagination logic');
+        const params: EmployeeQueryDto = {
+          search,
+          employee_number,
+          organization_code,
+          page: page || 1,
+          limit: limit || 10,
+        };
+        
+        const result = await this.employeeMetaService.findAllEmployees(params);
+        this.logger.log(
+          `REST API getEmployees (paginated) result: status=${result.status}, count=${result.count}, page=${params.page}, limit=${params.limit}`,
+        );
+        return result;
+      } else {
+        // Use existing method for full data
+        this.logger.log('Using full data logic');
+        const result = await this.employeeMetaService.getEmployeeFromOracleByDate();
+        this.logger.log(
+          `REST API getEmployees result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
+        );
+        return result;
+      }
     } catch (error) {
       this.logger.error(
         `REST API Error retrieving employees: ${error.message}`,
@@ -171,4 +233,5 @@ export class EmployeeMetaController {
       };
     }
   }
+
 }

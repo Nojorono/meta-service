@@ -6,6 +6,7 @@ import { EmployeeMetaResponseDto } from '../dtos/employee.dtos';
 import { EmployeeMetaDtoByDate } from '../dtos/employee.dtos';
 import { EmployeeMetaDtoByEmployeeNumber } from '../dtos/employee.dtos';
 import { EmployeeMetaDto } from '../dtos/employee.dtos';
+import { EmployeeQueryDto } from '../dtos/employee.dtos';
 import { EmployeeHrisDto } from '../dtos/employee.hris.dto';
 import * as oracledb from 'oracledb';
 
@@ -325,14 +326,14 @@ export class EmployeeMetaService {
     params?: EmployeeMetaDtoByEmployeeNumber,
   ): Promise<EmployeeMetaResponseDto> {
     // Set default values if not provided
-    const employee_number = params;
+    const employee_number = params?.employee_number;
 
-    this.logger.log('params' + params);
+    this.logger.log('params' + JSON.stringify(params));
 
     // Generate unique cache key based on parameters
     const cacheKey = employee_number
       ? `employee:employee_number:${employee_number}`
-      : `employee:employee_number:${employee_number}`;
+      : `employee:employee_number:all`;
 
     // Try to get data from cache first
     try {
@@ -358,9 +359,9 @@ export class EmployeeMetaService {
       `;
 
       // Add search condition if search term is provided
-      const queryParams = [];
+      const queryParams: any[] = [];
       if (employee_number) {
-        query += ` AND EMPLOYEE_NUMBER = :employee_number`;
+        query += ` AND EMPLOYEE_NUMBER = :1`;
         queryParams.push(employee_number);
       }
 
@@ -429,14 +430,14 @@ export class EmployeeMetaService {
     params?: EmployeeMetaDtoByDate,
   ): Promise<EmployeeMetaResponseDto> {
     // Set default values if not provided
-    const last_update_date = params;
+    const last_update_date = params?.last_update_date;
 
-    this.logger.log('params' + params);
+    this.logger.log('params' + JSON.stringify(params));
 
     // Generate unique cache key based on parameters
     const cacheKey = last_update_date
       ? `employee:last_update_date:${last_update_date}`
-      : `employee:last_update_date:${last_update_date}`;
+      : `employee:last_update_date:all`;
 
     // Try to get data from cache first
     try {
@@ -551,6 +552,201 @@ export class EmployeeMetaService {
         `Error invalidating cache: ${error.message}`,
         error.stack,
       );
+    }
+  }
+
+  async findAllEmployees(params: EmployeeQueryDto): Promise<EmployeeMetaResponseDto> {
+    this.logger.log('==== MICROSERVICE: Find all employees ====');
+    this.logger.log(`Input parameters: ${JSON.stringify(params)}`);
+    
+    const cacheKey = `employee:findAll:page:${params.page || 1}:limit:${params.limit || 10}:search:${params.search || 'all'}:orgCode:${params.organization_code || 'all'}`;
+    this.logger.log(`Cache key: ${cacheKey}`);
+
+    try {
+      // Temporarily bypass cache for debugging
+      // const cachedData = await this.redisService.get(cacheKey);
+      // if (cachedData) {
+      //   this.logger.log(`Cache hit for ${cacheKey}`);
+      //   const cachedResult = JSON.parse(cachedData as string) as EmployeeMetaResponseDto;
+      //   this.logger.log(`Returning cached data with count: ${cachedResult.count}`);
+      //   return cachedResult;
+      // }
+      this.logger.log(`Bypassing cache for debugging, fetching from Oracle`);
+    } catch (error) {
+      this.logger.error(`Error accessing Redis cache: ${error.message}`);
+    }
+
+    try {
+      // Use the same query pattern as getEmployeeFromOracleByDate which works
+      let query = `SELECT * FROM APPS.XTD_PAPF_EMPLOYEE_V WHERE 1=1`;
+      const queryParams: any[] = [];
+      let paramIndex = 1;
+
+      if (params.search) {
+        query += ` AND (UPPER(EMPLOYEE_NAME) LIKE UPPER(:${paramIndex}) OR UPPER(EMPLOYEE_NUMBER) LIKE UPPER(:${paramIndex + 1}))`;
+        queryParams.push(`%${params.search}%`, `%${params.search}%`);
+        paramIndex += 2;
+      }
+
+      if (params.employee_number) {
+        query += ` AND EMPLOYEE_NUMBER = :${paramIndex}`;
+        queryParams.push(params.employee_number);
+        paramIndex++;
+      }
+
+      if (params.organization_code) {
+        query += ` AND ORGANIZATION_CODE = :${paramIndex}`;
+        queryParams.push(params.organization_code);
+        paramIndex++;
+      }
+
+      query += ` ORDER BY EMPLOYEE_NUMBER`;
+      
+      this.logger.log(`Base query before pagination: ${query}`);
+      this.logger.log(`Base query parameters: ${JSON.stringify(queryParams)}`);
+
+      // Execute base query first to see data availability  
+      const baseResult = await this.oracleService.executeQuery(query, queryParams);
+      this.logger.log(`Base query result count: ${baseResult.rows?.length || 0}`);
+
+      // Apply pagination if needed
+      let finalResult = baseResult;
+      if (params.limit && baseResult.rows && baseResult.rows.length > 0) {
+        const offset = ((params.page || 1) - 1) * params.limit;
+        const paginatedQuery = query + ` OFFSET ${offset} ROWS FETCH NEXT ${params.limit} ROWS ONLY`;
+        this.logger.log(`Pagination applied: offset=${offset}, limit=${params.limit}`);
+        this.logger.log(`Paginated query: ${paginatedQuery}`);
+        
+        finalResult = await this.oracleService.executeQuery(paginatedQuery, queryParams);
+        this.logger.log(`Paginated result count: ${finalResult.rows?.length || 0}`);
+      } else {
+        this.logger.log(`No pagination applied - using base result`);
+      }
+
+      // Transform Oracle result to DTO format (same as getEmployeeFromOracleByDate)
+      const employees: EmployeeMetaDto[] = finalResult.rows.map((row) => ({
+        salesrep_id: row.SALESREP_ID,
+        sales_credit_type_id: row.SALES_CREDIT_TYPE_ID,
+        subinventory_code: row.SUBINVENTORY_CODE,
+        locator_id: row.LOCATOR_ID,
+        employee_number: row.EMPLOYEE_NUMBER,
+        employee_name: row.EMPLOYEE_NAME,
+        flag_salesman: row.FLAG_SALESMAN,
+        supervisor_number: row.SUPERVISOR_NUMBER,
+        vendor_name: row.VENDOR_NAME,
+        vendor_num: row.VENDOR_NUM,
+        vendor_site_code: row.VENDOR_SITE_CODE,
+        vendor_id: row.VENDOR_ID,
+        vendor_site_id: row.VENDOR_SITE_ID,
+        organization_code: row.ORGANIZATION_CODE,
+        organization_name: row.ORGANIZATION_NAME,
+        organization_id: row.ORGANIZATION_ID,
+        org_name: row.ORG_NAME,
+        org_id: row.ORG_ID,
+        effective_start_date: row.EFFECTIVE_START_DATE,
+        effective_end_date: row.EFFECTIVE_END_DATE,
+      }));
+      
+      this.logger.log(`Mapped employees count: ${employees.length}`);
+      
+      if (employees.length > 0) {
+        this.logger.log(`Sample mapped employee: ${JSON.stringify(employees[0])}`);
+      } else {
+        this.logger.log('No employees found after mapping');
+      }
+
+      const response: EmployeeMetaResponseDto = {
+        data: employees,
+        count: employees.length,
+        status: true,
+        message: 'Employee data retrieved successfully from Oracle',
+      };
+
+      this.logger.log(`Final response: status=${response.status}, count=${response.count}, message=${response.message}`);
+
+      // Temporarily disable caching for debugging
+      // try {
+      //   await this.redisService.set(cacheKey, JSON.stringify(response), this.CACHE_TTL);
+      // } catch (cacheError) {
+      //   this.logger.error(`Error storing data in Redis: ${cacheError.message}`);
+      // }
+
+      return response;
+    } catch (error) {
+      this.logger.error(`Error in findAllEmployees: ${error.message}`, error.stack);
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error retrieving employees: ${error.message}`,
+      };
+    }
+  }
+
+  async countEmployees(params: EmployeeQueryDto): Promise<{ count: number; status: boolean; message?: string }> {
+    this.logger.log('==== MICROSERVICE: Count employees ====');
+    
+    const cacheKey = `employee:count:search:${params.search || 'all'}:orgCode:${params.organization_code || 'all'}`;
+
+    try {
+      const cachedData = await this.redisService.get(cacheKey);
+      if (cachedData) {
+        this.logger.log(`Cache hit for ${cacheKey}`);
+        return JSON.parse(cachedData as string);
+      }
+    } catch (error) {
+      this.logger.error(`Error accessing Redis cache: ${error.message}`);
+    }
+
+    try {
+      let query = `SELECT COUNT(*) as count FROM APPS.XTD_PAPF_EMPLOYEE_V WHERE 1=1`;
+      const queryParams: any[] = [];
+      let paramIndex = 1;
+
+      if (params.search) {
+        query += ` AND (UPPER(EMPLOYEE_NAME) LIKE UPPER(:${paramIndex}) OR UPPER(EMPLOYEE_NUMBER) LIKE UPPER(:${paramIndex + 1}))`;
+        queryParams.push(`%${params.search}%`, `%${params.search}%`);
+        paramIndex += 2;
+      }
+
+      if (params.employee_number) {
+        query += ` AND EMPLOYEE_NUMBER = :${paramIndex}`;
+        queryParams.push(params.employee_number);
+        paramIndex++;
+      }
+
+      if (params.organization_code) {
+        query += ` AND ORGANIZATION_CODE = :${paramIndex}`;
+        queryParams.push(params.organization_code);
+        paramIndex++;
+      }
+
+      this.logger.log(`Count query: ${query}`);
+      this.logger.log(`Count parameters: ${JSON.stringify(queryParams)}`);
+
+      const result = await this.oracleService.executeQuery(query, queryParams);
+      const count = result.rows[0]?.count || 0;
+
+      const response = {
+        count,
+        status: true,
+        message: 'Employee count retrieved successfully',
+      };
+
+      try {
+        await this.redisService.set(cacheKey, JSON.stringify(response), this.CACHE_TTL);
+      } catch (cacheError) {
+        this.logger.error(`Error storing count in Redis: ${cacheError.message}`);
+      }
+
+      return response;
+    } catch (error) {
+      this.logger.error(`Error in countEmployees: ${error.message}`, error.stack);
+      return {
+        count: 0,
+        status: false,
+        message: `Error counting employees: ${error.message}`,
+      };
     }
   }
 }

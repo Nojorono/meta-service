@@ -5,6 +5,7 @@ import {
   EmployeeMetaResponseDto,
   EmployeeMetaDtoByDate,
   EmployeeMetaDtoByEmployeeNumber,
+  EmployeeQueryDto,
 } from '../dtos/employee.dtos';
 import { EmployeeHrisDto } from '../dtos/employee.hris.dto';
 
@@ -144,6 +145,48 @@ export class EmployeeMetaMicroserviceController {
       return {
         status: false,
         message: `Error invalidating cache: ${error.message}`,
+      };
+    }
+  }
+
+  @MessagePattern('employee.findAll')
+  async findAll(@Payload() dto: EmployeeQueryDto) {
+    this.logger.log(
+      '==== MICROSERVICE: Find all employees with pagination ====',
+    );
+    this.logger.log(`MICROSERVICE input DTO: ${JSON.stringify(dto)}`);
+    try {
+      const result = await this.employeeMetaService.findAllEmployees(dto);
+      this.logger.log(`MICROSERVICE result: status=${result.status}, count=${result.count}`);
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Error in findAll employees: ${error.message}`,
+        error.stack,
+      );
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error retrieving employees: ${error.message}`,
+      };
+    }
+  }
+
+  @MessagePattern('employee.getCount')
+  async getCount(@Payload() dto: EmployeeQueryDto) {
+    this.logger.log('==== MICROSERVICE: Count employees ====');
+    try {
+      return await this.employeeMetaService.countEmployees(dto);
+    } catch (error) {
+      this.logger.error(
+        `Error in getCount employees: ${error.message}`,
+        error.stack,
+      );
+      return {
+        count: 0,
+        status: false,
+        message: `Error counting employees: ${error.message}`,
       };
     }
   }

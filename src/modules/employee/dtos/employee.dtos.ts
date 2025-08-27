@@ -29,6 +29,14 @@ export class EmployeeMetaDtoByDate {
   last_update_date: string;
 }
 
+export class EmployeeQueryDto {
+  search?: string;
+  employee_number?: string;
+  organization_code?: string;
+  page?: number;
+  limit?: number;
+}
+
 export class EmployeeMetaResponseDto {
   data: EmployeeMetaDto[];
   count: number;
