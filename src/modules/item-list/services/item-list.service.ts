@@ -6,6 +6,7 @@ import {
   MetaItemListDto,
   MetaItemListDtoByItemCode,
   MetaItemListResponseDto,
+  ItemListQueryDto,
 } from '../dtos/item-list.dtos';
 
 @Injectable()
@@ -25,8 +26,8 @@ export class ItemListMetaService {
     const item_code = params?.item_code;
 
     const cacheKey = item_code
-      ? `sales-items:item_code:${item_code}`
-      : 'sales-items:all';
+      ? `item_list:item_code:${item_code}`
+      : 'item_list:all';
 
     // Try to get data from cache first
     try {
@@ -101,6 +102,119 @@ export class ItemListMetaService {
         count: 0,
         status: false,
         message: `Error retrieving sales items data: ${error.message}`,
+      };
+    }
+  }
+
+  async findAllItemLists(params: ItemListQueryDto): Promise<MetaItemListResponseDto> {
+    this.logger.log('==== MICROSERVICE: Find all item lists ====');
+    
+    const cacheKey = `item_list:findAll:page:${params.page || 1}:limit:${params.limit || 10}:search:${params.search || 'all'}`;
+
+    try {
+      const cachedData = await this.redisService.get(cacheKey);
+      if (cachedData) {
+        this.logger.log(`Cache hit for ${cacheKey}`);
+        return JSON.parse(cachedData as string) as MetaItemListResponseDto;
+      }
+    } catch (error) {
+      this.logger.error(`Error accessing Redis cache: ${error.message}`);
+    }
+
+    try {
+      let query = `
+        SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID  
+        FROM XTD_INV_SALES_ITEMS_V
+        group by ITEM_CODE
+      `;
+      const queryParams: any[] = [];
+
+      if (params.search) {
+        query += ` WHERE UPPER(ITEM_DESCRIPTION) LIKE UPPER(?)`;
+        queryParams.push(`%${params.search}%`);
+      }
+
+      query += ` ORDER BY ITEM_CODE`;
+
+      if (params.limit) {
+        const offset = ((params.page || 1) - 1) * params.limit;
+        query += ` OFFSET ${offset} ROWS FETCH NEXT ${params.limit} ROWS ONLY`;
+      }
+
+      const result = await this.oracleService.executeQuery(query, queryParams);
+      const data = result.rows as MetaItemListDto[];
+
+      const response: MetaItemListResponseDto = {
+        data,
+        count: data.length,
+        status: true,
+        message: 'Item lists retrieved successfully',
+      };
+
+      try {
+        await this.redisService.set(cacheKey, JSON.stringify(response), this.CACHE_TTL);
+      } catch (cacheError) {
+        this.logger.error(`Error storing data in Redis: ${cacheError.message}`);
+      }
+
+      return response;
+    } catch (error) {
+      this.logger.error(`Error in findAllItemLists: ${error.message}`, error.stack);
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error retrieving item lists: ${error.message}`,
+      };
+    }
+  }
+
+  async countItemLists(params: ItemListQueryDto): Promise<{ count: number; status: boolean; message?: string }> {
+    this.logger.log('==== MICROSERVICE: Count item lists ====');
+    
+    const cacheKey = `item_list:count:search:${params.search || 'all'}`;
+
+    try {
+      const cachedData = await this.redisService.get(cacheKey);
+      if (cachedData) {
+        this.logger.log(`Cache hit for ${cacheKey}`);
+        return JSON.parse(cachedData as string);
+      }
+    } catch (error) {
+      this.logger.error(`Error accessing Redis cache: ${error.message}`);
+    }
+
+    try {
+      let query = `SELECT COUNT(*) as count FROM XTD_INV_SALES_ITEMS_V`;
+      const queryParams: any[] = [];
+
+      if (params.search) {
+        query += ` WHERE UPPER(ITEM_DESCRIPTION) LIKE UPPER(?)`;
+        queryParams.push(`%${params.search}%`);
+      }
+
+      const result = await this.oracleService.executeQuery(query, queryParams);
+      const count = result.rows[0]?.count || 0;
+
+      const response = {
+        count,
+        status: true,
+        message: 'Item lists count retrieved successfully',
+      };
+
+      try {
+        await this.redisService.set(cacheKey, JSON.stringify(response), this.CACHE_TTL);
+      } catch (cacheError) {
+        this.logger.error(`Error storing count in Redis: ${cacheError.message}`);
+      }
+
+      return response;
+    } catch (error) {
+      this.logger.error(`Error in countItemLists: ${error.message}`, error.stack);
+      return {
+        count: 0,
+        status: false,
+        message: `Error counting item lists: ${error.message}`,
       };
     }
   }

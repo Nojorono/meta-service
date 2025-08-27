@@ -9,6 +9,13 @@ export class MetaItemListDtoByItemCode {
   item_code: string;
 }
 
+export class ItemListQueryDto {
+  page?: number;
+  limit?: number;
+  search?: string;
+  item_code?: string;
+}
+
 export class MetaItemListResponseDto {
   data: MetaItemListDto[];
   count: number;

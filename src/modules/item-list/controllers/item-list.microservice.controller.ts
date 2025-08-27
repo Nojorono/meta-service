@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ItemListMetaService } from '../services/item-list.service';
-import { MetaItemListDtoByItemCode } from '../dtos/item-list.dtos';
+import { MetaItemListDtoByItemCode, ItemListQueryDto } from '../dtos/item-list.dtos';
 import { Internal } from '../../../common/decorators/internal.decorator';
 
 @Controller()
@@ -9,13 +9,18 @@ import { Internal } from '../../../common/decorators/internal.decorator';
 export class ItemListMicroserviceController {
   constructor(private readonly itemListService: ItemListMetaService) {}
 
+  @MessagePattern('item-list.findAll')
+  async findAll(@Payload() dto: ItemListQueryDto) {
+    return this.itemListService.findAllItemLists(dto);
+  }
+
   @MessagePattern('item-list.findByItemCode')
   async findByItemCode(@Payload() dto: MetaItemListDtoByItemCode) {
     return this.itemListService.getItemListFromOracleByItemCode(dto);
   }
 
-  @MessagePattern('item-list.findAll')
-  async findAll() {
-    return this.itemListService.getItemListFromOracleByItemCode();
+  @MessagePattern('item-list.getCount')
+  async getCount(@Payload() dto: ItemListQueryDto) {
+    return this.itemListService.countItemLists(dto);
   }
 }
