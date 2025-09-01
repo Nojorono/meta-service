@@ -1,10 +1,11 @@
-import { Controller, Get, Query, Param, Logger } from '@nestjs/common';
+import { Controller, Get, Query, Param, Logger, Post, Body } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiQuery,
   ApiParam,
+  ApiBody,
 } from '@nestjs/swagger';
 import { EmployeeMetaService } from '../services/employee.service';
 import {
@@ -12,6 +13,7 @@ import {
   EmployeeMetaDtoByDate,
   EmployeeMetaDtoByEmployeeNumber,
 } from '../dtos/employee.dtos';
+import { EmployeeHrisDto } from '../dtos/employee.hris.dto';
 import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
 @ApiTags('Employee Meta')
@@ -20,7 +22,7 @@ import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 export class EmployeeMetaController {
   private readonly logger = new Logger(EmployeeMetaController.name);
 
-  constructor(private readonly employeeMetaService: EmployeeMetaService) {}
+  constructor(private readonly employeeMetaService: EmployeeMetaService) { }
 
   @Get()
   @ApiOperation({
@@ -168,6 +170,60 @@ export class EmployeeMetaController {
         count: 0,
         status: false,
         message: `Error retrieving employee data: ${error.message}`,
+      };
+    }
+  }
+
+  @Post('hris')
+  @ApiOperation({
+    summary: 'Post employee HRIS data',
+    description: 'Insert employee HRIS data into Oracle staging table',
+  })
+  @ApiBody({
+    type: EmployeeHrisDto,
+    description: 'Employee HRIS data to be inserted',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Employee HRIS data posted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array' },
+        count: { type: 'number' },
+        status: { type: 'boolean' },
+        message: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - invalid data format',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
+  async postEmployeeHris(@Body() params?: EmployeeHrisDto): Promise<any> {
+    this.logger.log('==== REST API: Post employee HRIS data ====');
+    this.logger.log(JSON.stringify(params || {}));
+
+    try {
+      const result = await this.employeeMetaService.postEmployeeHris(params);
+      this.logger.log(
+        `REST API postEmployeeHris result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `REST API Error posting employee HRIS data: ${error.message}`,
+        error.stack,
+      );
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error posting employee HRIS data: ${error.message}`,
       };
     }
   }
