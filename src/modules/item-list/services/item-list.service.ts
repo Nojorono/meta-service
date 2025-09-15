@@ -18,7 +18,7 @@ export class ItemListMetaService {
     private readonly configService: ConfigService,
     private readonly oracleService: OracleService,
     private readonly redisService: RedisService,
-  ) {}
+  ) { }
 
   async getItemListFromOracleByItemCode(
     params?: MetaItemListDtoByItemCode,
@@ -108,8 +108,8 @@ export class ItemListMetaService {
 
   async findAllItemLists(params: ItemListQueryDto): Promise<MetaItemListResponseDto> {
     this.logger.log('==== MICROSERVICE: Find all item lists ====');
-    
-    const cacheKey = `item_list:findAll:page:${params.page || 1}:limit:${params.limit || 10}:search:${params.search || 'all'}`;
+
+    const cacheKey = `item_list:findAll`;
 
     try {
       const cachedData = await this.redisService.get(cacheKey);
@@ -123,9 +123,12 @@ export class ItemListMetaService {
 
     try {
       let query = `
-        SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID  
+        SELECT * FROM 
+        (SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID  
         FROM XTD_INV_SALES_ITEMS_V
-        group by ITEM_CODE
+        GROUP BY ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID 
+        ORDER BY ITEM_CODE)
+        WHERE 1=1
       `;
       const queryParams: any[] = [];
 
@@ -171,7 +174,7 @@ export class ItemListMetaService {
 
   async countItemLists(params: ItemListQueryDto): Promise<{ count: number; status: boolean; message?: string }> {
     this.logger.log('==== MICROSERVICE: Count item lists ====');
-    
+
     const cacheKey = `item_list:count:search:${params.search || 'all'}`;
 
     try {
