@@ -60,6 +60,7 @@ import { MoveOrderModule } from 'src/modules/move-order/move-order.module';
 import { SalesOrderModule as SalesOrderIfaceModule } from 'src/modules/salesorder/salesorder.module';
 import { ApInvoiceModule } from 'src/modules/ap-invoice/ap-invoice.module';
 import { InvTransactionModule } from 'src/modules/inv-transaction/inv-transaction.module';
+import { WeekSalesModule } from 'src/modules/week-sales/week-sales.module';
 
 @Module({
   imports: [
@@ -111,6 +112,7 @@ import { InvTransactionModule } from 'src/modules/inv-transaction/inv-transactio
     SalesOrderIfaceModule,
     ApInvoiceModule,
     InvTransactionModule,
+    WeekSalesModule,
     AuthModule,
     // Other modules can be added here
 
