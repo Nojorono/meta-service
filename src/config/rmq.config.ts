@@ -28,5 +28,6 @@ export default registerAs(
     userDms: process.env.RABBITMQ_USER_DMS_QUEUE,
     priceList: process.env.RABBITMQ_PRICE_LIST_QUEUE,
     itemList: process.env.RABBITMQ_ITEM_LIST_QUEUE,
+    weekSales: process.env.RABBITMQ_WEEK_SALES_QUEUE,
   }),
 );

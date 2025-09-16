@@ -212,6 +212,10 @@ async function bootstrap() {
       name: 'MOVE_ORDER_SERVICE',
       queue: configService.get('rmq.moveOrder') || 'move_order_queue',
     },
+    {
+      name: 'WEEK_SALES_SERVICE',
+      queue: configService.get('rmq.weekSales') || 'week_sales_queue',
+    },
   ];
 
   // Initialize all microservices
