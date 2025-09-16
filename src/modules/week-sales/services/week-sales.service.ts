@@ -111,7 +111,7 @@ export class WeekSalesService {
         try {
             const query = `
         SELECT * FROM xtd_period_week_v 
-        WHERE TO_DATE(:1, 'YYYY-MM-DD') BETWEEN TANGGAL_AWAL_MINGGU AND TANGGAL_AKHIR_MINGGU
+        WHERE TO_DATE(:1, 'YYYY-MM-DD') BETWEEN TANGGAL_AWAL_MINGGU_REAL AND TANGGAL_AKHIR_MINGGU_REAL
         ORDER BY MINGGU
       `;
 
