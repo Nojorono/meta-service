@@ -216,6 +216,10 @@ async function bootstrap() {
       name: 'WEEK_SALES_SERVICE',
       queue: configService.get('rmq.weekSales') || 'week_sales_queue',
     },
+    {
+      name: 'DO_VALIDATION_SERVICE',
+      queue: configService.get('rmq.doValidation') || 'do_validation_queue',
+    },
   ];
 
   // Initialize all microservices

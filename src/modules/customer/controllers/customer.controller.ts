@@ -20,7 +20,7 @@ import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 export class CustomerMetaController {
   private readonly logger = new Logger(CustomerMetaController.name);
 
-  constructor(private readonly customerMetaService: CustomerMetaService) {}
+  constructor(private readonly customerMetaService: CustomerMetaService) { }
 
   @Get()
   @ApiOperation({

@@ -61,6 +61,7 @@ import { SalesOrderModule as SalesOrderIfaceModule } from 'src/modules/salesorde
 import { ApInvoiceModule } from 'src/modules/ap-invoice/ap-invoice.module';
 import { InvTransactionModule } from 'src/modules/inv-transaction/inv-transaction.module';
 import { WeekSalesModule } from 'src/modules/week-sales/week-sales.module';
+import { DoValidationModule } from 'src/modules/do-validation/do-validation.module';
 
 @Module({
   imports: [
@@ -113,6 +114,7 @@ import { WeekSalesModule } from 'src/modules/week-sales/week-sales.module';
     ApInvoiceModule,
     InvTransactionModule,
     WeekSalesModule,
+    DoValidationModule,
     AuthModule,
     // Other modules can be added here
 
