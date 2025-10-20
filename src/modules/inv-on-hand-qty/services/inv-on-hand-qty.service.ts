@@ -31,13 +31,12 @@ export class InvOnHandQtyService {
 
         // Try to get data from cache first
         try {
-            // Temporarily disable cache to test the fix
-            // const cachedData = await this.redisService.get(cacheKey);
-            // if (cachedData) {
-            //   this.logger.log(`Cache hit for ${cacheKey}`);
-            //   return JSON.parse(cachedData as string) as InvOnHandQtyResponseDto;
-            // }
-            this.logger.log(`Cache disabled for testing, fetching from Oracle`);
+            const cachedData = await this.redisService.get(cacheKey);
+            if (cachedData) {
+                this.logger.log(`Cache hit for ${cacheKey}`);
+                return JSON.parse(cachedData as string) as InvOnHandQtyResponseDto;
+            }
+            this.logger.log(`Cache miss for ${cacheKey}, fetching from Oracle`);
         } catch (error) {
             this.logger.error(
                 `Error accessing Redis cache: ${error.message}`,
