@@ -62,6 +62,7 @@ import { ApInvoiceModule } from 'src/modules/ap-invoice/ap-invoice.module';
 import { InvTransactionModule } from 'src/modules/inv-transaction/inv-transaction.module';
 import { WeekSalesModule } from 'src/modules/week-sales/week-sales.module';
 import { DoValidationModule } from 'src/modules/do-validation/do-validation.module';
+import { InvOnHandQtyModule } from 'src/modules/inv-on-hand-qty/inv-on-hand-qty.module';
 
 @Module({
   imports: [
@@ -115,6 +116,7 @@ import { DoValidationModule } from 'src/modules/do-validation/do-validation.modu
     InvTransactionModule,
     WeekSalesModule,
     DoValidationModule,
+    InvOnHandQtyModule,
     AuthModule,
     // Other modules can be added here
 

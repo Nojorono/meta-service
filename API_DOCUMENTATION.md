@@ -177,6 +177,12 @@ SOFIA Meta Service menyediakan API untuk mengakses data master dari Oracle Datab
 - `GET /api/v1/summary-fppr`
 - `GET /api/v1/summary-fppr/{id}`
 
+### 39. Inventory On Hand Quantity APIs
+- `GET /api/v1/inv-on-hand-qty` - Get all inventory data
+- `GET /api/v1/inv-on-hand-qty?item_code={itemCode}` - Filter by item code
+- `GET /api/v1/inv-on-hand-qty?subinventory_code={subinventoryCode}` - Filter by subinventory code
+- `GET /api/v1/inv-on-hand-qty?item_code={itemCode}&subinventory_code={subinventoryCode}` - Filter by both parameters
+
 ---
 
 **Catatan:**
@@ -264,6 +270,7 @@ All APIs fetch data from Oracle Database views:
 - **Positions**: `APPS.XTD_HR_POSITIONS_V`
 - **Suppliers**: `APPS.XTD_AP_SUPPLIERS_V`
 - **Categories**: `APPS.XTD_INV_CATEGORIES_V`
+- **Inventory On Hand Quantity**: `XTD_INV_ON_HAND_QTY_V` with `APPS.XTD_INV_SALES_ITEM_CONVERSIONS_V`
 
 ## Caching
 
