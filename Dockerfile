@@ -1,7 +1,7 @@
 # Multi-stage build for production
 FROM node:20-alpine AS base
 
-# Install Oracle Instant Client for hybrid mode (fallback when Thin fails)
+# Update repositories dengan mirror Indonesia
 RUN apk add --no-cache \
     libc6-compat \
     ca-certificates \
@@ -54,7 +54,7 @@ FROM node:20-alpine AS production
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nestjs -u 1001
 
-# Install Oracle Instant Client for production (hybrid mode support)
+# Install packages untuk production
 RUN apk add --no-cache \
     libc6-compat \
     ca-certificates \
