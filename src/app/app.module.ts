@@ -63,6 +63,8 @@ import { InvTransactionModule } from 'src/modules/inv-transaction/inv-transactio
 import { WeekSalesModule } from 'src/modules/week-sales/week-sales.module';
 import { DoValidationModule } from 'src/modules/do-validation/do-validation.module';
 import { InvOnHandQtyModule } from 'src/modules/inv-on-hand-qty/inv-on-hand-qty.module';
+import { HrOperatingUnitsModule } from '../modules/hr-operating-units/hr-operating-units.module';
+import { ArCustomersSdModule } from '../modules/ar-customers-sd/ar-customers-sd.module';
 
 @Module({
   imports: [
@@ -117,6 +119,8 @@ import { InvOnHandQtyModule } from 'src/modules/inv-on-hand-qty/inv-on-hand-qty.
     WeekSalesModule,
     DoValidationModule,
     InvOnHandQtyModule,
+    HrOperatingUnitsModule,
+    ArCustomersSdModule,
     AuthModule,
     // Other modules can be added here
 

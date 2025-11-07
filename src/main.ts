@@ -220,6 +220,14 @@ async function bootstrap() {
       name: 'DO_VALIDATION_SERVICE',
       queue: configService.get('rmq.doValidation') || 'do_validation_queue',
     },
+    {
+      name: 'HR_OPERATING_UNITS_SERVICE',
+      queue: configService.get('rmq.hrOperatingUnits') || 'hr_operating_units_queue',
+    },
+    {
+      name: 'AR_CUSTOMERS_SD_SERVICE',
+      queue: configService.get('rmq.arCustomersSd') || 'ar_customers_sd_queue',
+    },
   ];
 
   // Initialize all microservices
