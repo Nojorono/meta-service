@@ -9,7 +9,7 @@ import {
 export class ArCustomersSdService {
   private readonly logger = new Logger(ArCustomersSdService.name);
 
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async findAllCustomers(
     queryDto: ArCustomersSdQueryDto = {},
@@ -27,8 +27,6 @@ export class ArCustomersSdService {
         kecamatan,
         siteType,
         priceListId,
-        page = 1,
-        limit = 10,
       } = queryDto;
 
       let query = `
@@ -134,11 +132,6 @@ export class ArCustomersSdService {
         params.push(priceListId);
         paramIndex++;
       }
-
-      // Add pagination
-      const offset = (page - 1) * limit;
-      query += ` ORDER BY CUSTOMER_NUMBER OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
-      params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
 

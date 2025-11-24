@@ -279,19 +279,5 @@ export class ArCustomersSdQueryDto {
     required: false,
   })
   priceListId?: number;
-
-  @ApiProperty({
-    description: 'Page number for pagination',
-    example: 1,
-    required: false,
-  })
-  page?: number;
-
-  @ApiProperty({
-    description: 'Number of records per page',
-    example: 10,
-    required: false,
-  })
-  limit?: number;
 }
 

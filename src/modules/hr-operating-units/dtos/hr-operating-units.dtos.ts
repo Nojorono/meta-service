@@ -140,19 +140,5 @@ export class HrOperatingUnitsQueryDto {
     required: false,
   })
   usableFlag?: string;
-
-  @ApiProperty({
-    description: 'Page number for pagination',
-    example: 1,
-    required: false,
-  })
-  page?: number;
-
-  @ApiProperty({
-    description: 'Number of records per page',
-    example: 10,
-    required: false,
-  })
-  limit?: number;
 }
 

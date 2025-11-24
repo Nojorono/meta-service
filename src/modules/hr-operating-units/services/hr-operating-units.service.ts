@@ -9,7 +9,7 @@ import {
 export class HrOperatingUnitsService {
   private readonly logger = new Logger(HrOperatingUnitsService.name);
 
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async findAllOperatingUnits(
     queryDto: HrOperatingUnitsQueryDto = {},
@@ -22,8 +22,6 @@ export class HrOperatingUnitsService {
         orgCode,
         shortCode,
         usableFlag,
-        page = 1,
-        limit = 10,
       } = queryDto;
 
       let query = `
@@ -84,11 +82,6 @@ export class HrOperatingUnitsService {
         params.push(usableFlag);
         paramIndex++;
       }
-
-      // Add pagination
-      const offset = (page - 1) * limit;
-      query += ` ORDER BY ORG_CODE OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
-      params.push(offset, limit);
 
       const result = await this.oracleService.executeQuery(query, params);
 
