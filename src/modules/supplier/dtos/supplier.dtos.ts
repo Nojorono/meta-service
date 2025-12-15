@@ -220,6 +220,15 @@ export class SupplierQueryDto {
   VAT_CODE?: string;
 
   @ApiProperty({
+    description: 'Attribute 7 to filter by',
+    example: 'FREIGHT (FRG)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  ATTRIBUTE7?: string;
+
+  @ApiProperty({
     description: 'Page number for pagination',
     example: 1,
     required: false,

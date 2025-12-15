@@ -25,7 +25,7 @@ import { SupplierDto, SupplierQueryDto } from '../dtos/supplier.dtos';
 export class SupplierController {
   private readonly logger = new Logger(SupplierController.name);
 
-  constructor(private readonly supplierService: SupplierService) {}
+  constructor(private readonly supplierService: SupplierService) { }
 
   @Get()
   @AuthSwagger()
@@ -63,6 +63,12 @@ export class SupplierController {
     required: false,
     description: 'Filter by VAT code',
     example: 'VAT01',
+  })
+  @ApiQuery({
+    name: 'ATTRIBUTE7',
+    required: false,
+    description: 'Filter by attribute 7',
+    example: 'FREIGHT (FRG)',
   })
   @ApiQuery({
     name: 'page',

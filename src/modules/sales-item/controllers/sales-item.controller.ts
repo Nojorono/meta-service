@@ -4,6 +4,7 @@ import { SalesItemMetaService } from '../services/sales-item.service';
 import {
   MetaSalesItemResponseDto,
   MetaSalesItemDtoByDate,
+  MetaSalesItemDtoByBranch,
 } from '../dtos/sales-item.dtos';
 import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 
@@ -12,7 +13,7 @@ import { AuthSwagger } from '../../../decorators/auth-swagger.decorator';
 export class SalesItemMetaController {
   private readonly logger = new Logger(SalesItemMetaController.name);
 
-  constructor(private readonly salesItemMetaService: SalesItemMetaService) {}
+  constructor(private readonly salesItemMetaService: SalesItemMetaService) { }
 
   @Get()
   @AuthSwagger()
@@ -86,6 +87,53 @@ export class SalesItemMetaController {
     } catch (error) {
       this.logger.error(
         `REST API Error retrieving sales items by date: ${error.message}`,
+        error.stack,
+      );
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error retrieving sales items data: ${error.message}`,
+      };
+    }
+  }
+
+  @Get('by-branch')
+  @AuthSwagger()
+  @ApiOperation({
+    summary: 'Get sales items by branch',
+    description: 'Retrieve sales items filtered by branch',
+  })
+  @ApiQuery({
+    name: 'branch',
+    required: true,
+    type: String,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sales items retrieved successfully',
+    type: MetaSalesItemResponseDto,
+  })
+  async getSalesItemsByBranch(@Query('branch') branch: string, @Query('last_update_date') lastUpdateDate: string): Promise<MetaSalesItemResponseDto> {
+    this.logger.log('==== REST API: Get sales items by branch ====');
+    this.logger.log(`Branch filter: ${branch}`);
+
+    try {
+      const params: MetaSalesItemDtoByBranch = {
+        branch,
+        last_update_date: lastUpdateDate,
+      };
+      const result =
+        await this.salesItemMetaService.getSalesItemsFromOracleByBranch(
+          params,
+        );
+      this.logger.log(
+        `REST API getSalesItemsByBranch result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `REST API Error retrieving sales items by branch: ${error.message}`,
         error.stack,
       );
       return {

@@ -15,6 +15,11 @@ export class MetaSalesItemDtoByDate {
   last_update_date: string;
 }
 
+export class MetaSalesItemDtoByBranch {
+  branch: string;
+  last_update_date: string;
+}
+
 export class MetaSalesItemResponseDto {
   data: MetaSalesItemDto[];
   count: number;

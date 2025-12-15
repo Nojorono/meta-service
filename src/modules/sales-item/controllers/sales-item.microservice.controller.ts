@@ -1,13 +1,13 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SalesItemMetaService } from '../services/sales-item.service';
-import { MetaSalesItemDtoByDate } from '../dtos/sales-item.dtos';
+import { MetaSalesItemDtoByDate, MetaSalesItemDtoByBranch } from '../dtos/sales-item.dtos';
 import { Internal } from '../../../common/decorators/internal.decorator';
 
 @Controller()
 @Internal()
 export class SalesItemMicroserviceController {
-  constructor(private readonly salesItemService: SalesItemMetaService) {}
+  constructor(private readonly salesItemService: SalesItemMetaService) { }
 
   @MessagePattern('sales-item.findByDate')
   async findByDate(@Payload() dto: MetaSalesItemDtoByDate) {
@@ -17,5 +17,10 @@ export class SalesItemMicroserviceController {
   @MessagePattern('sales-item.findAll')
   async findAll() {
     return this.salesItemService.getSalesItemsFromOracleByDate();
+  }
+
+  @MessagePattern('sales-item.findByBranch')
+  async findByBranch(@Payload() dto: MetaSalesItemDtoByBranch) {
+    return this.salesItemService.getSalesItemsFromOracleByBranch(dto);
   }
 }

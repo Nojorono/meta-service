@@ -6,7 +6,7 @@ import { SupplierDto, SupplierQueryDto } from '../dtos/supplier.dtos';
 export class SupplierService {
   private readonly logger = new Logger(SupplierService.name);
 
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async findAllSuppliers(
     queryDto: SupplierQueryDto = {},
@@ -18,6 +18,7 @@ export class SupplierService {
         VENDOR_TYPE_LOOKUP_CODE,
         ENABLED_FLAG,
         VAT_CODE,
+        ATTRIBUTE7,
         page = 1,
         limit = 10,
       } = queryDto;
@@ -79,6 +80,12 @@ export class SupplierService {
       if (VAT_CODE) {
         query += ` AND UPPER(VAT_CODE) = UPPER(:${paramIndex})`;
         params.push(VAT_CODE);
+        paramIndex++;
+      }
+
+      if (ATTRIBUTE7) {
+        query += ` AND UPPER(ATTRIBUTE7) = UPPER(:${paramIndex})`;
+        params.push(ATTRIBUTE7);
         paramIndex++;
       }
 
@@ -194,7 +201,7 @@ export class SupplierService {
 
   async getSupplierCount(queryDto: SupplierQueryDto = {}): Promise<number> {
     try {
-      const { VENDOR_ID, VENDOR_NAME, VENDOR_TYPE_LOOKUP_CODE, ENABLED_FLAG, VAT_CODE } =
+      const { VENDOR_ID, VENDOR_NAME, VENDOR_TYPE_LOOKUP_CODE, ENABLED_FLAG, VAT_CODE, ATTRIBUTE7 } =
         queryDto;
 
       let query = `
@@ -233,6 +240,12 @@ export class SupplierService {
       if (VAT_CODE) {
         query += ` AND UPPER(VAT_CODE) = UPPER(:${paramIndex})`;
         params.push(VAT_CODE);
+        paramIndex++;
+      }
+
+      if (ATTRIBUTE7) {
+        query += ` AND UPPER(ATTRIBUTE7) = UPPER(:${paramIndex})`;
+        params.push(ATTRIBUTE7);
         paramIndex++;
       }
 
