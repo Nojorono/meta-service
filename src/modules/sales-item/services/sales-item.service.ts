@@ -135,14 +135,11 @@ export class SalesItemMetaService {
     try {
       let query = `
         SELECT * FROM APPS.XTD_INV_SALES_ITEMS_V
-        WHERE 1=1
+        WHERE ORGANIZATION_CODE = :branch
       `;
 
       const queryParams = [];
-      if (branch) {
-        query += ` AND ORGANIZATION_CODE = :branch`;
-        queryParams.push(branch);
-      }
+      queryParams.push(branch);
 
       const result = await this.oracleService.executeQuery(query, queryParams);
 
