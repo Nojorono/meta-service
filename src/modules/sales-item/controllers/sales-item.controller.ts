@@ -114,14 +114,13 @@ export class SalesItemMetaController {
     description: 'Sales items retrieved successfully',
     type: MetaSalesItemResponseDto,
   })
-  async getSalesItemsByBranch(@Query('branch') branch: string, @Query('last_update_date') lastUpdateDate: string): Promise<MetaSalesItemResponseDto> {
+  async getSalesItemsByBranch(@Query('branch') branch: string): Promise<MetaSalesItemResponseDto> {
     this.logger.log('==== REST API: Get sales items by branch ====');
     this.logger.log(`Branch filter: ${branch}`);
 
     try {
       const params: MetaSalesItemDtoByBranch = {
         branch,
-        last_update_date: lastUpdateDate,
       };
       const result =
         await this.salesItemMetaService.getSalesItemsFromOracleByBranch(

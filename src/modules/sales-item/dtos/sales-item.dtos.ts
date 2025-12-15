@@ -17,7 +17,6 @@ export class MetaSalesItemDtoByDate {
 
 export class MetaSalesItemDtoByBranch {
   branch: string;
-  last_update_date: string;
 }
 
 export class MetaSalesItemResponseDto {

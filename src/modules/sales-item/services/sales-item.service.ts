@@ -112,10 +112,9 @@ export class SalesItemMetaService {
     params?: MetaSalesItemDtoByBranch,
   ): Promise<MetaSalesItemResponseDto> {
     const branch = params?.branch;
-    const last_update_date = params?.last_update_date;
 
     const cacheKey = branch
-      ? `sales-items:branch:${branch}:last_update_date:${last_update_date}`
+      ? `sales-items:branch:${branch}`
       : 'sales-items:all';
 
     // Try to get data from cache first
@@ -143,10 +142,6 @@ export class SalesItemMetaService {
       if (branch) {
         query += ` AND ORGANIZATION_CODE = :branch`;
         queryParams.push(branch);
-      }
-      if (last_update_date) {
-        query += ` AND LAST_UPDATE_DATE >= TO_DATE(:last_update_date, 'YYYY-MM-DD')`;
-        queryParams.push(last_update_date);
       }
 
       const result = await this.oracleService.executeQuery(query, queryParams);
