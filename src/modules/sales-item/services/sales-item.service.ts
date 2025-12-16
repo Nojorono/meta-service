@@ -135,7 +135,7 @@ export class SalesItemMetaService {
     try {
       let query = `
         SELECT * FROM APPS.XTD_INV_SALES_ITEMS_V
-        WHERE ORGANIZATION_CODE = :branch
+        WHERE ORG_NAME = :branch
       `;
 
       const queryParams = [];
