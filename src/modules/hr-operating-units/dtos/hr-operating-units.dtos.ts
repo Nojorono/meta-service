@@ -96,6 +96,13 @@ export class HrOperatingUnitsDto {
     required: false,
   })
   USABLE_FLAG?: string;
+
+  @ApiProperty({
+    description: 'Address',
+    example: 'Jakarta, Indonesia',
+    required: false,
+  })
+  ADDRESS?: string;
 }
 
 export class HrOperatingUnitsQueryDto {

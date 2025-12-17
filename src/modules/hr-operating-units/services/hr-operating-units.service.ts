@@ -26,21 +26,24 @@ export class HrOperatingUnitsService {
 
       let query = `
         SELECT 
-          BUSINESS_GROUP_ID,
-          TO_CHAR(DATE_FROM, 'YYYY-MM-DD') AS DATE_FROM,
-          TO_CHAR(DATE_TO, 'YYYY-MM-DD') AS DATE_TO,
-          DEFAULT_LEGAL_CONTEXT_ID,
-          LOCATION_CODE,
-          LOCATION_DESCRIPTION,
-          NAME,
-          ORG_CODE,
-          ORG_ID,
-          ORG_NAME,
-          ORGANIZATION_ID,
-          SET_OF_BOOKS_ID,
-          SHORT_CODE,
-          USABLE_FLAG
-        FROM APPS.XTD_HR_OPERATING_UNITS_V
+          ou.BUSINESS_GROUP_ID,
+          TO_CHAR(ou.DATE_FROM, 'YYYY-MM-DD') AS DATE_FROM,
+          TO_CHAR(ou.DATE_TO, 'YYYY-MM-DD') AS DATE_TO,
+          ou.DEFAULT_LEGAL_CONTEXT_ID,
+          ou.LOCATION_CODE,
+          ou.LOCATION_DESCRIPTION,
+          ou.NAME,
+          ou.ORG_CODE,
+          ou.ORG_ID,
+          ou.ORG_NAME,
+          ou.ORGANIZATION_ID,
+          ou.SET_OF_BOOKS_ID,
+          ou.SHORT_CODE,
+          ou.USABLE_FLAG,
+          b.ADDRESS
+        FROM APPS.XTD_HR_OPERATING_UNITS_V ou
+        LEFT JOIN APPS.XTD_INV_BRANCHES_V b
+          ON ou.ORG_ID = b.ORG_ID
         WHERE 1=1
       `;
 
@@ -48,37 +51,37 @@ export class HrOperatingUnitsService {
       let paramIndex = 1;
 
       if (businessGroupId) {
-        query += ` AND BUSINESS_GROUP_ID = :${paramIndex}`;
+        query += ` AND ou.BUSINESS_GROUP_ID = :${paramIndex}`;
         params.push(businessGroupId);
         paramIndex++;
       }
 
       if (locationCode) {
-        query += ` AND UPPER(LOCATION_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ou.LOCATION_CODE) LIKE UPPER(:${paramIndex})`;
         params.push(`%${locationCode}%`);
         paramIndex++;
       }
 
       if (orgName) {
-        query += ` AND UPPER(ORG_NAME) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ou.ORG_NAME) LIKE UPPER(:${paramIndex})`;
         params.push(`%${orgName}%`);
         paramIndex++;
       }
 
       if (orgCode) {
-        query += ` AND UPPER(ORG_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ou.ORG_CODE) LIKE UPPER(:${paramIndex})`;
         params.push(`%${orgCode}%`);
         paramIndex++;
       }
 
       if (shortCode) {
-        query += ` AND UPPER(SHORT_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ou.SHORT_CODE) LIKE UPPER(:${paramIndex})`;
         params.push(`%${shortCode}%`);
         paramIndex++;
       }
 
       if (usableFlag) {
-        query += ` AND UPPER(USABLE_FLAG) = UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ou.USABLE_FLAG) = UPPER(:${paramIndex})`;
         params.push(usableFlag);
         paramIndex++;
       }
@@ -97,22 +100,25 @@ export class HrOperatingUnitsService {
     try {
       const query = `
         SELECT 
-          BUSINESS_GROUP_ID,
-          TO_CHAR(DATE_FROM, 'YYYY-MM-DD') AS DATE_FROM,
-          TO_CHAR(DATE_TO, 'YYYY-MM-DD') AS DATE_TO,
-          DEFAULT_LEGAL_CONTEXT_ID,
-          LOCATION_CODE,
-          LOCATION_DESCRIPTION,
-          NAME,
-          ORG_CODE,
-          ORG_ID,
-          ORG_NAME,
-          ORGANIZATION_ID,
-          SET_OF_BOOKS_ID,
-          SHORT_CODE,
-          USABLE_FLAG
-        FROM APPS.XTD_HR_OPERATING_UNITS_V
-        WHERE ORG_ID = :1
+          ou.BUSINESS_GROUP_ID,
+          TO_CHAR(ou.DATE_FROM, 'YYYY-MM-DD') AS DATE_FROM,
+          TO_CHAR(ou.DATE_TO, 'YYYY-MM-DD') AS DATE_TO,
+          ou.DEFAULT_LEGAL_CONTEXT_ID,
+          ou.LOCATION_CODE,
+          ou.LOCATION_DESCRIPTION,
+          ou.NAME,
+          ou.ORG_CODE,
+          ou.ORG_ID,
+          ou.ORG_NAME,
+          ou.ORGANIZATION_ID,
+          ou.SET_OF_BOOKS_ID,
+          ou.SHORT_CODE,
+          ou.USABLE_FLAG,
+          b.ADDRESS
+        FROM APPS.XTD_HR_OPERATING_UNITS_V ou
+        LEFT JOIN APPS.XTD_INV_BRANCHES_V b
+          ON ou.ORG_ID = b.ORG_ID
+        WHERE ou.ORG_ID = :1
       `;
 
       const result = await this.oracleService.executeQuery(query, [orgId]);
@@ -139,22 +145,25 @@ export class HrOperatingUnitsService {
     try {
       const query = `
         SELECT 
-          BUSINESS_GROUP_ID,
-          TO_CHAR(DATE_FROM, 'YYYY-MM-DD') AS DATE_FROM,
-          TO_CHAR(DATE_TO, 'YYYY-MM-DD') AS DATE_TO,
-          DEFAULT_LEGAL_CONTEXT_ID,
-          LOCATION_CODE,
-          LOCATION_DESCRIPTION,
-          NAME,
-          ORG_CODE,
-          ORG_ID,
-          ORG_NAME,
-          ORGANIZATION_ID,
-          SET_OF_BOOKS_ID,
-          SHORT_CODE,
-          USABLE_FLAG
-        FROM APPS.XTD_HR_OPERATING_UNITS_V
-        WHERE ORG_CODE = :1
+          ou.BUSINESS_GROUP_ID,
+          TO_CHAR(ou.DATE_FROM, 'YYYY-MM-DD') AS DATE_FROM,
+          TO_CHAR(ou.DATE_TO, 'YYYY-MM-DD') AS DATE_TO,
+          ou.DEFAULT_LEGAL_CONTEXT_ID,
+          ou.LOCATION_CODE,
+          ou.LOCATION_DESCRIPTION,
+          ou.NAME,
+          ou.ORG_CODE,
+          ou.ORG_ID,
+          ou.ORG_NAME,
+          ou.ORGANIZATION_ID,
+          ou.SET_OF_BOOKS_ID,
+          ou.SHORT_CODE,
+          ou.USABLE_FLAG,
+          b.ADDRESS
+        FROM APPS.XTD_HR_OPERATING_UNITS_V ou
+        LEFT JOIN APPS.XTD_INV_BRANCHES_V b
+          ON ou.ORG_ID = b.ORG_ID
+        WHERE ou.ORG_CODE = :1
       `;
 
       const result = await this.oracleService.executeQuery(query, [orgCode]);
@@ -190,7 +199,9 @@ export class HrOperatingUnitsService {
 
       let query = `
         SELECT COUNT(*) as TOTAL_COUNT
-        FROM APPS.XTD_HR_OPERATING_UNITS_V
+        FROM APPS.XTD_HR_OPERATING_UNITS_V ou
+        LEFT JOIN APPS.XTD_INV_BRANCHES_V b
+          ON ou.ORG_ID = b.ORG_ID
         WHERE 1=1
       `;
 
@@ -198,37 +209,37 @@ export class HrOperatingUnitsService {
       let paramIndex = 1;
 
       if (businessGroupId) {
-        query += ` AND BUSINESS_GROUP_ID = :${paramIndex}`;
+        query += ` AND ou.BUSINESS_GROUP_ID = :${paramIndex}`;
         params.push(businessGroupId);
         paramIndex++;
       }
 
       if (locationCode) {
-        query += ` AND UPPER(LOCATION_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ou.LOCATION_CODE) LIKE UPPER(:${paramIndex})`;
         params.push(`%${locationCode}%`);
         paramIndex++;
       }
 
       if (orgName) {
-        query += ` AND UPPER(ORG_NAME) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ou.ORG_NAME) LIKE UPPER(:${paramIndex})`;
         params.push(`%${orgName}%`);
         paramIndex++;
       }
 
       if (orgCode) {
-        query += ` AND UPPER(ORG_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ou.ORG_CODE) LIKE UPPER(:${paramIndex})`;
         params.push(`%${orgCode}%`);
         paramIndex++;
       }
 
       if (shortCode) {
-        query += ` AND UPPER(SHORT_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ou.SHORT_CODE) LIKE UPPER(:${paramIndex})`;
         params.push(`%${shortCode}%`);
         paramIndex++;
       }
 
       if (usableFlag) {
-        query += ` AND UPPER(USABLE_FLAG) = UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ou.USABLE_FLAG) = UPPER(:${paramIndex})`;
         params.push(usableFlag);
         paramIndex++;
       }
