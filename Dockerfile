@@ -46,12 +46,25 @@ COPY yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 COPY . .
-RUN yarn build
+
+# Debug: Check if source files exist before build
+RUN echo "=== Checking source files ===" && \
+    test -f /app/src/config/rmq.config.ts && echo "✓ rmq.config.ts exists" || echo "✗ rmq.config.ts NOT FOUND" && \
+    test -f /app/src/config/index.ts && echo "✓ index.ts exists" || echo "✗ index.ts NOT FOUND" && \
+    ls -la /app/src/config/ | head -10
+
+# Build with verbose output
+RUN yarn build 2>&1 | tee /tmp/build.log || (echo "Build failed!" && cat /tmp/build.log && exit 1)
+
+# Debug: List all files in dist/config after build
+RUN echo "=== Files in dist/config ===" && ls -la /app/dist/config/ || echo "dist/config directory not found"
+RUN echo "=== Files in dist/app ===" && ls -la /app/dist/app/ || echo "dist/app directory not found"
+RUN echo "=== Files in dist root ===" && ls -la /app/dist/ | head -20
 
 # Verify critical files were built
 RUN test -f /app/dist/main.js || (echo "ERROR: dist/main.js not found" && exit 1)
 RUN test -f /app/dist/app/app.controller.js || (echo "ERROR: dist/app/app.controller.js not found" && exit 1)
-RUN test -f /app/dist/config/rmq.config.js || (echo "ERROR: dist/config/rmq.config.js not found" && exit 1)
+RUN test -f /app/dist/config/rmq.config.js || (echo "ERROR: dist/config/rmq.config.js not found" && ls -la /app/dist/config/ && exit 1)
 RUN test -f /app/dist/config/index.js || (echo "ERROR: dist/config/index.js not found" && exit 1)
 
 # Production stage
