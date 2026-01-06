@@ -9,7 +9,7 @@ import {
 export class SalesItemConversionService {
   private readonly logger = new Logger(SalesItemConversionService.name);
 
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async findAllSalesItemConversions(
     queryDto: SalesItemConversionQueryDto = {},
@@ -59,26 +59,26 @@ export class SalesItemConversionService {
       }
 
       if (itemDescription) {
-        query += ` AND UPPER(ITEM_DESCRIPTION) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ITEM_DESCRIPTION) LIKE UPPER(':${paramIndex}')`;
         params.push(`%${itemDescription}%`);
         paramIndex++;
       }
 
       if (sourceUomCode) {
-        query += ` AND UPPER(SOURCE_UOM_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(SOURCE_UOM_CODE) LIKE UPPER(':${paramIndex}')`;
         params.push(`%${sourceUomCode}%`);
         paramIndex++;
       }
 
       if (baseUomCode) {
-        query += ` AND UPPER(BASE_UOM_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(BASE_UOM_CODE) LIKE UPPER(':${paramIndex}')`;
         params.push(`%${baseUomCode}%`);
         paramIndex++;
       }
 
       // Add pagination
       const offset = (page - 1) * limit;
-      query += ` ORDER BY ITEM_CODE OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
+      query += ` ORDER BY ITEM_CODE OFFSET ':${paramIndex}' ROWS FETCH NEXT ':${paramIndex + 1}' ROWS ONLY`;
       params.push(offset); // :paramIndex
       params.push(limit); // :paramIndex + 1
 
@@ -149,31 +149,31 @@ export class SalesItemConversionService {
       let paramIndex = 1;
 
       if (itemCode) {
-        query += ` AND UPPER(ITEM_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ITEM_CODE) LIKE UPPER(':${paramIndex}')`;
         params.push(`%${itemCode}%`);
         paramIndex++;
       }
 
       if (itemNumber) {
-        query += ` AND UPPER(ITEM_NUMBER) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ITEM_NUMBER) LIKE UPPER(':${paramIndex}')`;
         params.push(`%${itemNumber}%`);
         paramIndex++;
       }
 
       if (itemDescription) {
-        query += ` AND UPPER(ITEM_DESCRIPTION) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(ITEM_DESCRIPTION) LIKE UPPER(':${paramIndex}')`;
         params.push(`%${itemDescription}%`);
         paramIndex++;
       }
 
       if (sourceUomCode) {
-        query += ` AND UPPER(SOURCE_UOM_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(SOURCE_UOM_CODE) LIKE UPPER(':${paramIndex}')`;
         params.push(`%${sourceUomCode}%`);
         paramIndex++;
       }
 
       if (baseUomCode) {
-        query += ` AND UPPER(BASE_UOM_CODE) LIKE UPPER(:${paramIndex})`;
+        query += ` AND UPPER(BASE_UOM_CODE) LIKE UPPER(':${paramIndex}')`;
         params.push(`%${baseUomCode}%`);
         paramIndex++;
       }
