@@ -48,6 +48,12 @@ RUN yarn install --frozen-lockfile
 COPY . .
 RUN yarn build
 
+# Verify critical files were built
+RUN test -f /app/dist/main.js || (echo "ERROR: dist/main.js not found" && exit 1)
+RUN test -f /app/dist/app/app.controller.js || (echo "ERROR: dist/app/app.controller.js not found" && exit 1)
+RUN test -f /app/dist/config/rmq.config.js || (echo "ERROR: dist/config/rmq.config.js not found" && exit 1)
+RUN test -f /app/dist/config/index.js || (echo "ERROR: dist/config/index.js not found" && exit 1)
+
 # Production stage
 FROM node:20-alpine AS production
 
@@ -87,6 +93,12 @@ RUN yarn install --frozen-lockfile --production=true && yarn cache clean
 
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nestjs:nodejs /app/src/i18n ./i18n
+
+# Verify critical files were copied
+RUN test -f /app/dist/main.js || (echo "ERROR: dist/main.js not copied" && exit 1)
+RUN test -f /app/dist/app/app.controller.js || (echo "ERROR: dist/app/app.controller.js not copied" && exit 1)
+RUN test -f /app/dist/config/rmq.config.js || (echo "ERROR: dist/config/rmq.config.js not copied" && exit 1)
+RUN test -f /app/dist/config/index.js || (echo "ERROR: dist/config/index.js not copied" && exit 1)
 
 # Hybrid mode: Try Thin first, fallback to Thick if password verifier not supported
 # This solves both NJS-116 (verifier type) and ORA-24960 (library issues)

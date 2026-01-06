@@ -1,6 +1,6 @@
 import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from '../common/decorators/public.decorator';
 import { TypeormService } from '../common/services/typeorm.service';
 
 @Controller({
