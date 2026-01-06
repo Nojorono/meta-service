@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class SalesItemConversionDto {
   @ApiProperty({
@@ -83,6 +85,8 @@ export class SalesItemConversionQueryDto {
     example: 'KSN12',
     required: false,
   })
+  @IsOptional()
+  @IsString()
   itemCode?: string;
 
   @ApiProperty({
@@ -90,6 +94,8 @@ export class SalesItemConversionQueryDto {
     example: 'RK.KSN.120000',
     required: false,
   })
+  @IsOptional()
+  @IsString()
   itemNumber?: string;
 
   @ApiProperty({
@@ -97,6 +103,8 @@ export class SalesItemConversionQueryDto {
     example: 'Kapal Sakti Regular Merah',
     required: false,
   })
+  @IsOptional()
+  @IsString()
   itemDescription?: string;
 
   @ApiProperty({
@@ -104,6 +112,8 @@ export class SalesItemConversionQueryDto {
     example: 'BAL',
     required: false,
   })
+  @IsOptional()
+  @IsString()
   sourceUomCode?: string;
 
   @ApiProperty({
@@ -111,6 +121,8 @@ export class SalesItemConversionQueryDto {
     example: 'BKS',
     required: false,
   })
+  @IsOptional()
+  @IsString()
   baseUomCode?: string;
 
   @ApiProperty({
@@ -118,6 +130,9 @@ export class SalesItemConversionQueryDto {
     example: 1,
     required: false,
   })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   page?: number;
 
   @ApiProperty({
@@ -125,5 +140,8 @@ export class SalesItemConversionQueryDto {
     example: 10,
     required: false,
   })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   limit?: number;
 }

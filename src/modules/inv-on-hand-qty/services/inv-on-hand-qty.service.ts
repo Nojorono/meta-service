@@ -9,6 +9,8 @@ import {
 } from '../dtos/inv-on-hand-qty.dtos';
 import { OracleService } from '../../../common/services/oracle.service';
 import { RedisService } from '../../../common/services/redis.service';
+import { SalesItemConversionService } from '../../sales-item-conversion/services/sales-item-conversion.service';
+import { SalesItemConversionDto } from '../../sales-item-conversion/dtos/sales-item-conversion.dtos';
 
 @Injectable()
 export class InvOnHandQtyService {
@@ -19,6 +21,7 @@ export class InvOnHandQtyService {
         private readonly configService: ConfigService,
         private readonly oracleService: OracleService,
         private readonly redisService: RedisService,
+        private readonly salesItemConversionService: SalesItemConversionService,
     ) { }
 
     async getInvOnHandQtyFromOracle(
@@ -100,33 +103,36 @@ export class InvOnHandQtyService {
             this.logger.log(`First group items length: ${groupedData[0]?.items?.length || 0}`);
 
             // Transform to the expected format
-            const inventoryData: InvOnHandQtyDto[] = groupedData.map((group) => {
-                this.logger.log(`Processing group: ${group.SUBINVENTORY_CODE}, items count: ${group.items.length}`);
+            const inventoryData: InvOnHandQtyDto[] = await Promise.all(
+                groupedData.map(async (group) => {
+                    this.logger.log(`Processing group: ${group.SUBINVENTORY_CODE}, items count: ${group.items.length}`);
 
-                const items: ItemDto[] = group.items.map((item) => {
-                    // For now, create mock conversion data since we simplified the query
-                    const quantityConversions: QuantityConversionDto[] = [
-                        { UOM_CODE: 'DUS', QUANTITY: Math.round(item.QUANTITY / 600) },
-                        { UOM_CODE: 'BAL', QUANTITY: Math.round(item.QUANTITY / 100) },
-                        { UOM_CODE: 'PRS', QUANTITY: Math.round(item.QUANTITY / 10) },
-                        { UOM_CODE: 'BTG', QUANTITY: item.QUANTITY },
-                    ];
+                    const items: ItemDto[] = await Promise.all(
+                        group.items.map(async (item) => {
+                            // Get conversion rates from SalesItemConversionService
+                            const quantityConversions = await this.getQuantityConversions(
+                                item.ITEM_CODE,
+                                item.QUANTITY,
+                                item.UOM,
+                            );
+
+                            return {
+                                ITEM_CODE: item.ITEM_CODE,
+                                QUANTITY: item.QUANTITY,
+                                UOM: item.UOM,
+                                QUANTITY_CONVERTION: quantityConversions,
+                            };
+                        }),
+                    );
+
+                    this.logger.log(`Final items array length: ${items.length}`);
 
                     return {
-                        ITEM_CODE: item.ITEM_CODE,
-                        QUANTITY: item.QUANTITY,
-                        UOM: item.UOM,
-                        QUANTITY_CONVERTION: quantityConversions,
+                        SUBINVENTORY_CODE: group.SUBINVENTORY_CODE,
+                        ITEM: items,
                     };
-                });
-
-                this.logger.log(`Final items array length: ${items.length}`);
-
-                return {
-                    SUBINVENTORY_CODE: group.SUBINVENTORY_CODE,
-                    ITEM: items,
-                };
-            });
+                }),
+            );
 
             // Prepare response
             const response: InvOnHandQtyResponseDto = {
@@ -173,6 +179,92 @@ export class InvOnHandQtyService {
         }
     }
 
+    /**
+     * Get quantity conversions for an item using SalesItemConversionService
+     * @param itemCode Item code to get conversions for
+     * @param baseQuantity Quantity in base UOM
+     * @param baseUom Base UOM code
+     * @returns Array of quantity conversions
+     */
+    private async getQuantityConversions(
+        itemCode: string,
+        baseQuantity: number,
+        baseUom: string,
+    ): Promise<QuantityConversionDto[]> {
+        try {
+            // Get all conversions for this item
+            const conversions = await this.salesItemConversionService.findAllSalesItemConversions({
+                itemCode: itemCode,
+                limit: 1000, // Get all conversions for the item
+            });
+
+            if (!conversions || conversions.length === 0) {
+                this.logger.warn(`No conversions found for item ${itemCode}, returning base UOM only`);
+                // Return only base UOM if no conversions found
+                return [
+                    {
+                        UOM_CODE: baseUom,
+                        QUANTITY: baseQuantity,
+                    },
+                ];
+            }
+
+            // Build conversion array
+            const quantityConversions: QuantityConversionDto[] = [];
+            const addedUomCodes = new Set<string>(); // Track added UOM codes to avoid duplicates
+
+            // Add base UOM first
+            quantityConversions.push({
+                UOM_CODE: baseUom,
+                QUANTITY: baseQuantity,
+            });
+            addedUomCodes.add(baseUom.toUpperCase()); // Track base UOM
+
+            // Add conversions for each SOURCE_UOM_CODE
+            conversions.forEach((conversion: SalesItemConversionDto) => {
+                // Only process if BASE_UOM_CODE matches the item's base UOM
+                if (conversion.BASE_UOM_CODE === baseUom && conversion.CONVERSION_RATE > 0) {
+                    const sourceUomCode = conversion.SOURCE_UOM_CODE.toUpperCase();
+
+                    // Skip if this UOM code is already added (avoid duplicates)
+                    if (addedUomCodes.has(sourceUomCode)) {
+                        this.logger.debug(
+                            `Skipping duplicate UOM code ${conversion.SOURCE_UOM_CODE} for item ${itemCode}`,
+                        );
+                        return;
+                    }
+
+                    // Convert from base UOM to source UOM: divide by conversion rate
+                    const convertedQuantity = baseQuantity / conversion.CONVERSION_RATE;
+
+                    quantityConversions.push({
+                        UOM_CODE: conversion.SOURCE_UOM_CODE,
+                        QUANTITY: Math.round(convertedQuantity * 100) / 100, // Round to 2 decimal places
+                    });
+                    addedUomCodes.add(sourceUomCode); // Track added UOM
+                }
+            });
+
+            this.logger.log(
+                `Generated ${quantityConversions.length} conversions for item ${itemCode}`,
+            );
+
+            return quantityConversions;
+        } catch (error) {
+            this.logger.error(
+                `Error getting quantity conversions for item ${itemCode}: ${error.message}`,
+                error.stack,
+            );
+            // Return base UOM only on error
+            return [
+                {
+                    UOM_CODE: baseUom,
+                    QUANTITY: baseQuantity,
+                },
+            ];
+        }
+    }
+
     private groupInventoryData(rows: any[]): any[] {
         const groups = new Map();
 
@@ -212,14 +304,14 @@ export class InvOnHandQtyService {
      */
     async invalidateInvOnHandQtyCache(itemCode?: string, subinventoryCode?: string): Promise<void> {
         try {
-            if (itemCode && subinventoryCode) {
-                // Invalidate specific cache
-                const cacheKey = `inv-on-hand-qty:${itemCode}:${subinventoryCode}`;
+            if (itemCode || subinventoryCode) {
+                // Invalidate specific cache - use same key format as getInvOnHandQtyFromOracle
+                const cacheKey = `inv-on-hand-qty-v2:${itemCode || 'all'}:${subinventoryCode || 'all'}`;
                 await this.redisService.delete(cacheKey);
-                this.logger.log(`Invalidated cache for item ${itemCode} in subinventory ${subinventoryCode}`);
+                this.logger.log(`Invalidated cache for key: ${cacheKey}`);
             } else {
                 // Invalidate all inventory cache entries
-                await this.redisService.deleteByPattern('inv-on-hand-qty:*');
+                await this.redisService.deleteByPattern('inv-on-hand-qty-v2:*');
                 this.logger.log('Invalidated all inventory on hand quantity caches');
             }
         } catch (error) {

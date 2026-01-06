@@ -20,7 +20,7 @@ import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 export class SalesItemConversionController {
   constructor(
     private readonly salesItemConversionService: SalesItemConversionService,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({ summary: 'Get all sales item conversions' })
@@ -57,6 +57,7 @@ export class SalesItemConversionController {
   @ApiQuery({ name: 'page', required: false, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, description: 'Records per page' })
   async findAll(@Query() query: SalesItemConversionQueryDto): Promise<any> {
+    console.log('Controller received query params:', JSON.stringify(query));
     const data =
       await this.salesItemConversionService.findAllSalesItemConversions(query);
     const total =

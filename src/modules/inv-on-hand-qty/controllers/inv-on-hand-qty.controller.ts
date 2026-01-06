@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Logger } from '@nestjs/common';
+import { Controller, Get, Query, Delete, Logger, HttpCode, HttpStatus } from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
@@ -82,6 +82,62 @@ export class InvOnHandQtyController {
                 count: 0,
                 status: false,
                 message: `Error retrieving inventory data: ${error.message}`,
+            };
+        }
+    }
+
+    @Delete('cache')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Clear inventory on hand quantity cache',
+        description: 'Invalidate cache for inventory on hand quantity. Can clear specific cache by item_code and subinventory_code, or all caches if no parameters provided.',
+    })
+    @ApiQuery({
+        name: 'item_code',
+        required: false,
+        type: String,
+        description: 'Item code to clear specific cache',
+        example: 'CLM16',
+    })
+    @ApiQuery({
+        name: 'subinventory_code',
+        required: false,
+        type: String,
+        description: 'Subinventory code to clear specific cache',
+        example: 'GOOD-RK-1',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Cache cleared successfully',
+    })
+    async clearCache(
+        @Query('item_code') itemCode?: string,
+        @Query('subinventory_code') subinventoryCode?: string,
+    ): Promise<{ message: string; success: boolean }> {
+        this.logger.log('==== REST API: Clear inventory on hand quantity cache ====');
+        this.logger.log(`Item Code: ${itemCode || 'not provided'}, Subinventory Code: ${subinventoryCode || 'not provided'}`);
+
+        try {
+            await this.invOnHandQtyService.invalidateInvOnHandQtyCache(itemCode, subinventoryCode);
+            
+            const message = itemCode || subinventoryCode
+                ? `Cache cleared for item ${itemCode || 'all'} in subinventory ${subinventoryCode || 'all'}`
+                : 'All inventory on hand quantity caches cleared';
+
+            this.logger.log(message);
+            
+            return {
+                success: true,
+                message,
+            };
+        } catch (error) {
+            this.logger.error(
+                `REST API Error clearing cache: ${error.message}`,
+                error.stack,
+            );
+            return {
+                success: false,
+                message: `Error clearing cache: ${error.message}`,
             };
         }
     }
