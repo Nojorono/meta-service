@@ -54,18 +54,30 @@ RUN echo "=== Checking source files ===" && \
     ls -la /app/src/config/ | head -10
 
 # Build with verbose output
-RUN yarn build 2>&1 | tee /tmp/build.log || (echo "Build failed!" && cat /tmp/build.log && exit 1)
+RUN echo "=== Starting build process ===" && \
+    set -o pipefail && \
+    yarn build --verbose 2>&1 | tee /tmp/build.log || { \
+        echo "=== Build failed! Showing full build log ==="; \
+        cat /tmp/build.log; \
+        echo "=== Checking dist directory after failed build ==="; \
+        ls -la /app/dist/ 2>/dev/null || echo "dist directory does not exist"; \
+        exit 1; \
+    }
+RUN echo "=== Build succeeded, showing last 50 lines of log ===" && tail -50 /tmp/build.log
 
 # Debug: List all files in dist/config after build
-RUN echo "=== Files in dist/config ===" && ls -la /app/dist/config/ || echo "dist/config directory not found"
-RUN echo "=== Files in dist/app ===" && ls -la /app/dist/app/ || echo "dist/app directory not found"
-RUN echo "=== Files in dist root ===" && ls -la /app/dist/ | head -20
+RUN echo "=== Files in dist/config ===" && (ls -la /app/dist/config/ || echo "dist/config directory not found")
+RUN echo "=== Files in dist/app ===" && (ls -la /app/dist/app/ || echo "dist/app directory not found")
+RUN echo "=== Files in dist root ===" && (ls -la /app/dist/ | head -20 || echo "dist directory not found")
+RUN echo "=== Checking if dist directory exists ===" && test -d /app/dist && echo "dist directory exists" || echo "dist directory NOT FOUND"
 
-# Verify critical files were built
-RUN test -f /app/dist/main.js || (echo "ERROR: dist/main.js not found" && exit 1)
-RUN test -f /app/dist/app/app.controller.js || (echo "ERROR: dist/app/app.controller.js not found" && exit 1)
-RUN test -f /app/dist/config/rmq.config.js || (echo "ERROR: dist/config/rmq.config.js not found" && ls -la /app/dist/config/ && exit 1)
-RUN test -f /app/dist/config/index.js || (echo "ERROR: dist/config/index.js not found" && exit 1)
+# Verify critical files were built (with detailed error messages)
+RUN echo "=== Verifying critical files ===" && \
+    (test -f /app/dist/main.js && echo "✓ dist/main.js exists" || (echo "✗ ERROR: dist/main.js not found" && exit 1)) && \
+    (test -f /app/dist/app/app.controller.js && echo "✓ dist/app/app.controller.js exists" || (echo "✗ ERROR: dist/app/app.controller.js not found" && ls -la /app/dist/app/ && exit 1)) && \
+    (test -f /app/dist/config/index.js && echo "✓ dist/config/index.js exists" || (echo "✗ ERROR: dist/config/index.js not found" && echo "Files in dist/config:" && ls -la /app/dist/config/ && exit 1)) && \
+    (test -f /app/dist/config/rmq.config.js && echo "✓ dist/config/rmq.config.js exists" || (echo "✗ ERROR: dist/config/rmq.config.js not found" && echo "Files in dist/config:" && ls -la /app/dist/config/ && exit 1)) && \
+    echo "=== All critical files verified ==="
 
 # Production stage
 FROM node:20-alpine AS production
