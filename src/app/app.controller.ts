@@ -1,7 +1,7 @@
 import { Controller, Get, VERSION_NEUTRAL } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
 import { Public } from 'src/decorators/public.decorator';
-import { TypeormService } from 'src/common/services/typeorm.service';
+import { TypeormService } from '../common/services/typeorm.service';
 
 @Controller({
   version: VERSION_NEUTRAL,
@@ -11,7 +11,7 @@ export class AppController {
   constructor(
     private readonly healthCheckService: HealthCheckService,
     private readonly typeormService: TypeormService,
-  ) {}
+  ) { }
 
   @Get('/health')
   @HealthCheck()
