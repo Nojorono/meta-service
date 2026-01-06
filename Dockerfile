@@ -53,6 +53,18 @@ RUN echo "=== Checking source files ===" && \
     test -f /app/src/config/index.ts && echo "✓ index.ts exists" || echo "✗ index.ts NOT FOUND" && \
     ls -la /app/src/config/ | head -10
 
+# Clean dist and build cache before build
+RUN echo "=== Cleaning dist directory and build cache ===" && \
+    rm -rf /app/dist && \
+    rm -rf /app/tsconfig.build.tsbuildinfo && \
+    rm -rf /app/tsconfig.tsbuildinfo && \
+    rm -rf /app/node_modules/.cache
+
+# Temporarily disable incremental build to ensure all files are compiled
+RUN echo "=== Temporarily modifying tsconfig for clean build ===" && \
+    sed -i 's/"incremental": true/"incremental": false/' /app/tsconfig.json || \
+    echo "Note: Could not modify tsconfig.json (may not have incremental option)"
+
 # Build with output logging
 RUN echo "=== Starting build process ===" && \
     set -o pipefail && \
@@ -73,10 +85,38 @@ RUN echo "=== Checking if dist directory exists ===" && test -d /app/dist && ech
 
 # Verify critical files were built (with detailed error messages)
 RUN echo "=== Verifying critical files ===" && \
-    (test -f /app/dist/main.js && echo "✓ dist/main.js exists" || (echo "✗ ERROR: dist/main.js not found" && exit 1)) && \
-    (test -f /app/dist/app/app.controller.js && echo "✓ dist/app/app.controller.js exists" || (echo "✗ ERROR: dist/app/app.controller.js not found" && ls -la /app/dist/app/ && exit 1)) && \
-    (test -f /app/dist/config/index.js && echo "✓ dist/config/index.js exists" || (echo "✗ ERROR: dist/config/index.js not found" && echo "Files in dist/config:" && ls -la /app/dist/config/ && exit 1)) && \
-    (test -f /app/dist/config/rmq.config.js && echo "✓ dist/config/rmq.config.js exists" || (echo "✗ ERROR: dist/config/rmq.config.js not found" && echo "Files in dist/config:" && ls -la /app/dist/config/ && exit 1)) && \
+    if [ ! -f /app/dist/main.js ]; then \
+        echo "✗ ERROR: dist/main.js not found"; \
+        exit 1; \
+    else \
+        echo "✓ dist/main.js exists"; \
+    fi && \
+    if [ ! -f /app/dist/app/app.controller.js ]; then \
+        echo "✗ ERROR: dist/app/app.controller.js not found"; \
+        echo "Files in dist/app:"; \
+        ls -la /app/dist/app/ || echo "dist/app directory not found"; \
+        exit 1; \
+    else \
+        echo "✓ dist/app/app.controller.js exists"; \
+    fi && \
+    if [ ! -f /app/dist/config/index.js ]; then \
+        echo "✗ ERROR: dist/config/index.js not found"; \
+        echo "Files in dist/config:"; \
+        ls -la /app/dist/config/ || echo "dist/config directory not found"; \
+        echo "Checking if dist/config exists:"; \
+        test -d /app/dist/config && echo "dist/config directory exists" || echo "dist/config directory NOT FOUND"; \
+        exit 1; \
+    else \
+        echo "✓ dist/config/index.js exists"; \
+    fi && \
+    if [ ! -f /app/dist/config/rmq.config.js ]; then \
+        echo "✗ ERROR: dist/config/rmq.config.js not found"; \
+        echo "Files in dist/config:"; \
+        ls -la /app/dist/config/ || echo "dist/config directory not found"; \
+        exit 1; \
+    else \
+        echo "✓ dist/config/rmq.config.js exists"; \
+    fi && \
     echo "=== All critical files verified ==="
 
 # Production stage
