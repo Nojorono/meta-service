@@ -53,10 +53,10 @@ RUN echo "=== Checking source files ===" && \
     test -f /app/src/config/index.ts && echo "✓ index.ts exists" || echo "✗ index.ts NOT FOUND" && \
     ls -la /app/src/config/ | head -10
 
-# Build with verbose output
+# Build with output logging
 RUN echo "=== Starting build process ===" && \
     set -o pipefail && \
-    yarn build --verbose 2>&1 | tee /tmp/build.log || { \
+    yarn build 2>&1 | tee /tmp/build.log || { \
         echo "=== Build failed! Showing full build log ==="; \
         cat /tmp/build.log; \
         echo "=== Checking dist directory after failed build ==="; \
