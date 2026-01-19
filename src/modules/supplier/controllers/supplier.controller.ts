@@ -250,4 +250,39 @@ export class SupplierController {
       );
     }
   }
+
+  @Get('attribute7/list')
+  @AuthSwagger()
+  @ApiOperation({
+    summary: 'Get distinct ATTRIBUTE7 values',
+    description:
+      'Retrieve a list of all distinct ATTRIBUTE7 values from XTD_AP_SUPPLIERS_V view for dropdown options',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of distinct ATTRIBUTE7 values retrieved successfully',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'string',
+        example: 'FREIGHT (FRG)',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal server error',
+  })
+  async getDistinctAttribute7(): Promise<string[]> {
+    try {
+      this.logger.log('Fetching distinct ATTRIBUTE7 values');
+      return await this.supplierService.getDistinctAttribute7();
+    } catch (error) {
+      this.logger.error('Error fetching distinct ATTRIBUTE7:', error);
+      throw new HttpException(
+        'Failed to fetch distinct ATTRIBUTE7 values',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

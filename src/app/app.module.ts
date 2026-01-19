@@ -65,6 +65,7 @@ import { DoValidationModule } from 'src/modules/do-validation/do-validation.modu
 import { InvOnHandQtyModule } from 'src/modules/inv-on-hand-qty/inv-on-hand-qty.module';
 import { HrOperatingUnitsModule } from '../modules/hr-operating-units/hr-operating-units.module';
 import { ArCustomersSdModule } from '../modules/ar-customers-sd/ar-customers-sd.module';
+import { PoLineModule } from '../modules/po-line/po-line.module';
 
 @Module({
   imports: [
@@ -121,6 +122,7 @@ import { ArCustomersSdModule } from '../modules/ar-customers-sd/ar-customers-sd.
     InvOnHandQtyModule,
     HrOperatingUnitsModule,
     ArCustomersSdModule,
+    PoLineModule,
     AuthModule,
     // Other modules can be added here
 

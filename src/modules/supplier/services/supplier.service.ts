@@ -259,4 +259,26 @@ export class SupplierService {
       throw error;
     }
   }
+
+  async getDistinctAttribute7(): Promise<string[]> {
+    try {
+      const query = `
+        SELECT DISTINCT(ATTRIBUTE7) as ATTRIBUTE7
+        FROM APPS.XTD_AP_SUPPLIERS_V
+        WHERE ATTRIBUTE7 IS NOT NULL
+        ORDER BY ATTRIBUTE7
+      `;
+
+      const result = await this.oracleService.executeQuery(query, []);
+      const attribute7List = result.rows
+        .map((row: any) => row.ATTRIBUTE7)
+        .filter((value: string) => value !== null && value !== undefined);
+
+      this.logger.log(`Found ${attribute7List.length} distinct ATTRIBUTE7 values`);
+      return attribute7List;
+    } catch (error) {
+      this.logger.error('Error getting distinct ATTRIBUTE7:', error);
+      throw error;
+    }
+  }
 }
