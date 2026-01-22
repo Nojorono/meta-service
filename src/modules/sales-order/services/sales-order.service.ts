@@ -5,14 +5,14 @@ import { SalesOrderQueryDto } from '../dtos/sales-order.dtos';
 @Injectable()
 export class SalesOrderService {
   private readonly logger = new Logger(SalesOrderService.name);
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async findAll(
     query: SalesOrderQueryDto = {},
   ): Promise<{ data: any[]; total: number }> {
     const { order_number, page = 1, limit = 10 } = query;
     let sql = `
-      SELECT so.HEADER_ID, so.SO_TYPE, so.ORG_ID, so.STATUS, so.ORGANIZATION_ID, so.TRANSACTION_TYPE, so.ORDER_NUMBER,
+      SELECT so.HEADER_ID, so.SO_TYPE, so.ORG_ID, hou.NAME as ORG_NAME, so.STATUS, so.ORGANIZATION_ID, so.TRANSACTION_TYPE, so.ORDER_NUMBER,
         so.ORGANIZATION_ID_FROM, so.SUBINVENTORY_FROM, so.ORDERED_DATE, so.ORGANIZATION_ID_TO, so.SUBINVENTORY_TO,
         so.LOCATION_BILL, so.LOCATON_SHIP, so.INVOICE_TO_ADDRESS1, so.CREATED_BY, so.CREATED_DATE,
         so.INVENTORY_ITEM_ID, so.ITEM_DESC, so.ORDERED_QUANTITY, so.ORDER_QUANTITY_UOM, so.SHIPPING_QUANTITY, so.SHIPPING_QUANTITY_UOM,
@@ -23,6 +23,7 @@ export class SalesOrderService {
         FROM APPS.XTD_INV_SALES_ITEMS_V
         GROUP BY ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
       ) si ON si.INVENTORY_ITEM_ID = so.INVENTORY_ITEM_ID
+       LEFT JOIN APPS.HR_ORGANIZATION_UNITS hou ON hou.ORGANIZATION_ID = so.ORG_ID  
       WHERE 1=1
     `;
     const params: any[] = [];
@@ -60,6 +61,7 @@ export class SalesOrderService {
         HEADER_ID,
         SO_TYPE,
         ORG_ID,
+        ORG_NAME,
         STATUS,
         ORGANIZATION_ID,
         TRANSACTION_TYPE,
@@ -80,6 +82,7 @@ export class SalesOrderService {
           HEADER_ID,
           SO_TYPE,
           ORG_ID,
+          ORG_NAME,
           STATUS,
           ORGANIZATION_ID,
           TRANSACTION_TYPE,

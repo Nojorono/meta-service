@@ -13,6 +13,8 @@ export class SalesOrderDto {
   @ApiProperty()
   ORG_ID: number;
   @ApiProperty()
+  ORG_NAME: string;
+  @ApiProperty()
   STATUS: string;
   @ApiProperty()
   ORGANIZATION_ID: number;
