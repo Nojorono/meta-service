@@ -9,8 +9,10 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { PurchaseOrderService } from '../services/purchase-order.service';
 import { PurchaseOrderDto } from '../dtos/purchase-order.dtos';
 import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Purchase Order')
+@Public()
 @AuthSwagger()
 @Controller('purchase-order')
 export class PurchaseOrderController {
