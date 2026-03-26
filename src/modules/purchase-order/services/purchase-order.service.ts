@@ -1,13 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OracleService } from 'src/common/services/oracle.service';
-import { PurchaseOrderDto } from '../dtos/purchase-order.dtos';
+import {
+  PurchaseOrderDto,
+  PurchaseOrderResponseDto,
+} from '../dtos/purchase-order.dtos';
 
 @Injectable()
 export class PurchaseOrderService {
   private readonly logger = new Logger(PurchaseOrderService.name);
   constructor(private readonly oracleService: OracleService) {}
 
-  async findByNomorPO(nomorPO: string): Promise<PurchaseOrderDto[]> {
+  async findByNomorPO(nomorPO: string): Promise<PurchaseOrderResponseDto> {
     const sql = `
       SELECT DISTINCT
         PHA.SEGMENT1 AS NOMOR_PO,
@@ -41,33 +44,15 @@ export class PurchaseOrderService {
         AND PHA.SEGMENT1 IN (:1)
       ORDER BY NOMOR_PO, PO_LINE_NUM ASC
     `;
-    const params = [nomorPO];
-    const result = await this.oracleService.executeQuery(sql, params);
+    try {
+      const params = [nomorPO];
+      const result = await this.oracleService.executeQuery(sql, params);
 
-    // Parsing hasil query
-    const poData: Record<string, any> = {};
-    if (result && Array.isArray(result.rows)) {
-      for (const row of result.rows) {
-        const {
-          NOMOR_PO,
-          ID_VENDOR,
-          NAMA_VENDOR,
-          ALAMAT_VENDOR,
-          PRIN_GROUP,
-          TANGGAL_PEMBUATAN_PO,
-          STATUS_PO,
-          TANGGAL_APPROVE_PO,
-          PO_LINE_NUM,
-          SKU,
-          KODE_ITEM,
-          DESKRIPSI_ITEM_LINE_PO,
-          PO_LINE_QUANTITY,
-          UOM,
-          KONDISI_PO,
-        } = row;
-
-        if (!poData[NOMOR_PO]) {
-          poData[NOMOR_PO] = {
+      // Parsing hasil query
+      const poData: Record<string, any> = {};
+      if (result && Array.isArray(result.rows)) {
+        for (const row of result.rows) {
+          const {
             NOMOR_PO,
             ID_VENDOR,
             NAMA_VENDOR,
@@ -76,27 +61,66 @@ export class PurchaseOrderService {
             TANGGAL_PEMBUATAN_PO,
             STATUS_PO,
             TANGGAL_APPROVE_PO,
-            ITEM: [],
-          };
+            PO_LINE_NUM,
+            SKU,
+            KODE_ITEM,
+            DESKRIPSI_ITEM_LINE_PO,
+            PO_LINE_QUANTITY,
+            UOM,
+            KONDISI_PO,
+          } = row;
+
+          if (!poData[NOMOR_PO]) {
+            poData[NOMOR_PO] = {
+              NOMOR_PO,
+              ID_VENDOR,
+              NAMA_VENDOR,
+              ALAMAT_VENDOR,
+              PRIN_GROUP,
+              TANGGAL_PEMBUATAN_PO,
+              STATUS_PO,
+              TANGGAL_APPROVE_PO,
+              ITEM: [],
+            };
+          }
+
+          poData[NOMOR_PO].ITEM.push({
+            PO_LINE_NUM,
+            SKU,
+            KODE_ITEM,
+            DESKRIPSI_ITEM_LINE_PO,
+            PO_LINE_QUANTITY,
+            UOM,
+            STATUS: KONDISI_PO,
+          });
         }
-
-        poData[NOMOR_PO].ITEM.push({
-          PO_LINE_NUM,
-          SKU,
-          KODE_ITEM,
-          DESKRIPSI_ITEM_LINE_PO,
-          PO_LINE_QUANTITY,
-          UOM,
-          STATUS: KONDISI_PO,
-        });
+      } else {
+        this.logger.error(
+          'No rows returned from Oracle query or result is undefined.',
+        );
+        return {
+          data: [],
+          count: 0,
+          status: false,
+          message: 'Failed to retrieve Purchase Order',
+        };
       }
-    } else {
-      this.logger.error(
-        'No rows returned from Oracle query or result is undefined.',
-      );
-      throw new Error('Failed to retrieve Purchase Order');
-    }
 
-    return Object.values(poData);
+      const purchaseOrderData = Object.values(poData) as PurchaseOrderDto[];
+      return {
+        data: purchaseOrderData,
+        count: purchaseOrderData.length,
+        status: true,
+        message: 'Purchase Order retrieved successfully',
+      };
+    } catch (error) {
+      this.logger.error(`Error retrieving Purchase Order: ${error.message}`);
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error retrieving Purchase Order: ${error.message}`,
+      };
+    }
   }
 }

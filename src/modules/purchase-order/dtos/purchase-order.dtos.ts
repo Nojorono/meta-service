@@ -15,3 +15,10 @@ export class PurchaseOrderDto {
   UOM: string;
   KONDISI_PO: string;
 }
+
+export class PurchaseOrderResponseDto {
+  data: PurchaseOrderDto[];
+  count: number;
+  status: boolean;
+  message: string;
+}
