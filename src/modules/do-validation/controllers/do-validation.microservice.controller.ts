@@ -48,4 +48,23 @@ export class DoValidationMicroserviceController {
             };
         }
     }
+
+    @MessagePattern('do_validation_find_by_surat_jalan_so')
+    async findBySuratJalanSO(@Payload() data: { noSuratJalan: string }): Promise<DoValidationResponseDto> {
+        this.logger.log('==== MICROSERVICE: Find DO validation by delivery order number ====');
+        this.logger.log(`Delivery order number: ${data.noSuratJalan}`);
+
+        try {
+            return await this.doValidationService.findBySuratJalanSO(data.noSuratJalan);
+        }
+        catch (error) {
+            this.logger.error(`Error in microservice findBySuratJalanSO: ${error.message}`, error.stack);
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error retrieving DO validation data for delivery order ${data.noSuratJalan}: ${error.message}`,
+            };
+        }
+    }
 }

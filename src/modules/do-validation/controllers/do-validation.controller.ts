@@ -61,6 +61,24 @@ export class DoValidationController {
         }
     }
 
+    @Get('surat-jalan-so/:noSuratJalan')
+    @ApiOperation({ summary: 'Get DO validation data by delivery order number' })
+    @ApiResponse({
+        status: 200,
+        description: 'DO validation data for the specified delivery order retrieved successfully',
+        type: DoValidationResponseDto,
+    })
+    @ApiParam({
+        name: 'noSuratJalan',
+        description: 'Delivery order number to filter by',
+        example: 'DO-2024-001',
+        type: String,
+    })
+    async getBySuratJalanSO(@Param('noSuratJalan') noSuratJalan: string): Promise<DoValidationResponseDto> {
+        this.logger.log(`Getting DO validation data for delivery order: ${noSuratJalan}`);
+        return await this.doValidationService.findBySuratJalanSO(noSuratJalan);
+    }
+
     @Get()
     @ApiOperation({ summary: 'Get all DO validation data' })
     @ApiResponse({

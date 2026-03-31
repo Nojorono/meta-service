@@ -167,4 +167,59 @@ export class DoValidationService {
             };
         }
     }
+
+    async findBySuratJalanSO(noSuratJalan: string): Promise<DoValidationResponseDto> {
+        const cacheKey = `do_validation_so:${noSuratJalan}`;
+
+        try {
+            const cachedData = await this.redisService.get(cacheKey);
+            if (cachedData) {
+                this.logger.log(`Cache hit for ${cacheKey}`);
+                return JSON.parse(cachedData as string) as DoValidationResponseDto;
+            }
+            this.logger.log(`Cache miss for ${cacheKey}, fetching from Oracle`);
+        } catch (error) {
+            this.logger.error(`Error accessing Redis cache: ${error.message}`, error.stack);
+        }
+
+        try {
+            const query = `
+                SELECT * FROM XTD_OM_ISO_SJ_DELIVERY
+                WHERE NO_SJ = :1
+            `;
+
+            const result = await this.oracleService.executeQuery(query, [noSuratJalan]);
+
+            const doValidationData = result.rows as any[];
+
+            const response: any = {
+                data: doValidationData,
+                count: doValidationData.length,
+                status: true,
+                message: `DO validation SO data for ${noSuratJalan} retrieved successfully`,
+            };
+
+            try {
+                await this.redisService.set(
+                    cacheKey,
+                    JSON.stringify(response),
+                    this.CACHE_TTL,
+                );
+                this.logger.log(`Data stored in cache with key ${cacheKey}`);
+            } catch (cacheError) {
+                this.logger.error(`Error storing data in Redis: ${cacheError.message}`, cacheError.stack);
+            }
+
+            return response;
+
+        } catch (error) {
+            this.logger.error(`Error in findBySuratJalanSO: ${error.message}`, error.stack);
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error retrieving DO validation data for ${noSuratJalan}: ${error.message}`,
+            };
+        }
+    }
 }
