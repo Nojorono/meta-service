@@ -33,7 +33,7 @@ export class DoValidationController {
         };
     }
 
-    @Get('no-surat-jalan/:noSuratJalan')
+    @Get('no-surat-jalan/:noSuratJalan(*)')
     @ApiOperation({ summary: 'Get DO validation data by delivery order number' })
     @ApiResponse({
         status: 200,
@@ -61,7 +61,7 @@ export class DoValidationController {
         }
     }
 
-    @Get('surat-jalan-so/:noSuratJalan')
+    @Get('surat-jalan-so/:noSuratJalan(*)')
     @ApiOperation({ summary: 'Get DO validation data by delivery order number' })
     @ApiResponse({
         status: 200,
