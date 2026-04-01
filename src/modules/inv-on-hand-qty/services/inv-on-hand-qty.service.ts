@@ -27,10 +27,11 @@ export class InvOnHandQtyService {
     async getInvOnHandQtyFromOracle(
         params?: InvOnHandQtyParamsDto,
     ): Promise<InvOnHandQtyResponseDto> {
-        const { item_code, subinventory_code } = params || {};
+        const { item_code, subinventory_code, organization_code } = params || {};
+        const organizationCode = organization_code ?? 'CWH';
 
         // Generate unique cache key based on parameters
-        const cacheKey = `inv-on-hand-qty-v2:${item_code || 'all'}:${subinventory_code || 'all'}`;
+        const cacheKey = `inv-on-hand-qty-v2:${organizationCode}:${item_code || 'all'}:${subinventory_code || 'all'}`;
 
         // Try to get data from cache first
         try {
@@ -60,21 +61,24 @@ export class InvOnHandQtyService {
                 b.SOURCE_UOM_CODE AS UOM
             FROM XTD_INV_ON_HAND_QTY_V a
             LEFT JOIN APPS.XTD_INV_SALES_ITEM_CONVERSIONS_V b ON b.ITEM_CODE = a.ITEM_CODE 
-            WHERE a.ORGANIZATION_CODE = 'CWH'
+            WHERE a.ORGANIZATION_CODE = :1
       `;
 
-            const queryParams = [];
+            const queryParams: any[] = [organizationCode];
+            let paramIndex = 2;
 
             // Add item_code filter if provided
             if (item_code) {
-                query += ` AND a.ITEM_CODE = :item_code`;
+                query += ` AND a.ITEM_CODE = :${paramIndex}`;
                 queryParams.push(item_code);
+                paramIndex++;
             }
 
             // Add subinventory_code filter if provided
             if (subinventory_code) {
-                query += ` AND a.SUBINVENTORY_CODE = :subinventory_code`;
+                query += ` AND a.SUBINVENTORY_CODE = :${paramIndex}`;
                 queryParams.push(subinventory_code);
+                paramIndex++;
             }
 
             // query += ` ORDER BY a.SUBINVENTORY_CODE, a.ITEM_CODE, a.SOURCE_UOM_CODE`;
@@ -82,18 +86,20 @@ export class InvOnHandQtyService {
             const result = await this.oracleService.executeQuery(query, queryParams);
 
             if (result.rows.length === 0) {
-                const filterMsg = item_code && subinventory_code
-                    ? `for item ${item_code} in subinventory ${subinventory_code}`
-                    : item_code
-                        ? `for item ${item_code}`
-                        : subinventory_code
-                            ? `in subinventory ${subinventory_code}`
-                            : '';
+                const filterMsg = [
+                    `org ${organizationCode}`,
+                    item_code && `item ${item_code}`,
+                    subinventory_code && `subinventory ${subinventory_code}`,
+                ]
+                    .filter(Boolean)
+                    .join(', ');
                 return {
                     data: [],
                     count: 0,
                     status: false,
-                    message: `No inventory data found ${filterMsg}`,
+                    message: filterMsg
+                        ? `No inventory data found (${filterMsg})`
+                        : 'No inventory data found',
                 };
             }
 
@@ -139,13 +145,15 @@ export class InvOnHandQtyService {
                 data: inventoryData,
                 count: inventoryData.length,
                 status: true,
-                message: item_code && subinventory_code
-                    ? `ON_HAND_QUANTITY data for ${item_code} in ${subinventory_code} retrieved successfully`
-                    : item_code
-                        ? `ON_HAND_QUANTITY data for ${item_code} retrieved successfully`
-                        : subinventory_code
-                            ? `ON_HAND_QUANTITY data in ${subinventory_code} retrieved successfully`
-                            : 'ON_HAND_QUANTITY data retrieved successfully',
+                message: [
+                    'ON_HAND_QUANTITY data',
+                    `org ${organizationCode}`,
+                    item_code && `item ${item_code}`,
+                    subinventory_code && `subinventory ${subinventory_code}`,
+                    'retrieved successfully',
+                ]
+                    .filter(Boolean)
+                    .join(' '),
             };
 
             // Store in Redis cache
@@ -302,11 +310,15 @@ export class InvOnHandQtyService {
      * @param itemCode Optional item code to invalidate specific cache
      * @param subinventoryCode Optional subinventory code to invalidate specific cache
      */
-    async invalidateInvOnHandQtyCache(itemCode?: string, subinventoryCode?: string): Promise<void> {
+    async invalidateInvOnHandQtyCache(
+        itemCode?: string,
+        subinventoryCode?: string,
+        organizationCode?: string,
+    ): Promise<void> {
         try {
-            if (itemCode || subinventoryCode) {
-                // Invalidate specific cache - use same key format as getInvOnHandQtyFromOracle
-                const cacheKey = `inv-on-hand-qty-v2:${itemCode || 'all'}:${subinventoryCode || 'all'}`;
+            if (itemCode || subinventoryCode || organizationCode) {
+                const org = organizationCode ?? 'CWH';
+                const cacheKey = `inv-on-hand-qty-v2:${org}:${itemCode || 'all'}:${subinventoryCode || 'all'}`;
                 await this.redisService.delete(cacheKey);
                 this.logger.log(`Invalidated cache for key: ${cacheKey}`);
             } else {

@@ -1,4 +1,13 @@
-import { Controller, Get, Query, Delete, Logger, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Query,
+    Delete,
+    Logger,
+    HttpCode,
+    HttpStatus,
+    BadRequestException,
+} from '@nestjs/common';
 import {
     ApiTags,
     ApiOperation,
@@ -86,6 +95,87 @@ export class InvOnHandQtyController {
         }
     }
 
+    @Get('by-organization')
+    @ApiOperation({
+        summary: 'Get inventory on hand quantity by organization',
+        description:
+            'Same as the main inventory endpoint, but requires organization_code to filter by inventory organization (e.g. CWH, branch code). Optional item_code and subinventory_code filters apply.',
+    })
+    @ApiQuery({
+        name: 'organization_code',
+        required: true,
+        type: String,
+        description: 'Organization code to filter (maps to ORGANIZATION_CODE on the view)',
+        example: 'CWH',
+    })
+    @ApiQuery({
+        name: 'item_code',
+        required: false,
+        type: String,
+        description: 'Item code to filter inventory data',
+        example: 'CLM16',
+    })
+    @ApiQuery({
+        name: 'subinventory_code',
+        required: false,
+        type: String,
+        description: 'Subinventory code to filter inventory data',
+        example: 'GOOD-RK-1',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Inventory on hand quantity data retrieved successfully',
+        type: InvOnHandQtyResponseDto,
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Bad request - organization_code is required',
+    })
+    async getInvOnHandQtyByOrganization(
+        @Query('organization_code') organizationCode: string,
+        @Query('item_code') itemCode?: string,
+        @Query('subinventory_code') subinventoryCode?: string,
+    ): Promise<InvOnHandQtyResponseDto> {
+        this.logger.log('==== REST API: Get inventory on hand quantity by organization ====');
+        this.logger.log(
+            `Organization Code: ${organizationCode || 'not provided'}, Item Code: ${itemCode || 'not provided'}, Subinventory Code: ${subinventoryCode || 'not provided'}`,
+        );
+
+        if (!organizationCode?.trim()) {
+            throw new BadRequestException('organization_code is required');
+        }
+
+        try {
+            const params: InvOnHandQtyParamsDto = {
+                organization_code: organizationCode.trim(),
+                item_code: itemCode,
+                subinventory_code: subinventoryCode,
+            };
+
+            const result = await this.invOnHandQtyService.getInvOnHandQtyFromOracle(params);
+
+            this.logger.log(
+                `REST API getInvOnHandQtyByOrganization result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
+            );
+
+            return result;
+        } catch (error) {
+            if (error instanceof BadRequestException) {
+                throw error;
+            }
+            this.logger.error(
+                `REST API Error retrieving inventory on hand quantity by organization: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error retrieving inventory data: ${error.message}`,
+            };
+        }
+    }
+
     @Delete('cache')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({
@@ -106,6 +196,13 @@ export class InvOnHandQtyController {
         description: 'Subinventory code to clear specific cache',
         example: 'GOOD-RK-1',
     })
+    @ApiQuery({
+        name: 'organization_code',
+        required: false,
+        type: String,
+        description: 'Organization code segment of the cache key (defaults to CWH when omitted)',
+        example: 'CWH',
+    })
     @ApiResponse({
         status: 200,
         description: 'Cache cleared successfully',
@@ -113,16 +210,24 @@ export class InvOnHandQtyController {
     async clearCache(
         @Query('item_code') itemCode?: string,
         @Query('subinventory_code') subinventoryCode?: string,
+        @Query('organization_code') organizationCode?: string,
     ): Promise<{ message: string; success: boolean }> {
         this.logger.log('==== REST API: Clear inventory on hand quantity cache ====');
-        this.logger.log(`Item Code: ${itemCode || 'not provided'}, Subinventory Code: ${subinventoryCode || 'not provided'}`);
+        this.logger.log(
+            `Organization Code: ${organizationCode || 'not provided'}, Item Code: ${itemCode || 'not provided'}, Subinventory Code: ${subinventoryCode || 'not provided'}`,
+        );
 
         try {
-            await this.invOnHandQtyService.invalidateInvOnHandQtyCache(itemCode, subinventoryCode);
+            await this.invOnHandQtyService.invalidateInvOnHandQtyCache(
+                itemCode,
+                subinventoryCode,
+                organizationCode,
+            );
             
-            const message = itemCode || subinventoryCode
-                ? `Cache cleared for item ${itemCode || 'all'} in subinventory ${subinventoryCode || 'all'}`
-                : 'All inventory on hand quantity caches cleared';
+            const message =
+                itemCode || subinventoryCode || organizationCode
+                    ? `Cache cleared for org ${organizationCode || 'CWH'}, item ${itemCode || 'all'}, subinventory ${subinventoryCode || 'all'}`
+                    : 'All inventory on hand quantity caches cleared';
 
             this.logger.log(message);
             

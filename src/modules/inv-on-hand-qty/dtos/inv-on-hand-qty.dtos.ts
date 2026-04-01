@@ -59,6 +59,14 @@ export class InvOnHandQtyParamsDto {
     @IsString()
     @IsOptional()
     subinventory_code?: string;
+
+    @ApiPropertyOptional({
+        description: 'Organization code (inventory org) to filter',
+        example: 'CWH',
+    })
+    @IsString()
+    @IsOptional()
+    organization_code?: string;
 }
 
 export class InvOnHandQtyResponseDto {

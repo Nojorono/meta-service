@@ -59,7 +59,12 @@ export class InvOnHandQtyMicroserviceController {
 
     @MessagePattern('invalidate_inv_on_hand_qty_cache')
     async invalidateInvOnHandQtyCache(
-        @Payload() data?: { itemCode?: string; subinventoryCode?: string },
+        @Payload()
+        data?: {
+            itemCode?: string;
+            subinventoryCode?: string;
+            organizationCode?: string;
+        },
     ): Promise<{ status: boolean; message: string }> {
         try {
             this.logger.log(
@@ -69,6 +74,7 @@ export class InvOnHandQtyMicroserviceController {
             await this.invOnHandQtyService.invalidateInvOnHandQtyCache(
                 data?.itemCode,
                 data?.subinventoryCode,
+                data?.organizationCode,
             );
 
             return {
@@ -108,6 +114,39 @@ export class InvOnHandQtyMicroserviceController {
     async findByItemAndSubinventory(@Payload() data: { itemCode: string; subinventoryCode: string }) {
         try {
             const params: InvOnHandQtyParamsDto = {
+                item_code: data.itemCode,
+                subinventory_code: data.subinventoryCode,
+            };
+            return await this.invOnHandQtyService.getInvOnHandQtyFromOracle(params);
+        } catch (error) {
+            return {
+                success: false,
+                error: error.message,
+            };
+        }
+    }
+
+    @MessagePattern('invOnHandQty.findByOrganization')
+    @Internal()
+    async findByOrganization(
+        @Payload()
+        data: {
+            organizationCode: string;
+            itemCode?: string;
+            subinventoryCode?: string;
+        },
+    ) {
+        try {
+            if (!data?.organizationCode?.trim()) {
+                return {
+                    data: [],
+                    count: 0,
+                    status: false,
+                    message: 'organizationCode is required',
+                };
+            }
+            const params: InvOnHandQtyParamsDto = {
+                organization_code: data.organizationCode.trim(),
                 item_code: data.itemCode,
                 subinventory_code: data.subinventoryCode,
             };
