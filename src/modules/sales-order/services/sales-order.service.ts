@@ -17,7 +17,90 @@ export class SalesOrderService {
         so.LOCATION_BILL, so.LOCATON_SHIP, so.INVOICE_TO_ADDRESS1, so.CREATED_BY, so.CREATED_DATE,
         so.INVENTORY_ITEM_ID, so.ITEM_DESC, so.ORDERED_QUANTITY, so.ORDER_QUANTITY_UOM, so.SHIPPING_QUANTITY, so.SHIPPING_QUANTITY_UOM,
         si.ITEM_CODE, si.ITEM_NUMBER, si.ITEM_DESCRIPTION
-      FROM APPS.XTD_ONT_SO_OPEN_V so
+      FROM (SELECT CASE
+               WHEN ot.name = 'HOQ-Taking Order'
+               THEN
+                  'SO SUB-DIST'
+               WHEN ot.name = 'HOQ-Internal Order'
+               THEN
+                  'ISO DC To Cabang'
+               WHEN ot.name LIKE '%Internal Order'
+                    AND UPPER (hcs_bill.location) LIKE '%TO CWH%'
+               THEN
+                  'ISO Cabang to CWH'
+               WHEN ot.name LIKE '%Internal Order'
+                    AND UPPER (msib.description) LIKE 'BS%'
+               THEN
+                  'ISO RETUR BS'
+               WHEN ot.name LIKE '%Internal Order'
+               THEN
+                  'ISO'
+               ELSE
+                  'SO'
+            END
+               AS SO_TYPE,
+	            ooha.header_id header_id,
+	            ooha.org_id org_id,
+	            oola.flow_status_code status,
+	            ooha.ship_from_org_id organization_id,
+	            ot.name transaction_type,
+	            ooha.order_number,
+	            oola.ship_from_org_id organization_id_from,
+	            mp.organization_code subinventory_from,
+	            ooha.ordered_date ordered_date,
+	            oola.ship_from_org_id organization_id_to,
+	            hp_bill.party_name subinventory_to,
+	            hcs_bill.location location_bill,
+	            hcs_ship.location locaton_ship,
+	            hl_ship.address1 invoice_to_address1,
+	            ooha.created_by created_by,
+	            ooha.creation_date created_date,
+	            oola.inventory_item_id inventory_item_id,
+	            msib.description item_desc,
+	            oola.ordered_quantity,
+	            oola.order_quantity_uom,
+	            oola.shipping_quantity,
+	            oola.shipping_quantity_uom
+	       FROM apps.oe_order_headers_all ooha,
+	            apps.oe_order_lines_all oola,
+	            apps.oe_order_holds_all ohld,
+	            apps.oe_transaction_types_tl ot,
+	            hz_cust_site_uses_all hcs_ship,
+	            hz_cust_acct_sites_all hca_ship,
+	            hz_party_sites hps_ship,
+	            hz_parties hp_ship,
+	            hz_locations hl_ship,
+	            hz_cust_site_uses_all hcs_bill,
+	            hz_cust_acct_sites_all hca_bill,
+	            hz_party_sites hps_bill,
+	            hz_parties hp_bill,
+	            hz_cust_accounts hca,
+	            mtl_system_items_b msib,
+	            mtl_parameters mp
+	      WHERE     1 = 1
+	            AND ooha.header_id = oola.header_id
+	            AND ooha.header_id = ohld.header_id(+)
+	            AND NVL (ohld.released_flag, 'Y') = 'Y'
+	            AND ooha.ship_to_org_id = hcs_ship.site_use_id
+	            AND hcs_ship.cust_acct_site_id = hca_ship.cust_acct_site_id
+	            AND hca_ship.party_site_id = hps_ship.party_site_id
+	            AND hps_ship.party_id = hp_ship.party_id
+	            AND hps_ship.location_id = hl_ship.location_id
+	            AND ooha.invoice_to_org_id = hcs_bill.site_use_id(+)
+	            AND hcs_bill.site_use_code = 'BILL_TO'
+	            AND hcs_bill.cust_acct_site_id = hca_bill.cust_acct_site_id
+	            AND hca_bill.party_site_id = hps_bill.party_site_id
+	            AND hps_bill.party_id = hp_bill.party_id
+	            AND hp_bill.party_id = hca.party_id
+	            AND msib.inventory_item_id = oola.inventory_item_id
+	            AND msib.organization_id = oola.ship_from_org_id
+	            AND ooha.order_type_id = ot.transaction_type_id
+	            AND oola.ship_from_org_id = mp.organization_id
+	            AND NVL (oola.cancelled_flag, '-') = 'N'
+	            AND NVL (oola.BOOKED_flag, '-') = 'Y'
+	            AND UPPER(ot.name) NOT LIKE '%CANVAS%'
+	            --AND NVL (oola.flow_status_code, '-') NOT IN ('CLOSED', 'CANCELLED', 'ENTERED')
+	   ORDER BY organization_id, order_number) so
       LEFT JOIN (
         SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
         FROM APPS.XTD_INV_SALES_ITEMS_V
