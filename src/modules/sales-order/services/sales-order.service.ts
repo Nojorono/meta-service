@@ -11,13 +11,7 @@ export class SalesOrderService {
     query: SalesOrderQueryDto = {},
   ): Promise<{ data: any[]; total: number }> {
     const { order_number, page = 1, limit = 10 } = query;
-    let sql = `
-      SELECT so.HEADER_ID, so.SO_TYPE, so.ORG_ID, hou.NAME as ORG_NAME, so.STATUS, so.ORGANIZATION_ID, so.TRANSACTION_TYPE, so.ORDER_NUMBER,
-        so.ORGANIZATION_ID_FROM, so.SUBINVENTORY_FROM, so.ORDERED_DATE, so.ORGANIZATION_ID_TO, so.SUBINVENTORY_TO,
-        so.LOCATION_BILL, so.LOCATON_SHIP, so.INVOICE_TO_ADDRESS1, so.CREATED_BY, so.CREATED_DATE,
-        so.INVENTORY_ITEM_ID, so.ITEM_DESC, so.ORDERED_QUANTITY, so.ORDER_QUANTITY_UOM, so.SHIPPING_QUANTITY, so.SHIPPING_QUANTITY_UOM,
-        si.ITEM_CODE, si.ITEM_NUMBER, si.ITEM_DESCRIPTION
-      FROM (SELECT CASE
+    const XTD_ONT_SO_OPEN_V = `SELECT CASE
                WHEN ot.name = 'HOQ-Taking Order'
                THEN
                   'SO SUB-DIST'
@@ -100,7 +94,14 @@ export class SalesOrderService {
 	            AND NVL (oola.BOOKED_flag, '-') = 'Y'
 	            AND UPPER(ot.name) NOT LIKE '%CANVAS%'
 	            --AND NVL (oola.flow_status_code, '-') NOT IN ('CLOSED', 'CANCELLED', 'ENTERED')
-	   ORDER BY organization_id, order_number) so
+	   ORDER BY organization_id, order_number`
+    let sql = `
+      SELECT so.HEADER_ID, so.SO_TYPE, so.ORG_ID, hou.NAME as ORG_NAME, so.STATUS, so.ORGANIZATION_ID, so.TRANSACTION_TYPE, so.ORDER_NUMBER,
+        so.ORGANIZATION_ID_FROM, so.SUBINVENTORY_FROM, so.ORDERED_DATE, so.ORGANIZATION_ID_TO, so.SUBINVENTORY_TO,
+        so.LOCATION_BILL, so.LOCATON_SHIP, so.INVOICE_TO_ADDRESS1, so.CREATED_BY, so.CREATED_DATE,
+        so.INVENTORY_ITEM_ID, so.ITEM_DESC, so.ORDERED_QUANTITY, so.ORDER_QUANTITY_UOM, so.SHIPPING_QUANTITY, so.SHIPPING_QUANTITY_UOM,
+        si.ITEM_CODE, si.ITEM_NUMBER, si.ITEM_DESCRIPTION
+      FROM (${XTD_ONT_SO_OPEN_V}) so
       LEFT JOIN (
         SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
         FROM APPS.XTD_INV_SALES_ITEMS_V
@@ -123,7 +124,7 @@ export class SalesOrderService {
     params.push(limit);
     const result = await this.oracleService.executeQuery(sql, params);
     // Get total count
-    let countSql = `SELECT COUNT(*) AS TOTAL FROM APPS.XTD_ONT_SO_OPEN_V so WHERE 1=1`;
+    let countSql = `SELECT COUNT(*) AS TOTAL FROM (${XTD_ONT_SO_OPEN_V}) so WHERE 1=1`;
     const countParams: any[] = [];
     let countIndex = 1;
     if (order_number) {
