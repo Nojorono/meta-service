@@ -89,7 +89,11 @@ export class OrganizationController {
       this.logger.log('Fetching all organizations with filters:', queryDto);
       return await this.organizationService.findAllOrganizations(queryDto);
     } catch (error) {
-      this.logger.error('Error fetching organizations:', error);
+      const errMsg = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Error fetching organizations: ${errMsg}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw new HttpException(
         'Failed to fetch organizations',
         HttpStatus.INTERNAL_SERVER_ERROR,

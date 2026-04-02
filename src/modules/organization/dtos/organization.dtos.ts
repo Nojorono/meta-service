@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class OrganizationDto {
   @ApiProperty({
@@ -73,6 +75,8 @@ export class OrganizationQueryDto {
     example: 'ORG001',
     required: false,
   })
+  @IsOptional()
+  @IsString()
   organizationCode?: string;
 
   @ApiProperty({
@@ -80,6 +84,8 @@ export class OrganizationQueryDto {
     example: 'Sales',
     required: false,
   })
+  @IsOptional()
+  @IsString()
   organizationName?: string;
 
   @ApiProperty({
@@ -87,6 +93,8 @@ export class OrganizationQueryDto {
     example: 'SALES',
     required: false,
   })
+  @IsOptional()
+  @IsString()
   organizationType?: string;
 
   @ApiProperty({
@@ -94,6 +102,8 @@ export class OrganizationQueryDto {
     example: 'JKT',
     required: false,
   })
+  @IsOptional()
+  @IsString()
   locationCode?: string;
 
   @ApiProperty({
@@ -101,6 +111,10 @@ export class OrganizationQueryDto {
     example: 1,
     required: false,
   })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
   page?: number;
 
   @ApiProperty({
@@ -108,5 +122,10 @@ export class OrganizationQueryDto {
     example: 10,
     required: false,
   })
+  @Type(() => Number)
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(500)
   limit?: number;
 }

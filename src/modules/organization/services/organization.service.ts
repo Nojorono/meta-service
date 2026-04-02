@@ -8,8 +8,25 @@ import {
 @Injectable()
 export class OrganizationService {
   private readonly logger = new Logger(OrganizationService.name);
+  private readonly maxPageSize = 500;
 
   constructor(private readonly oracleService: OracleService) {}
+
+  private normalizePage(value: unknown): number {
+    const n = parseInt(String(value ?? ''), 10);
+    if (!Number.isFinite(n) || n < 1) {
+      return 1;
+    }
+    return n;
+  }
+
+  private normalizeLimit(value: unknown): number {
+    const n = parseInt(String(value ?? ''), 10);
+    if (!Number.isFinite(n) || n < 1) {
+      return 10;
+    }
+    return Math.min(n, this.maxPageSize);
+  }
 
   async findAllOrganizations(
     queryDto: OrganizationQueryDto = {},
@@ -20,9 +37,12 @@ export class OrganizationService {
         organizationName,
         organizationType,
         locationCode,
-        page = 1,
-        limit = 10,
+        page,
+        limit,
       } = queryDto;
+
+      const pageNum = this.normalizePage(page);
+      const limitNum = this.normalizeLimit(limit);
 
       let query = `
         SELECT 
@@ -67,10 +87,10 @@ export class OrganizationService {
         paramIndex++;
       }
 
-      // Add pagination
-      const offset = (page - 1) * limit;
+      // Add pagination (page/limit from query are strings unless transformed — normalize to safe integers)
+      const offset = (pageNum - 1) * limitNum;
       query += ` ORDER BY ORGANIZATION_CODE OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
-      params.push(offset, limit);
+      params.push(offset, limitNum);
 
       const result = await this.oracleService.executeQuery(query, params);
 
