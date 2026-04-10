@@ -22,6 +22,7 @@ export class HrOperatingUnitsService {
         orgCode,
         shortCode,
         usableFlag,
+        organizationCode,
       } = queryDto;
 
       let query = `
@@ -37,6 +38,7 @@ export class HrOperatingUnitsService {
           ou.ORG_ID,
           ou.ORG_NAME,
           ou.ORGANIZATION_ID,
+          REGEXP_SUBSTR(ou.ORG_CODE, '[^_]+', 1, 2) AS ORGANIZATION_CODE,
           ou.SET_OF_BOOKS_ID,
           ou.SHORT_CODE,
           ou.USABLE_FLAG,
@@ -80,6 +82,12 @@ export class HrOperatingUnitsService {
         paramIndex++;
       }
 
+      if (organizationCode) {
+        query += ` AND UPPER(REGEXP_SUBSTR(ou.ORG_CODE, '[^_]+', 1, 2)) = UPPER(:${paramIndex})`;
+        params.push(`%${organizationCode}%`);
+        paramIndex++;
+      }
+
       if (usableFlag) {
         query += ` AND UPPER(ou.USABLE_FLAG) = UPPER(:${paramIndex})`;
         params.push(usableFlag);
@@ -111,6 +119,7 @@ export class HrOperatingUnitsService {
           ou.ORG_ID,
           ou.ORG_NAME,
           ou.ORGANIZATION_ID,
+          REGEXP_SUBSTR(ou.ORG_CODE, '[^_]+', 1, 2) AS ORGANIZATION_CODE,
           ou.SET_OF_BOOKS_ID,
           ou.SHORT_CODE,
           ou.USABLE_FLAG,
@@ -156,6 +165,7 @@ export class HrOperatingUnitsService {
           ou.ORG_ID,
           ou.ORG_NAME,
           ou.ORGANIZATION_ID,
+          REGEXP_SUBSTR(ou.ORG_CODE, '[^_]+', 1, 2) AS ORGANIZATION_CODE,
           ou.SET_OF_BOOKS_ID,
           ou.SHORT_CODE,
           ou.USABLE_FLAG,

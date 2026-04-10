@@ -77,6 +77,13 @@ export class HrOperatingUnitsDto {
   ORGANIZATION_ID?: number;
 
   @ApiProperty({
+    description: 'Organization Code',
+    example: 'JAT',
+    required: false,
+  })
+  ORGANIZATION_CODE?: string;
+
+  @ApiProperty({
     description: 'Set of Books ID',
     example: 'SOB001',
     required: false,
@@ -128,11 +135,18 @@ export class HrOperatingUnitsQueryDto {
   orgName?: string;
 
   @ApiProperty({
-    description: 'Organization Code to filter by',
-    example: 'ORG001',
+    description: 'Org Code to filter by',
+    example: 'NNA_PMK_OU',
     required: false,
   })
   orgCode?: string;
+
+  @ApiProperty({
+    description: 'Organization Code to filter by',
+    example: 'JAT',
+    required: false,
+  })
+  organizationCode?: string;
 
   @ApiProperty({
     description: 'Short Code to filter by',

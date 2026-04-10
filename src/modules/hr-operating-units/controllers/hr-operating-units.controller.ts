@@ -30,7 +30,7 @@ export class HrOperatingUnitsController {
 
   constructor(
     private readonly hrOperatingUnitsService: HrOperatingUnitsService,
-  ) {}
+  ) { }
 
   @Get()
   @AuthSwagger()
@@ -68,6 +68,12 @@ export class HrOperatingUnitsController {
     required: false,
     description: 'Filter by short code',
     example: 'JKT',
+  })
+  @ApiQuery({
+    name: 'organizationCode',
+    required: false,
+    description: 'Filter by organization code',
+    example: 'JAT',
   })
   @ApiQuery({
     name: 'usableFlag',
@@ -151,6 +157,12 @@ export class HrOperatingUnitsController {
     example: 'JKT',
   })
   @ApiQuery({
+    name: 'organizationCode',
+    required: false,
+    description: 'Filter by organization code',
+    example: 'JAT',
+  })
+  @ApiQuery({
     name: 'usableFlag',
     required: false,
     description: 'Filter by usable flag (Y/N)',
@@ -196,8 +208,8 @@ export class HrOperatingUnitsController {
   })
   @ApiParam({
     name: 'code',
-    description: 'Organization code',
-    example: 'ORG001',
+    description: 'Org code',
+    example: 'NNA_PMK_OU',
   })
   @ApiResponse({
     status: 200,
