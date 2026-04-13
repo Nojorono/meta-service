@@ -41,3 +41,5 @@ lerna-debug.log*
 junit.xml
 firebase.config.json
 tsconfig.build.tsbuildinfo
+
+.VSCodeCounter
