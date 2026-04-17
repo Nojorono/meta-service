@@ -57,6 +57,35 @@ export class InvOnHandQtyMicroserviceController {
         }
     }
 
+    @MessagePattern('get_inv_locator')
+    async getInvLocator(
+        @Payload() params?: InvOnHandQtyParamsDto,
+    ): Promise<any> {
+        this.logger.log(
+            '==== Received request for Oracle inventory locator list with params ====',
+        );
+        this.logger.log(JSON.stringify(params || {}));
+
+        try {
+            const result = await this.invOnHandQtyService.getInvLocator(params);
+            this.logger.log(
+                `Oracle getInvLocator result: status=${result.status}, count=${result.count}, dataLength=${result.data?.length || 0}`,
+            );
+            return result;
+        } catch (error) {
+            this.logger.error(
+                `Error retrieving Oracle inventory locator list: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error in microservice: ${error.message}`,
+            };
+        }
+    }
+
     @MessagePattern('invalidate_inv_on_hand_qty_cache')
     async invalidateInvOnHandQtyCache(
         @Payload()

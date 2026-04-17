@@ -176,6 +176,58 @@ export class InvOnHandQtyController {
         }
     }
 
+    @Get('locator')
+    @ApiOperation({
+        summary: 'Get inventory locator list',
+        description:
+            'Retrieve unique locator list (SUBINVENTORY_CODE, LOCATOR_ID, LOCATOR) filtered by organization_code and optional subinventory_code. Defaults to JAT when organization_code is omitted.',
+    })
+    @ApiQuery({
+        name: 'organization_code',
+        required: false,
+        type: String,
+        description: 'Organization code to filter locator data (default: JAT)',
+        example: 'JAT',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Inventory locator data retrieved successfully',
+    })
+    @ApiQuery({
+        name: 'subinventory_code',
+        required: false,
+        type: String,
+        description: 'Subinventory code to filter locator data',
+        example: 'GOOD-RK-1',
+    })
+    async getInvLocator(
+        @Query('organization_code') organizationCode?: string,
+        @Query('subinventory_code') subinventoryCode?: string,
+    ): Promise<any> {
+        this.logger.log('==== REST API: Get inventory locator list ====');
+        this.logger.log(
+            `Organization Code: ${organizationCode || 'JAT (default)'}, Subinventory Code: ${subinventoryCode || 'not provided'}`,
+        );
+
+        try {
+            return await this.invOnHandQtyService.getInvLocator({
+                organization_code: organizationCode,
+                subinventory_code: subinventoryCode,
+            });
+        } catch (error) {
+            this.logger.error(
+                `REST API Error retrieving inventory locator list: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error retrieving locator data: ${error.message}`,
+            };
+        }
+    }
+
     @Delete('cache')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({

@@ -15,13 +15,16 @@ export const setupSwagger = async (app: INestApplication) => {
   const docDesc: string = configService.get<string>('doc.description');
   const docVersion: string = configService.get<string>('doc.version');
   const docPrefix: string = configService.get<string>('doc.prefix');
+  const directServerUrl: string = configService.get<string>(
+    'doc.directServerUrl',
+  );
 
   const documentBuild = new DocumentBuilder()
     .setTitle(docName)
     .setDescription(docDesc)
     .setVersion(docVersion)
     .addServer('/service-meta', 'Production (via Kong Gateway)')
-    .addServer('', 'Development (Direct)')
+    .addServer(directServerUrl, 'Development (Direct)')
     .addBearerAuth(
       {
         type: 'http',

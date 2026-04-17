@@ -4,11 +4,11 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
-import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { Reflector } from '@nestjs/core';
 import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { I18nService } from 'nestjs-i18n';
-import { firstValueFrom, of } from 'rxjs';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   HTTP_SUCCESS_STATUS_MESSAGES,
   RESPONSE_SERIALIZATION_META_KEY,
@@ -22,35 +22,50 @@ export class ResponseInterceptor implements NestInterceptor {
     private readonly i18nService: I18nService,
   ) {}
 
-  async intercept(context: ExecutionContext, next: CallHandler): Promise<any> {
-    const body = await firstValueFrom(next.handle());
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    if (context.getType() !== 'http') {
+      return next.handle();
+    }
+
     const status =
       this.reflector.get<number>('__httpCode__', context.getHandler()) || 200;
-    const ctx: HttpArgumentsHost = context.switchToHttp();
-    const request = ctx.getRequest();
+    const request = context.switchToHttp().getRequest();
 
     const classSerialization: ClassConstructor<any> = this.reflector.get<
       ClassConstructor<any>
     >(RESPONSE_SERIALIZATION_META_KEY, context.getHandler());
 
-    if (classSerialization?.name === GenericResponseDto?.name) {
-      const getData = body as unknown as GenericResponseDto;
-      getData.message = this.i18nService.translate(getData.message, {
-        lang: request.headers['accept-language'] || 'en',
-        defaultValue: 'Operation successful.',
-      });
-      const responseData = plainToInstance(classSerialization, getData);
-      return of({
-        statusCode: status,
-        message: HTTP_SUCCESS_STATUS_MESSAGES[status],
-        data: responseData,
-      });
-    }
-    const responseData = plainToInstance(classSerialization, body);
-    return of({
-      statusCode: status,
-      message: HTTP_SUCCESS_STATUS_MESSAGES[status],
-      data: responseData,
-    });
+    return next.handle().pipe(
+      map((body: unknown) => {
+        let responseData: unknown = body;
+
+        if (classSerialization?.name === GenericResponseDto?.name) {
+          const getData = body as GenericResponseDto;
+          getData.message = this.i18nService.translate(getData.message, {
+            lang: request.headers['accept-language'] || 'en',
+            defaultValue: 'Operation successful.',
+          });
+          responseData = plainToInstance(classSerialization, getData);
+        } else if (classSerialization) {
+          responseData = plainToInstance(classSerialization, body);
+        }
+
+        const wrappedBody = responseData as Record<string, unknown>;
+        if (
+          wrappedBody &&
+          typeof wrappedBody === 'object' &&
+          Object.prototype.hasOwnProperty.call(wrappedBody, 'data')
+        ) {
+          // Avoid nested data.data in global response envelope.
+          responseData = wrappedBody.data;
+        }
+
+        return {
+          statusCode: status,
+          message: HTTP_SUCCESS_STATUS_MESSAGES[status] || 'OK',
+          data: responseData,
+        };
+      }),
+    );
   }
 }

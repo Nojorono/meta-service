@@ -228,6 +228,10 @@ async function bootstrap() {
       name: 'AR_CUSTOMERS_SD_SERVICE',
       queue: configService.get('rmq.arCustomersSd') || 'ar_customers_sd_queue',
     },
+    {
+      name: 'INV_ON_HAND_QTY_SERVICE',
+      queue: configService.get('rmq.invOnHandQty') || 'inv_on_hand_qty_queue',
+    },
   ];
 
   // Initialize all microservices

@@ -24,11 +24,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const errorMessageKey =
-      exception instanceof HttpException
-        ? exception.message
-        : 'translation.internalServerError';
-    const message = await this.i18n.t(`translation.${errorMessageKey}`);
+    const exceptionResponse =
+      exception instanceof HttpException ? exception.getResponse() : null;
+    const rawMessage =
+      typeof exceptionResponse === 'string'
+        ? exceptionResponse
+        : (exceptionResponse as any)?.message || exception?.['message'];
+    const normalizedMessage = Array.isArray(rawMessage)
+      ? rawMessage.join(', ')
+      : rawMessage || 'internalServerError';
+    const message = await this.i18n.t(`translation.${normalizedMessage}`, {
+      defaultValue: normalizedMessage,
+    });
 
     if (statusCode === HttpStatus.INTERNAL_SERVER_ERROR) {
       this.logger.error(exception);
@@ -37,7 +44,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const errorResponse = {
       statusCode,
       message,
-      timestamp: new Date().toISOString(),
+      data: null,
     };
 
     response.status(statusCode).json(errorResponse);

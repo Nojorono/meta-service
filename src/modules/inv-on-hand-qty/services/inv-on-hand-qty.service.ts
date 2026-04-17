@@ -24,6 +24,83 @@ export class InvOnHandQtyService {
         private readonly salesItemConversionService: SalesItemConversionService,
     ) { }
 
+
+    async getInvLocator(
+        params?: InvOnHandQtyParamsDto,
+    ): Promise<any> {
+        const { organization_code, subinventory_code } = params || {};
+        const organizationCode = organization_code ?? 'JAT';
+        const cacheKey = `inv-locator-v1:${organizationCode}:${subinventory_code || 'all'}`;
+
+        try {
+            const cachedData = await this.redisService.get(cacheKey);
+            if (cachedData) {
+                this.logger.log(`Cache hit for ${cacheKey}`);
+                return JSON.parse(cachedData as string);
+            }
+        } catch (error) {
+            this.logger.error(
+                `Error accessing Redis cache for locator data: ${error.message}`,
+                error.stack,
+            );
+        }
+
+        try {
+            let query = `
+                SELECT
+                    SUBINVENTORY_CODE,
+                    LOCATOR_ID,
+                    LOCATOR
+                FROM XTD_INV_ON_HAND_QTY_V
+                WHERE ORGANIZATION_CODE = :1
+            `;
+            const queryParams: any[] = [organizationCode];
+
+            if (subinventory_code) {
+                query += ` AND SUBINVENTORY_CODE = :2`;
+                queryParams.push(subinventory_code);
+            }
+
+            query += ` GROUP BY SUBINVENTORY_CODE, LOCATOR_ID, LOCATOR`;
+
+            const result = await this.oracleService.executeQuery(query, queryParams);
+
+            const response = {
+                data: result.rows,
+                count: result.rows.length,
+                status: true,
+                message: 'Locator data retrieved successfully',
+            };
+
+            try {
+                await this.redisService.set(
+                    cacheKey,
+                    JSON.stringify(response),
+                    this.CACHE_TTL,
+                );
+                this.logger.log(`Locator data stored in cache with key ${cacheKey}`);
+            } catch (cacheError) {
+                this.logger.error(
+                    `Error storing locator data in Redis: ${cacheError.message}`,
+                    cacheError.stack,
+                );
+            }
+
+            return response;
+        } catch (error) {
+            this.logger.error(
+                `Error in getInvLocator: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error retrieving locator data: ${error.message}`,
+            };
+        }
+    }
+
     async getInvOnHandQtyFromOracle(
         params?: InvOnHandQtyParamsDto,
     ): Promise<InvOnHandQtyResponseDto> {
