@@ -15,10 +15,26 @@ export const setupSwagger = async (app: INestApplication) => {
   const docDesc: string = configService.get<string>('doc.description');
   const docVersion: string = configService.get<string>('doc.version');
   const docPrefix: string = configService.get<string>('doc.prefix');
+  const swaggerDirectServerUrl = configService
+    .get<string>('SWAGGER_DIRECT_SERVER_URL')
+    ?.trim();
   const httpHost: string = configService.get<string>('app.http.host') || 'localhost';
   const httpPort: number = configService.get<number>('app.http.port') || 9000;
   const normalizedHost = httpHost === '0.0.0.0' ? 'localhost' : httpHost;
-  const devServerUrl = `http://${normalizedHost}:${httpPort}`;
+  const fallbackDevServerUrl = `http://${normalizedHost}:${httpPort}`;
+  let devServerUrl = fallbackDevServerUrl;
+
+  if (swaggerDirectServerUrl) {
+    try {
+      const parsedUrl = new URL(swaggerDirectServerUrl);
+      if (!parsedUrl.port) {
+        parsedUrl.port = `${httpPort}`;
+      }
+      devServerUrl = parsedUrl.toString().replace(/\/$/, '');
+    } catch {
+      devServerUrl = swaggerDirectServerUrl;
+    }
+  }
 
   const documentBuild = new DocumentBuilder()
     .setTitle(docName)
