@@ -18,6 +18,9 @@ export const setupSwagger = async (app: INestApplication) => {
   const swaggerDirectServerUrl = configService
     .get<string>('SWAGGER_DIRECT_SERVER_URL')
     ?.trim();
+  const swaggerGatewayServerUrl =
+    configService.get<string>('SWAGGER_GATEWAY_SERVER_URL')?.trim() ||
+    '/service-meta';
   const httpHost: string = configService.get<string>('app.http.host') || 'localhost';
   const httpPort: number = configService.get<number>('app.http.port') || 9000;
   const normalizedHost = httpHost === '0.0.0.0' ? 'localhost' : httpHost;
@@ -40,8 +43,8 @@ export const setupSwagger = async (app: INestApplication) => {
     .setTitle(docName)
     .setDescription(docDesc)
     .setVersion(docVersion)
-    .addServer('/service-meta', 'Production (via Kong Gateway)')
     .addServer(devServerUrl, 'Development (Direct)')
+    .addServer(swaggerGatewayServerUrl, 'Production (Kong Gateway)')
     .addBearerAuth(
       {
         type: 'http',
