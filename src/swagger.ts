@@ -15,16 +15,36 @@ export const setupSwagger = async (app: INestApplication) => {
   const docDesc: string = configService.get<string>('doc.description');
   const docVersion: string = configService.get<string>('doc.version');
   const docPrefix: string = configService.get<string>('doc.prefix');
-  const directServerUrl: string = configService.get<string>(
-    'doc.directServerUrl',
-  );
+  const swaggerDirectServerUrl = configService
+    .get<string>('SWAGGER_DIRECT_SERVER_URL')
+    ?.trim();
+  const swaggerGatewayServerUrl =
+    configService.get<string>('SWAGGER_GATEWAY_SERVER_URL')?.trim() ||
+    '/service-meta';
+  const httpHost: string = configService.get<string>('app.http.host') || 'localhost';
+  const httpPort: number = configService.get<number>('app.http.port') || 9000;
+  const normalizedHost = httpHost === '0.0.0.0' ? 'localhost' : httpHost;
+  const fallbackDevServerUrl = `http://${normalizedHost}:${httpPort}`;
+  let devServerUrl = fallbackDevServerUrl;
+
+  if (swaggerDirectServerUrl) {
+    try {
+      const parsedUrl = new URL(swaggerDirectServerUrl);
+      if (!parsedUrl.port) {
+        parsedUrl.port = `${httpPort}`;
+      }
+      devServerUrl = parsedUrl.toString().replace(/\/$/, '');
+    } catch {
+      devServerUrl = swaggerDirectServerUrl;
+    }
+  }
 
   const documentBuild = new DocumentBuilder()
     .setTitle(docName)
     .setDescription(docDesc)
     .setVersion(docVersion)
-    .addServer('/service-meta', 'Production (via Kong Gateway)')
-    .addServer(directServerUrl, 'Development (Direct)')
+    .addServer(devServerUrl, 'Development (Direct)')
+    .addServer(swaggerGatewayServerUrl, 'Production (Kong Gateway)')
     .addBearerAuth(
       {
         type: 'http',
