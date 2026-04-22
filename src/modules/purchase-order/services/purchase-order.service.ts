@@ -8,13 +8,14 @@ import {
 @Injectable()
 export class PurchaseOrderService {
   private readonly logger = new Logger(PurchaseOrderService.name);
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async findByNomorPO(nomorPO: string): Promise<PurchaseOrderResponseDto> {
     const sql = `
       SELECT DISTINCT
         PHA.SEGMENT1 AS NOMOR_PO,
         (SELECT VENDOR_ID FROM AP_SUPPLIERS WHERE VENDOR_ID = PHA.VENDOR_ID) AS ID_VENDOR,
+        (SELECT VENDOR_SITE_ID FROM AP_SUPPLIER_SITES_ALL WHERE VENDOR_SITE_ID = PHA.VENDOR_SITE_ID) AS VENDOR_SITE_ID,
         (SELECT VENDOR_NAME FROM AP_SUPPLIERS WHERE VENDOR_ID = PHA.VENDOR_ID) AS NAMA_VENDOR,
         (SELECT ADDRESS_LINE1 FROM AP_SUPPLIER_SITES_ALL WHERE VENDOR_SITE_ID = PHA.VENDOR_SITE_ID) AS ALAMAT_VENDOR,
         (SELECT PRIN_GROUP FROM XTD_AP_SUPP_PRIN_ROKOK_V WHERE VENDOR_ID = PHA.VENDOR_ID) AS PRIN_GROUP,
@@ -55,6 +56,7 @@ export class PurchaseOrderService {
           const {
             NOMOR_PO,
             ID_VENDOR,
+            VENDOR_SITE_ID,
             NAMA_VENDOR,
             ALAMAT_VENDOR,
             PRIN_GROUP,
@@ -74,6 +76,7 @@ export class PurchaseOrderService {
             poData[NOMOR_PO] = {
               NOMOR_PO,
               ID_VENDOR,
+              VENDOR_SITE_ID,
               NAMA_VENDOR,
               ALAMAT_VENDOR,
               PRIN_GROUP,

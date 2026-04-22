@@ -232,6 +232,10 @@ async function bootstrap() {
       name: 'INV_ON_HAND_QTY_SERVICE',
       queue: configService.get('rmq.invOnHandQty') || 'inv_on_hand_qty_queue',
     },
+    {
+      name: 'RCV_RECEIPT_SERVICE',
+      queue: configService.get('rmq.rcvReceipt') || 'rcv_receipt_queue',
+    },
   ];
 
   // Initialize all microservices

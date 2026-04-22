@@ -1,6 +1,7 @@
 export class PurchaseOrderDto {
   NOMOR_PO: string;
   ID_VENDOR: number;
+  VENDOR_SITE_ID: number;
   NAMA_VENDOR: string;
   ALAMAT_VENDOR: string;
   PRIN_GROUP: string;

@@ -66,6 +66,7 @@ import { InvOnHandQtyModule } from 'src/modules/inv-on-hand-qty/inv-on-hand-qty.
 import { HrOperatingUnitsModule } from '../modules/hr-operating-units/hr-operating-units.module';
 import { ArCustomersSdModule } from '../modules/ar-customers-sd/ar-customers-sd.module';
 import { PoLineModule } from '../modules/po-line/po-line.module';
+import { RcvReceiptModule } from '../modules/rcv-receipt/rcv-receipt.module';
 
 @Module({
   imports: [
@@ -123,6 +124,7 @@ import { PoLineModule } from '../modules/po-line/po-line.module';
     HrOperatingUnitsModule,
     ArCustomersSdModule,
     PoLineModule,
+    RcvReceiptModule,
     AuthModule,
     // Other modules can be added here
 
