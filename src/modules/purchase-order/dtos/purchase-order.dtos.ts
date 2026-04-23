@@ -13,6 +13,8 @@ export class PurchaseOrderDto {
   KODE_ITEM: string;
   DESKRIPSI_ITEM_LINE_PO: string;
   PO_LINE_QUANTITY: string;
+  QTY_RECEIVED: number;
+  QTY_DUE: number;
   UOM: string;
   KONDISI_PO: string;
 }

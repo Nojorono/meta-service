@@ -23,7 +23,7 @@ export class PurchaseOrderService {
         PHA.AUTHORIZATION_STATUS AS STATUS_PO,
         TO_CHAR(PHA.APPROVED_DATE, 'DD-MON-RRRR') AS TANGGAL_APPROVE_PO,
         PLA.LINE_NUM AS PO_LINE_NUM,
-        XISI.ITEM_CODE AS SKU,
+        MCRV.CROSS_REFERENCE SKU,
         MSIB.SEGMENT1 || '.' || MSIB.SEGMENT2 || '.' || MSIB.SEGMENT3 AS KODE_ITEM,
         PLA.ITEM_DESCRIPTION AS DESKRIPSI_ITEM_LINE_PO,
         CASE
@@ -32,16 +32,19 @@ export class PurchaseOrderService {
           WHEN TO_CHAR(PLA.QUANTITY) >= 1 THEN
             TO_CHAR(PLA.QUANTITY)
         END AS PO_LINE_QUANTITY,
+        PLLA.QUANTITY_RECEIVED AS QTY_RECEIVED,
+        PLLA.QUANTITY-PLLA.QUANTITY_RECEIVED AS QTY_DUE ,
         PLA.UNIT_MEAS_LOOKUP_CODE AS UOM,
         PLA.CLOSED_CODE AS KONDISI_PO
       FROM PO_HEADERS_ALL PHA,
            PO_LINES_ALL PLA,
            MTL_SYSTEM_ITEMS_B MSIB,
-           XTD_INV_SALES_ITEMS_V XISI
+           MTL_CROSS_REFERENCES_VL MCRV 
       WHERE PHA.PO_HEADER_ID = PLA.PO_HEADER_ID
         AND MSIB.INVENTORY_ITEM_ID(+) = PLA.ITEM_ID
-        AND XISI.ITEM_NUMBER = (MSIB.SEGMENT1 || '.' || MSIB.SEGMENT2 || '.' || MSIB.SEGMENT3)
+        AND MSIB.INVENTORY_ITEM_ID = MCRV.INVENTORY_ITEM_ID
         AND MSIB.SEGMENT1 IN ('RK')
+        AND PLA.CLOSED_CODE = 'OPEN'
         AND PHA.SEGMENT1 IN (:1)
       ORDER BY NOMOR_PO, PO_LINE_NUM ASC
     `;
@@ -68,6 +71,8 @@ export class PurchaseOrderService {
             KODE_ITEM,
             DESKRIPSI_ITEM_LINE_PO,
             PO_LINE_QUANTITY,
+            QTY_RECEIVED,
+            QTY_DUE,
             UOM,
             KONDISI_PO,
           } = row;
@@ -93,6 +98,8 @@ export class PurchaseOrderService {
             KODE_ITEM,
             DESKRIPSI_ITEM_LINE_PO,
             PO_LINE_QUANTITY,
+            QTY_RECEIVED,
+            QTY_DUE,
             UOM,
             STATUS: KONDISI_PO,
           });
