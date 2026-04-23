@@ -4,7 +4,7 @@ import { CreateRcvReceiptLinesDto } from '../dtos/rcv-receipt-lines.dtos';
 
 @Injectable()
 export class RcvReceiptLinesService {
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async createMany(lines: CreateRcvReceiptLinesDto[]): Promise<void> {
     const lineSql = `
@@ -42,4 +42,32 @@ export class RcvReceiptLinesService {
       await this.oracleService.executeQuery(lineSql, lineParams);
     }
   }
+
+  async findBySourceHeaderId(sourceHeaderId: string): Promise<Record<string, any>[]> {
+    const sql = `
+      SELECT
+        *
+      FROM XTD_RCV_RECEIPT_LNS_IFACE
+      WHERE SOURCE_HEADER_ID = :1
+      ORDER BY CREATION_DATE DESC
+    `;
+
+    const result = await this.oracleService.executeQuery(sql, [sourceHeaderId]);
+    return result.rows || [];
+  }
+
+  async findByIfaceHeaderId(ifaceHeaderId: number): Promise<Record<string, any>[]> {
+    const sql = `
+      SELECT
+        *
+      FROM XTD_RCV_RECEIPT_LNS_IFACE
+      WHERE IFACE_HEADER_ID = :1
+      ORDER BY CREATION_DATE DESC
+    `;
+
+    const result = await this.oracleService.executeQuery(sql, [ifaceHeaderId]);
+    return result.rows || [];
+  }
+
+
 }

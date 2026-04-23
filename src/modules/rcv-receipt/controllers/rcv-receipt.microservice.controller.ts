@@ -18,4 +18,12 @@ export class RcvReceiptMicroserviceController {
   ): Promise<RcvReceiptResponseDto> {
     return this.rcvReceiptService.create(payload);
   }
+
+  @MessagePattern('rcv-receipt.findBySourceHeaderId')
+  @Internal()
+  async findBySourceHeaderId(
+    @Payload() payload: { source_header_id: string },
+  ): Promise<RcvReceiptResponseDto> {
+    return this.rcvReceiptService.getBySourceHeaderId(payload.source_header_id);
+  }
 }
