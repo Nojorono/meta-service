@@ -4,7 +4,7 @@ import { CreateRcvReceiptDto } from '../dtos/rcv-receipt.dtos';
 
 @Injectable()
 export class RcvReceiptHeaderService {
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async create(payload: CreateRcvReceiptDto): Promise<void> {
     const headerSql = `
@@ -42,5 +42,21 @@ export class RcvReceiptHeaderService {
     ];
 
     await this.oracleService.executeQuery(headerSql, headerParams);
+  }
+
+  async findLatestBySourceHeaderId(
+    sourceHeaderId: string,
+  ): Promise<Record<string, any> | null> {
+    const sql = `
+      SELECT
+        *
+      FROM XTD_RCV_RECEIPT_HDR_IFACE
+      WHERE SOURCE_HEADER_ID = :1
+      ORDER BY CREATION_DATE DESC
+      FETCH FIRST 1 ROWS ONLY
+    `;
+
+    const result = await this.oracleService.executeQuery(sql, [sourceHeaderId]);
+    return result.rows?.[0] || null;
   }
 }

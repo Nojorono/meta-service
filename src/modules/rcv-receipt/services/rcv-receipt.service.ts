@@ -45,4 +45,45 @@ export class RcvReceiptService {
       };
     }
   }
+
+  async getBySourceHeaderId(
+    sourceHeaderId: string,
+  ): Promise<RcvReceiptResponseDto> {
+    try {
+      const header =
+        await this.rcvReceiptHeaderService.findLatestBySourceHeaderId(
+          sourceHeaderId,
+        );
+
+      if (!header) {
+        return {
+          status: false,
+          message: `No receipt data found for source_header_id ${sourceHeaderId}`,
+          data: null,
+        };
+      }
+
+      const lines =
+        await this.rcvReceiptLinesService.findByIfaceHeaderId(header.IFACE_HEADER_ID);
+
+      return {
+        status: true,
+        message: 'Receipt header and line interface data retrieved successfully',
+        data: {
+          ...header,
+          LINES: lines,
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving receipt interface data: ${error.message}`,
+        error.stack,
+      );
+      return {
+        status: false,
+        message: `Error retrieving receipt interface data: ${error.message}`,
+        data: null,
+      };
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -13,7 +13,7 @@ import { RcvReceiptService } from '../services/rcv-receipt.service';
 @AuthSwagger()
 @Controller('rcv-receipt')
 export class RcvReceiptController {
-  constructor(private readonly rcvReceiptService: RcvReceiptService) {}
+  constructor(private readonly rcvReceiptService: RcvReceiptService) { }
 
   @Post()
   @ApiOperation({
@@ -28,5 +28,20 @@ export class RcvReceiptController {
     @Body() payload: CreateRcvReceiptDto,
   ): Promise<RcvReceiptResponseDto> {
     return this.rcvReceiptService.create(payload);
+  }
+
+  @Get(':source_header_id')
+  @ApiOperation({
+    summary: 'Get receipt header interface record by source_header_id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Receipt header interface data retrieved successfully',
+    type: RcvReceiptResponseDto,
+  })
+  async getBySourceHeaderId(
+    @Param('source_header_id') source_header_id: string,
+  ): Promise<RcvReceiptResponseDto> {
+    return this.rcvReceiptService.getBySourceHeaderId(source_header_id);
   }
 }
