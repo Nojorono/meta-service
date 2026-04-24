@@ -127,7 +127,7 @@ export class SalesOrderService {
     }
     // Pagination
     const offset = (page - 1) * limit;
-    sql += ` ORDER BY so.HEADER_ID OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
+    sql += ` ORDER BY so.HEADER_ID, so.LINE_NUMBER OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
     params.push(offset);
     params.push(limit);
     const result = await this.oracleService.executeQuery(sql, params);
