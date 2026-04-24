@@ -49,12 +49,17 @@ export class SalesOrderService {
 	            hl_ship.address1 invoice_to_address1,
 	            ooha.created_by created_by,
 	            ooha.creation_date created_date,
+	            oola.line_number line_number,
 	            oola.inventory_item_id inventory_item_id,
 	            msib.description item_desc,
 	            oola.ordered_quantity,
 	            oola.order_quantity_uom,
 	            oola.shipping_quantity,
-	            oola.shipping_quantity_uom
+	            oola.shipping_quantity_uom,
+    			    APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, oola.ordered_quantity, 'BKS', 'DUS' ) dus,
+    			    APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, oola.ordered_quantity, 'BKS', 'BAL' ) bal,
+    			    APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, oola.ordered_quantity, 'BKS', 'PRS' ) prs,
+    			    APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, oola.ordered_quantity, 'BKS', 'BKS' ) bks
 	       FROM apps.oe_order_headers_all ooha,
 	            apps.oe_order_lines_all oola,
 	            apps.oe_order_holds_all ohld,
@@ -70,8 +75,11 @@ export class SalesOrderService {
 	            hz_parties hp_bill,
 	            hz_cust_accounts hca,
 	            mtl_system_items_b msib,
-	            mtl_parameters mp
+	            mtl_parameters mp,
+	            apps.wsh_delivery_details wdd
 	      WHERE     1 = 1
+	      		  and oola.header_id = ooha.header_id
+    			    and oola.line_id = wdd.source_line_id(+)
 	            AND ooha.header_id = oola.header_id
 	            AND ooha.header_id = ohld.header_id(+)
 	            AND NVL (ohld.released_flag, 'Y') = 'Y'
@@ -98,9 +106,9 @@ export class SalesOrderService {
     let sql = `
       SELECT so.HEADER_ID, so.SO_TYPE, so.ORG_ID, hou.NAME as ORG_NAME, so.STATUS, so.ORGANIZATION_ID, so.TRANSACTION_TYPE, so.ORDER_NUMBER,
         so.ORGANIZATION_ID_FROM, so.SUBINVENTORY_FROM, so.ORDERED_DATE, so.ORGANIZATION_ID_TO, so.SUBINVENTORY_TO,
-        so.LOCATION_BILL, so.LOCATON_SHIP, so.INVOICE_TO_ADDRESS1, so.CREATED_BY, so.CREATED_DATE,
+        so.LOCATION_BILL, so.LOCATON_SHIP, so.INVOICE_TO_ADDRESS1, so.CREATED_BY, so.CREATED_DATE, so.LINE_NUMBER,
         so.INVENTORY_ITEM_ID, so.ITEM_DESC, so.ORDERED_QUANTITY, so.ORDER_QUANTITY_UOM, so.SHIPPING_QUANTITY, so.SHIPPING_QUANTITY_UOM,
-        si.ITEM_CODE, si.ITEM_NUMBER, si.ITEM_DESCRIPTION
+        si.ITEM_CODE, si.ITEM_NUMBER, si.ITEM_DESCRIPTION, so.DUS, so.BAL, so.PRS, so.BKS
       FROM (${XTD_ONT_SO_OPEN_V}) so
       LEFT JOIN (
         SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
@@ -185,6 +193,7 @@ export class SalesOrderService {
         };
       }
       grouped[HEADER_ID].ITEM.push({
+        SO_LINE_NUMBER: row.LINE_NUMBER,
         INVENTORY_ITEM_ID: row.INVENTORY_ITEM_ID,
         ITEM_CODE: row.ITEM_CODE,
         ITEM_NUMBER: row.ITEM_NUMBER,
@@ -193,6 +202,10 @@ export class SalesOrderService {
         ORDER_QUANTITY_UOM: row.ORDER_QUANTITY_UOM,
         SHIPPING_QUANTITY: row.SHIPPING_QUANTITY,
         SHIPPING_QUANTITY_UOM: row.SHIPPING_QUANTITY_UOM,
+        CONVERTED_TO_DUS: row.DUS,
+        CONVERTED_TO_BAL: row.BAL,
+        CONVERTED_TO_PRS: row.PRS,
+        CONVERTED_TO_BKS: row.BKS,
       });
     }
     const data = Object.values(grouped).sort(
