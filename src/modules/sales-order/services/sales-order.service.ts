@@ -33,28 +33,33 @@ export class SalesOrderService {
                   'SO'
             END
                AS SO_TYPE,
-	            ooha.header_id header_id,
-	            ooha.org_id org_id,
-	            oola.flow_status_code status,
-	            ooha.ship_from_org_id organization_id,
-	            ot.name transaction_type,
-	            ooha.order_number,
-	            oola.ship_from_org_id organization_id_from,
-	            mp.organization_code subinventory_from,
-	            ooha.ordered_date ordered_date,
-	            oola.ship_from_org_id organization_id_to,
-	            hp_bill.party_name subinventory_to,
-	            hcs_bill.location location_bill,
-	            hcs_ship.location locaton_ship,
-	            hl_ship.address1 invoice_to_address1,
-	            ooha.created_by created_by,
-	            ooha.creation_date created_date,
-	            oola.inventory_item_id inventory_item_id,
-	            msib.description item_desc,
-	            oola.ordered_quantity,
-	            oola.order_quantity_uom,
-	            oola.shipping_quantity,
-	            oola.shipping_quantity_uom
+                ooha.header_id header_id,
+                ooha.org_id org_id,
+                oola.flow_status_code status,
+                ooha.ship_from_org_id organization_id,
+                ot.name transaction_type,
+                ooha.order_number,
+                oola.ship_from_org_id organization_id_from,
+                mp.organization_code subinventory_from,
+                ooha.ordered_date ordered_date,
+                oola.ship_from_org_id organization_id_to,
+                hp_bill.party_name subinventory_to,
+                hcs_bill.location location_bill,
+                hcs_ship.location locaton_ship,
+                hl_ship.address1 invoice_to_address1,
+                ooha.created_by created_by,
+                ooha.creation_date created_date,
+                oola.line_number line_number,
+                oola.inventory_item_id inventory_item_id,
+                msib.description item_desc,
+                oola.ordered_quantity,
+                oola.order_quantity_uom,
+                oola.shipping_quantity,
+                oola.shipping_quantity_uom,
+              APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, wdd.requested_quantity, 'BKS', 'DUS' ) dus
+              , APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, wdd.requested_quantity, 'BKS', 'BAL' ) bal
+              , APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, wdd.requested_quantity, 'BKS', 'PRS' ) prs
+              , APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, wdd.requested_quantity, 'BKS', 'BKS' ) bks
 	       FROM apps.oe_order_headers_all ooha,
 	            apps.oe_order_lines_all oola,
 	            apps.oe_order_holds_all ohld,
@@ -70,8 +75,11 @@ export class SalesOrderService {
 	            hz_parties hp_bill,
 	            hz_cust_accounts hca,
 	            mtl_system_items_b msib,
-	            mtl_parameters mp
+	            mtl_parameters mp,
+    			    wsh_delivery_details wdd
 	      WHERE     1 = 1
+	      		  and wdd.source_header_id = ooha.header_id
+    			    and wdd.source_line_id = oola.line_id(+)
 	            AND ooha.header_id = oola.header_id
 	            AND ooha.header_id = ohld.header_id(+)
 	            AND NVL (ohld.released_flag, 'Y') = 'Y'
@@ -93,14 +101,15 @@ export class SalesOrderService {
 	            AND NVL (oola.cancelled_flag, '-') = 'N'
 	            AND NVL (oola.BOOKED_flag, '-') = 'Y'
 	            AND UPPER(ot.name) NOT LIKE '%CANVAS%'
-	            --AND NVL (oola.flow_status_code, '-') NOT IN ('CLOSED', 'CANCELLED', 'ENTERED')
+	            AND NVL (oola.flow_status_code, '-') IN ('CLOSED')
 	   ORDER BY organization_id, order_number`
     let sql = `
       SELECT so.HEADER_ID, so.SO_TYPE, so.ORG_ID, hou.NAME as ORG_NAME, so.STATUS, so.ORGANIZATION_ID, so.TRANSACTION_TYPE, so.ORDER_NUMBER,
         so.ORGANIZATION_ID_FROM, so.SUBINVENTORY_FROM, so.ORDERED_DATE, so.ORGANIZATION_ID_TO, so.SUBINVENTORY_TO,
-        so.LOCATION_BILL, so.LOCATON_SHIP, so.INVOICE_TO_ADDRESS1, so.CREATED_BY, so.CREATED_DATE,
+        so.LOCATION_BILL, so.LOCATON_SHIP, so.INVOICE_TO_ADDRESS1, so.CREATED_BY, so.CREATED_DATE, so.LINE_NUMBER,
         so.INVENTORY_ITEM_ID, so.ITEM_DESC, so.ORDERED_QUANTITY, so.ORDER_QUANTITY_UOM, so.SHIPPING_QUANTITY, so.SHIPPING_QUANTITY_UOM,
-        si.ITEM_CODE, si.ITEM_NUMBER, si.ITEM_DESCRIPTION
+        si.ITEM_CODE, si.ITEM_NUMBER, si.ITEM_DESCRIPTION, 
+        so.DUS, so.BAL, so.PRS, so.BKS
       FROM (${XTD_ONT_SO_OPEN_V}) so
       LEFT JOIN (
         SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
@@ -119,7 +128,7 @@ export class SalesOrderService {
     }
     // Pagination
     const offset = (page - 1) * limit;
-    sql += ` ORDER BY so.HEADER_ID OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
+    sql += ` ORDER BY so.LINE_NUMBER OFFSET :${paramIndex} ROWS FETCH NEXT :${paramIndex + 1} ROWS ONLY`;
     params.push(offset);
     params.push(limit);
     const result = await this.oracleService.executeQuery(sql, params);
@@ -185,6 +194,7 @@ export class SalesOrderService {
         };
       }
       grouped[HEADER_ID].ITEM.push({
+        SO_LINE_NUMBER: row.LINE_NUMBER,
         INVENTORY_ITEM_ID: row.INVENTORY_ITEM_ID,
         ITEM_CODE: row.ITEM_CODE,
         ITEM_NUMBER: row.ITEM_NUMBER,
@@ -193,6 +203,10 @@ export class SalesOrderService {
         ORDER_QUANTITY_UOM: row.ORDER_QUANTITY_UOM,
         SHIPPING_QUANTITY: row.SHIPPING_QUANTITY,
         SHIPPING_QUANTITY_UOM: row.SHIPPING_QUANTITY_UOM,
+        CONVERTED_TO_DUS: row.DUS,
+        CONVERTED_TO_BAL: row.BAL,
+        CONVERTED_TO_PRS: row.PRS,
+        CONVERTED_TO_BKS: row.BKS,
       });
     }
     const data = Object.values(grouped).sort(
