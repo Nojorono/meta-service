@@ -32,18 +32,18 @@ export class InvOnHandQtyService {
         const organizationCode = organization_code ?? 'JAT';
         const cacheKey = `inv-locator-v1:${organizationCode}:${subinventory_code || 'all'}`;
 
-        try {
-            const cachedData = await this.redisService.get(cacheKey);
-            if (cachedData) {
-                this.logger.log(`Cache hit for ${cacheKey}`);
-                return JSON.parse(cachedData as string);
-            }
-        } catch (error) {
-            this.logger.error(
-                `Error accessing Redis cache for locator data: ${error.message}`,
-                error.stack,
-            );
-        }
+        // try {
+        //     const cachedData = await this.redisService.get(cacheKey);
+        //     if (cachedData) {
+        //         this.logger.log(`Cache hit for ${cacheKey}`);
+        //         return JSON.parse(cachedData as string);
+        //     }
+        // } catch (error) {
+        //     this.logger.error(
+        //         `Error accessing Redis cache for locator data: ${error.message}`,
+        //         error.stack,
+        //     );
+        // }
 
         try {
             let query = `
@@ -94,19 +94,19 @@ export class InvOnHandQtyService {
                 message: 'Locator data retrieved successfully',
             };
 
-            try {
-                await this.redisService.set(
-                    cacheKey,
-                    JSON.stringify(response),
-                    this.CACHE_TTL,
-                );
-                this.logger.log(`Locator data stored in cache with key ${cacheKey}`);
-            } catch (cacheError) {
-                this.logger.error(
-                    `Error storing locator data in Redis: ${cacheError.message}`,
-                    cacheError.stack,
-                );
-            }
+            // try {
+            //     await this.redisService.set(
+            //         cacheKey,
+            //         JSON.stringify(response),
+            //         this.CACHE_TTL,
+            //     );
+            //     this.logger.log(`Locator data stored in cache with key ${cacheKey}`);
+            // } catch (cacheError) {
+            //     this.logger.error(
+            //         `Error storing locator data in Redis: ${cacheError.message}`,
+            //         cacheError.stack,
+            //     );
+            // }
 
             return response;
         } catch (error) {
