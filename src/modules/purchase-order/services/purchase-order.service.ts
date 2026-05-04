@@ -35,7 +35,8 @@ export class PurchaseOrderService {
         PLLA.QUANTITY_RECEIVED AS QTY_RECEIVED,
         PLLA.QUANTITY-PLLA.QUANTITY_RECEIVED AS QTY_DUE ,
         PLA.UNIT_MEAS_LOOKUP_CODE AS UOM,
-        PLA.CLOSED_CODE AS KONDISI_PO
+        PLLA.CLOSED_CODE AS KONDISI_PO,
+        PLLA.QUANTITY_BILLED AS QTY_BILLED
       FROM PO_HEADERS_ALL PHA,
            PO_LINES_ALL PLA,
            PO_LINE_LOCATIONS_ALL PLLA,
@@ -46,7 +47,7 @@ export class PurchaseOrderService {
         AND MSIB.INVENTORY_ITEM_ID(+) = PLA.ITEM_ID
         AND MSIB.INVENTORY_ITEM_ID = MCRV.INVENTORY_ITEM_ID
         AND MSIB.SEGMENT1 IN ('RK')
-        AND PLA.CLOSED_CODE = 'OPEN'
+        AND PLLA.CLOSED_CODE = 'OPEN'
         AND PHA.SEGMENT1 IN (:1)
       ORDER BY NOMOR_PO, PO_LINE_NUM ASC
     `;
@@ -77,6 +78,7 @@ export class PurchaseOrderService {
             QTY_DUE,
             UOM,
             KONDISI_PO,
+            QTY_BILLED,
           } = row;
 
           if (!poData[NOMOR_PO]) {
@@ -104,6 +106,7 @@ export class PurchaseOrderService {
             QTY_DUE,
             UOM,
             STATUS: KONDISI_PO,
+            QTY_BILLED,
           });
         }
       } else {
