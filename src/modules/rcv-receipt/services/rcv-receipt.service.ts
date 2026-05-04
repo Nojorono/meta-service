@@ -21,8 +21,8 @@ export class RcvReceiptService {
 
 
     try {
-      await this.rcvReceiptHeaderService.create(payload);
       await this.rcvReceiptLinesService.createMany(payload.LINES || []);
+      await this.rcvReceiptHeaderService.create(payload);
 
       return {
         status: true,

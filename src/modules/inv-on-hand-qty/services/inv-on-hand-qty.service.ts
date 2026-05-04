@@ -32,36 +32,58 @@ export class InvOnHandQtyService {
         const organizationCode = organization_code ?? 'JAT';
         const cacheKey = `inv-locator-v1:${organizationCode}:${subinventory_code || 'all'}`;
 
-        try {
-            const cachedData = await this.redisService.get(cacheKey);
-            if (cachedData) {
-                this.logger.log(`Cache hit for ${cacheKey}`);
-                return JSON.parse(cachedData as string);
-            }
-        } catch (error) {
-            this.logger.error(
-                `Error accessing Redis cache for locator data: ${error.message}`,
-                error.stack,
-            );
-        }
+        // try {
+        //     const cachedData = await this.redisService.get(cacheKey);
+        //     if (cachedData) {
+        //         this.logger.log(`Cache hit for ${cacheKey}`);
+        //         return JSON.parse(cachedData as string);
+        //     }
+        // } catch (error) {
+        //     this.logger.error(
+        //         `Error accessing Redis cache for locator data: ${error.message}`,
+        //         error.stack,
+        //     );
+        // }
 
         try {
             let query = `
                 SELECT
-                    SUBINVENTORY_CODE,
-                    LOCATOR_ID,
-                    LOCATOR
-                FROM XTD_INV_ON_HAND_QTY_V
-                WHERE ORGANIZATION_CODE = :1
+                    mp.organization_id,
+                    haou.name,
+                    mp.organization_code AS "Org Code",
+                    haou.name AS "Organization Name",
+                    msi.secondary_inventory_name AS "Subinventory",
+                    msi.description AS "Subinventory Description",
+                    mil.inventory_location_id AS "locator_id",
+                    mil.segment1 AS "Locator",
+                    mil.description AS "Locator Description",
+                    DECODE(
+                        msi.locator_type,
+                        1, 'None',
+                        2, 'Prespecified',
+                        3, 'Dynamic',
+                        4, 'Item Level',
+                        5, 'Subinventory Level',
+                        'Unknown'
+                    ) AS "Locator Control Type"
+                FROM mtl_secondary_inventories msi
+                JOIN mtl_parameters mp
+                    ON msi.organization_id = mp.organization_id
+                JOIN hr_all_organization_units haou
+                    ON mp.organization_id = haou.organization_id
+                LEFT JOIN mtl_item_locations mil
+                    ON msi.secondary_inventory_name = mil.subinventory_code
+                    AND msi.organization_id = mil.organization_id
+                WHERE mp.organization_code = :1
             `;
             const queryParams: any[] = [organizationCode];
 
             if (subinventory_code) {
-                query += ` AND SUBINVENTORY_CODE = :2`;
+                query += ` AND msi.secondary_inventory_name = :2`;
                 queryParams.push(subinventory_code);
             }
 
-            query += ` GROUP BY SUBINVENTORY_CODE, LOCATOR_ID, LOCATOR`;
+            query += ` ORDER BY mp.organization_code, msi.secondary_inventory_name`;
 
             const result = await this.oracleService.executeQuery(query, queryParams);
 
@@ -72,19 +94,19 @@ export class InvOnHandQtyService {
                 message: 'Locator data retrieved successfully',
             };
 
-            try {
-                await this.redisService.set(
-                    cacheKey,
-                    JSON.stringify(response),
-                    this.CACHE_TTL,
-                );
-                this.logger.log(`Locator data stored in cache with key ${cacheKey}`);
-            } catch (cacheError) {
-                this.logger.error(
-                    `Error storing locator data in Redis: ${cacheError.message}`,
-                    cacheError.stack,
-                );
-            }
+            // try {
+            //     await this.redisService.set(
+            //         cacheKey,
+            //         JSON.stringify(response),
+            //         this.CACHE_TTL,
+            //     );
+            //     this.logger.log(`Locator data stored in cache with key ${cacheKey}`);
+            // } catch (cacheError) {
+            //     this.logger.error(
+            //         `Error storing locator data in Redis: ${cacheError.message}`,
+            //         cacheError.stack,
+            //     );
+            // }
 
             return response;
         } catch (error) {
