@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsOptional } from 'class-validator';
+import { IsNumber, IsString, IsOptional, MaxLength } from 'class-validator';
 
 export class CreateRcvReceiptLinesDto {
   @ApiProperty({ example: 'LINE-2026-0001' })
@@ -49,4 +49,20 @@ export class CreateRcvReceiptLinesDto {
   @ApiProperty({ example: 100200300 })
   @IsNumber()
   LOCATOR_ID: number;
+
+  @ApiProperty({ example: 0, required: false })
+  @IsOptional()
+  @IsNumber()
+  QUANTITY_SELISIH?: number;
+
+  @ApiProperty({ example: 'GOOD-RK-1', required: false, maxLength: 10 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  SUBINVENTORY_SELISIH?: string;
+
+  @ApiProperty({ example: 100200300, required: false })
+  @IsOptional()
+  @IsNumber()
+  LOCATOR_ID_SELISIH?: number;
 }

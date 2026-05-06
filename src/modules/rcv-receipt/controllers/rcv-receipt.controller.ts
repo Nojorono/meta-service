@@ -1,5 +1,12 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseArrayPipe,
+  Post,
+} from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 import {
@@ -16,8 +23,9 @@ export class RcvReceiptController {
   constructor(private readonly rcvReceiptService: RcvReceiptService) { }
 
   @Post()
+  @ApiBody({ type: [CreateRcvReceiptDto] })
   @ApiOperation({
-    summary: 'Insert receipt header interface record',
+    summary: 'Insert one or more receipt header interface records',
   })
   @ApiResponse({
     status: 201,
@@ -25,7 +33,8 @@ export class RcvReceiptController {
     type: RcvReceiptResponseDto,
   })
   async create(
-    @Body() payload: CreateRcvReceiptDto,
+    @Body(new ParseArrayPipe({ items: CreateRcvReceiptDto }))
+    payload: CreateRcvReceiptDto[],
   ): Promise<RcvReceiptResponseDto> {
     return this.rcvReceiptService.create(payload);
   }

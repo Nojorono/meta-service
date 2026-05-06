@@ -6,7 +6,14 @@ import { CreateRcvReceiptLinesDto } from '../dtos/rcv-receipt-lines.dtos';
 export class RcvReceiptLinesService {
   constructor(private readonly oracleService: OracleService) { }
 
-  async createMany(lines: CreateRcvReceiptLinesDto[]): Promise<void> {
+  /**
+   * Inserts lines for one receipt. SOURCE_HEADER_ID is always taken from
+   * sourceHeaderId so batch payloads cannot map lines to the wrong header.
+   */
+  async createMany(
+    lines: CreateRcvReceiptLinesDto[],
+    sourceHeaderId: string,
+  ): Promise<void> {
     const lineSql = `
       INSERT INTO XTD_RCV_RECEIPT_LNS_IFACE (
         SOURCE_LINE_ID,
@@ -19,16 +26,19 @@ export class RcvReceiptLinesService {
         UOM_CODE,
         QUANTITY,
         SUBINVENTORY,
-        LOCATOR_ID
+        LOCATOR_ID,
+        QUANTITY_SELISIH,
+        SUBINVENTORY_SELISIH,
+        LOCATOR_ID_SELISIH
       ) VALUES (
-        :1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11
+        :1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12, :13, :14
       )
     `;
 
     for (const line of lines || []) {
       const lineParams = [
         line.SOURCE_LINE_ID,
-        line.SOURCE_HEADER_ID,
+        sourceHeaderId,
         line.PO_NUMBER ?? null,
         line.PO_LINE_NUMBER ?? null,
         line.ISO_NUMBER ?? null,
@@ -38,6 +48,9 @@ export class RcvReceiptLinesService {
         line.QUANTITY,
         line.SUBINVENTORY,
         line.LOCATOR_ID,
+        line.QUANTITY_SELISIH ?? null,
+        line.SUBINVENTORY_SELISIH ?? null,
+        line.LOCATOR_ID_SELISIH ?? null,
       ];
       await this.oracleService.executeQuery(lineSql, lineParams);
     }

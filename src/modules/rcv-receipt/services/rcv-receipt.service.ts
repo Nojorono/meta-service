@@ -16,22 +16,43 @@ export class RcvReceiptService {
   ) { }
 
   async create(
-    payload: CreateRcvReceiptDto,
+    payloads: CreateRcvReceiptDto[],
   ): Promise<RcvReceiptResponseDto> {
+    const list = payloads ?? [];
 
+    if (list.length === 0) {
+      return {
+        status: true,
+        message: 'No receipt data to insert',
+        data: [],
+      };
+    }
 
     try {
-      await this.rcvReceiptLinesService.createMany(payload.LINES || []);
-      await this.rcvReceiptHeaderService.create(payload);
+      const data: RcvReceiptResponseDto['data'][] = [];
+
+      for (const payload of list) {
+        await this.rcvReceiptLinesService.createMany(
+          payload.LINES || [],
+          payload.SOURCE_HEADER_ID,
+        );
+        await this.rcvReceiptHeaderService.create(payload);
+
+        const fetched = await this.getBySourceHeaderId(payload.SOURCE_HEADER_ID);
+        if (!fetched.status || fetched.data == null) {
+          return {
+            status: false,
+            message: fetched.message,
+            data: null,
+          };
+        }
+        data.push(fetched.data);
+      }
 
       return {
         status: true,
         message: 'Receipt header and line interface data inserted successfully',
-        data: {
-          SOURCE_HEADER_ID: payload.SOURCE_HEADER_ID,
-          TOTAL_LINES: payload.TOTAL_LINES,
-          INSERTED_LINES: payload.LINES?.length || 0,
-        },
+        data,
       };
     } catch (error) {
       this.logger.error(

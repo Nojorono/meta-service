@@ -9,14 +9,16 @@ import { RcvReceiptService } from '../services/rcv-receipt.service';
 
 @Controller()
 export class RcvReceiptMicroserviceController {
-  constructor(private readonly rcvReceiptService: RcvReceiptService) {}
+  constructor(private readonly rcvReceiptService: RcvReceiptService) { }
 
   @MessagePattern('rcv-receipt.create')
   @Internal()
   async create(
-    @Payload() payload: CreateRcvReceiptDto,
-  ): Promise<RcvReceiptResponseDto> {
-    return this.rcvReceiptService.create(payload);
+    @Payload() payload: CreateRcvReceiptDto | CreateRcvReceiptDto[],
+  ): Promise<any> {
+    const list = Array.isArray(payload) ? payload : [payload];
+    console.log(list);
+    return this.rcvReceiptService.create(list);
   }
 
   @MessagePattern('rcv-receipt.findBySourceHeaderId')
