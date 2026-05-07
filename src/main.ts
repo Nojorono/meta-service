@@ -236,6 +236,11 @@ async function bootstrap() {
       name: 'RCV_RECEIPT_SERVICE',
       queue: configService.get('rmq.rcvReceipt') || 'rcv_receipt_queue',
     },
+    {
+      name: 'PO_INTERNAL_REQ_SERVICE',
+      queue:
+        configService.get('rmq.poInternalReq') || 'po_internal_req_queue',
+    },
   ];
 
   // Initialize all microservices

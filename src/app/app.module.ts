@@ -67,6 +67,7 @@ import { HrOperatingUnitsModule } from '../modules/hr-operating-units/hr-operati
 import { ArCustomersSdModule } from '../modules/ar-customers-sd/ar-customers-sd.module';
 import { PoLineModule } from '../modules/po-line/po-line.module';
 import { RcvReceiptModule } from '../modules/rcv-receipt/rcv-receipt.module';
+import { PoInternalReqModule } from '../modules/po-internal-req/po-internal-req.module';
 
 @Module({
   imports: [
@@ -125,6 +126,7 @@ import { RcvReceiptModule } from '../modules/rcv-receipt/rcv-receipt.module';
     ArCustomersSdModule,
     PoLineModule,
     RcvReceiptModule,
+    PoInternalReqModule,
     AuthModule,
     // Other modules can be added here
 
