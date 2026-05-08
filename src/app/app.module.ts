@@ -68,6 +68,7 @@ import { ArCustomersSdModule } from '../modules/ar-customers-sd/ar-customers-sd.
 import { PoLineModule } from '../modules/po-line/po-line.module';
 import { RcvReceiptModule } from '../modules/rcv-receipt/rcv-receipt.module';
 import { PoInternalReqModule } from '../modules/po-internal-req/po-internal-req.module';
+import { OntBranchesModule } from '../modules/ont-branches/ont-branches.module';
 
 @Module({
   imports: [
@@ -127,6 +128,7 @@ import { PoInternalReqModule } from '../modules/po-internal-req/po-internal-req.
     PoLineModule,
     RcvReceiptModule,
     PoInternalReqModule,
+    OntBranchesModule,
     AuthModule,
     // Other modules can be added here
 

@@ -241,6 +241,10 @@ async function bootstrap() {
       queue:
         configService.get('rmq.poInternalReq') || 'po_internal_req_queue',
     },
+    {
+      name: 'ONT_BRANCHES_SERVICE',
+      queue: configService.get('rmq.ontBranches') || 'ont_branches_queue',
+    },
   ];
 
   // Initialize all microservices

@@ -101,7 +101,6 @@ export class SalesOrderService {
 	            AND NVL (oola.cancelled_flag, '-') = 'N'
 	            AND NVL (oola.BOOKED_flag, '-') = 'Y'
 	            AND UPPER(ot.name) NOT LIKE '%CANVAS%'
-	            AND NVL (oola.flow_status_code, '-') IN ('CLOSED')
 	   ORDER BY organization_id, order_number`
     let sql = `
       SELECT so.HEADER_ID, so.SO_TYPE, so.ORG_ID, hou.NAME as ORG_NAME, so.STATUS, so.ORGANIZATION_ID, so.TRANSACTION_TYPE, so.ORDER_NUMBER,
