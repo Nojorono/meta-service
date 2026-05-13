@@ -6,12 +6,13 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 import { CreatePoInternalReqLinesDto } from './po-internal-req-lines.dtos';
 
 export class CreatePoInternalReqDto {
-  @ApiProperty({ example: 'INTERNAL REQUISITION' })
+  @ApiProperty({ example: 'Outbound GS Mutasi SO Internal' })
   @IsString()
   TRANSACTION_TYPE: string;
 
@@ -23,63 +24,72 @@ export class CreatePoInternalReqDto {
   @IsString()
   SOURCE_HEADER_ID: string;
 
-  @ApiProperty({ example: '2026-05-06T00:00:00.000Z' })
+  @ApiProperty({
+    example: '2026-05-06',
+    description:
+      'Date only (YYYY-MM-DD) or ISO-8601; first 10 characters are used for NEED_BY_DATE',
+  })
   @IsDateString()
   NEED_BY_DATE: string;
 
-  @ApiProperty({ example: 'EMP001' })
+  @ApiProperty({ example: '1' })
   @IsString()
   PREPARER_NUMBER: string;
 
-  @ApiProperty({ example: '1001' })
+  @ApiProperty({ example: '1001', required: false, maxLength: 30 })
+  @IsOptional()
   @IsString()
-  PREPARER_ID: string;
+  @MaxLength(30)
+  PREPARER_ID?: string;
 
   @ApiProperty({ example: 'EMP002' })
   @IsString()
   REQUESTOR_NUMBER: string;
 
-  @ApiProperty({ example: '1002' })
+  @ApiProperty({ example: '1002', required: false, maxLength: 30 })
+  @IsOptional()
   @IsString()
-  REQUESTOR_ID: string;
+  @MaxLength(30)
+  REQUESTOR_ID?: string;
 
   @ApiProperty({ example: 'MAIN OU' })
   @IsString()
   ORG_NAME: string;
 
-  @ApiProperty({ example: 204 })
+  @ApiProperty({ example: 204, required: false })
+  @IsOptional()
   @IsNumber()
-  ORG_ID: number;
+  ORG_ID?: number;
 
   @ApiProperty({ example: 'WH SOURCE' })
   @IsString()
   IO_SOURCE_NAME: string;
 
-  @ApiProperty({ example: 3001 })
+  @ApiProperty({ example: 3001, required: false })
+  @IsOptional()
   @IsNumber()
-  IO_SOURCE_ID: number;
+  IO_SOURCE_ID?: number;
 
   @ApiProperty({ example: 'WH DEST' })
   @IsString()
   IO_DEST_NAME: string;
 
-  @ApiProperty({ example: 3002 })
+  @ApiProperty({ example: 3002, required: false })
+  @IsOptional()
   @IsNumber()
-  IO_DEST_ID: number;
+  IO_DEST_ID?: number;
 
   @ApiProperty({ example: 2 })
   @IsNumber()
   TOTAL_LINES: number;
 
-  @ApiProperty({ example: 'WMS-INT-REQ', required: false })
-  @IsOptional()
+  @ApiProperty({ example: 'WMS-INT-REQ' })
   @IsString()
-  HEADER_ATTRIBUTE_CATEGORY?: string;
+  HEADER_ATTRIBUTE_CATEGORY: string;
 
-  @ApiProperty({ example: 'batch-001', required: false })
-  @IsOptional()
+  @ApiProperty({ example: 'batch-001' })
   @IsString()
-  HEADER_ATTRIBUTE7?: string;
+  HEADER_ATTRIBUTE7: string;
 
   @ApiProperty({ type: [CreatePoInternalReqLinesDto] })
   @IsArray()

@@ -9,7 +9,7 @@ import { PoInternalReqService } from '../services/po-internal-req.service';
 
 @Controller()
 export class PoInternalReqMicroserviceController {
-  constructor(private readonly poInternalReqService: PoInternalReqService) {}
+  constructor(private readonly poInternalReqService: PoInternalReqService) { }
 
   @MessagePattern('po-internal-req.create')
   @Internal()
@@ -18,5 +18,12 @@ export class PoInternalReqMicroserviceController {
   ): Promise<PoInternalReqResponseDto> {
     const list = Array.isArray(payload) ? payload : [payload];
     return this.poInternalReqService.create(list);
+  }
+  @MessagePattern('po-internal-req.findBySourceHeaderId')
+  @Internal()
+  async getBySourceHeaderId(
+    @Payload() payload: { source_header_id: string },
+  ): Promise<PoInternalReqResponseDto> {
+    return this.poInternalReqService.getBySourceHeaderId(payload.source_header_id as string);
   }
 }

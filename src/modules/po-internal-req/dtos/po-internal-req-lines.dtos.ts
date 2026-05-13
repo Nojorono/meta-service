@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, MaxLength } from 'class-validator';
 
 export class CreatePoInternalReqLinesDto {
   @ApiProperty({ example: 'HDR-2026-0001' })
@@ -14,15 +14,17 @@ export class CreatePoInternalReqLinesDto {
   @IsNumber()
   INVENTORY_ITEM_ID: number;
 
-  @ApiProperty({ example: 'ITEM-CODE-001' })
+  @ApiProperty({ example: 'ITEM-CODE-001', maxLength: 40 })
   @IsString()
+  @MaxLength(40)
   ITEM: string;
 
   @ApiProperty({ example: 10 })
   @IsNumber()
   QUANTITY: number;
 
-  @ApiProperty({ example: 'PCS' })
+  @ApiProperty({ example: 'PCS', maxLength: 5 })
   @IsString()
+  @MaxLength(5)
   TRANSACTION_UOM: string;
 }

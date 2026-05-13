@@ -13,7 +13,7 @@ export class PoInternalReqService {
   constructor(
     private readonly poInternalReqHeaderService: PoInternalReqHeaderService,
     private readonly poInternalReqLinesService: PoInternalReqLinesService,
-  ) {}
+  ) { }
 
   async create(
     payloads: CreatePoInternalReqDto[],
@@ -30,6 +30,8 @@ export class PoInternalReqService {
 
     try {
       const data: PoInternalReqResponseDto['data'][] = [];
+
+      console.log('list', list);
 
       for (const payload of list) {
         await this.poInternalReqLinesService.createMany(
@@ -58,6 +60,47 @@ export class PoInternalReqService {
       return {
         status: false,
         message: `Error inserting PO internal requisition interface data: ${error.message}`,
+        data: null,
+      };
+    }
+  }
+
+  async getBySourceHeaderId(
+    sourceHeaderId: string,
+  ): Promise<PoInternalReqResponseDto> {
+    try {
+      const header =
+        await this.poInternalReqHeaderService.findLatestBySourceHeaderId(
+          sourceHeaderId,
+        );
+
+      if (!header) {
+        return {
+          status: false,
+          message: `No PO internal requisition data found for source_header_id ${sourceHeaderId}`,
+          data: null,
+        };
+      }
+
+      const lines =
+        await this.poInternalReqLinesService.findByIfaceHeaderId(header.IFACE_HEADER_ID);
+
+      return {
+        status: true,
+        message: 'PO internal requisition header and line interface data retrieved successfully',
+        data: {
+          ...header,
+          LINES: lines,
+        },
+      };
+    } catch (error) {
+      this.logger.error(
+        `Error retrieving PO internal requisition interface data: ${error.message}`,
+        error.stack,
+      );
+      return {
+        status: false,
+        message: `Error retrieving PO internal requisition interface data: ${error.message}`,
         data: null,
       };
     }

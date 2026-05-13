@@ -1,4 +1,4 @@
-import { Body, Controller, ParseArrayPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseArrayPipe, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { AuthSwagger } from 'src/decorators/auth-swagger.decorator';
@@ -13,7 +13,7 @@ import { PoInternalReqService } from '../services/po-internal-req.service';
 @AuthSwagger()
 @Controller('po-internal-req')
 export class PoInternalReqController {
-  constructor(private readonly poInternalReqService: PoInternalReqService) {}
+  constructor(private readonly poInternalReqService: PoInternalReqService) { }
 
   @Post()
   @ApiBody({ type: [CreatePoInternalReqDto] })
@@ -30,5 +30,18 @@ export class PoInternalReqController {
     payload: CreatePoInternalReqDto[],
   ): Promise<PoInternalReqResponseDto> {
     return this.poInternalReqService.create(payload);
+  }
+
+  @Get(':source_header_id')
+  @ApiOperation({
+    summary: 'Get PO internal requisition interface data by source header id',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'PO internal requisition interface data retrieved successfully',
+    type: PoInternalReqResponseDto,
+  })
+  async getBySourceHeaderId(@Param('source_header_id') source_header_id: string): Promise<PoInternalReqResponseDto> {
+    return this.poInternalReqService.getBySourceHeaderId(source_header_id);
   }
 }

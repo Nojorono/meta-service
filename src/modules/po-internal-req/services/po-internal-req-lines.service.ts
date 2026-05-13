@@ -4,7 +4,7 @@ import { CreatePoInternalReqLinesDto } from '../dtos/po-internal-req-lines.dtos'
 
 @Injectable()
 export class PoInternalReqLinesService {
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async createMany(
     lines: CreatePoInternalReqLinesDto[],
@@ -34,5 +34,19 @@ export class PoInternalReqLinesService {
       ];
       await this.oracleService.executeQuery(lineSql, lineParams);
     }
+  }
+
+
+  async findByIfaceHeaderId(ifaceHeaderId: number): Promise<Record<string, any>[]> {
+    const sql = `
+      SELECT
+        *
+      FROM XTD_PO_INTERNAL_REQ_LNS_IFACE
+      WHERE IFACE_HEADER_ID = :1
+      ORDER BY CREATION_DATE DESC
+    `;
+
+    const result = await this.oracleService.executeQuery(sql, [ifaceHeaderId]);
+    return result.rows || [];
   }
 }
