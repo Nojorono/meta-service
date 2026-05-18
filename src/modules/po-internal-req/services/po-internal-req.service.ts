@@ -9,6 +9,7 @@ import { PoInternalReqLinesService } from './po-internal-req-lines.service';
 @Injectable()
 export class PoInternalReqService {
   private readonly logger = new Logger(PoInternalReqService.name);
+  private readonly successStatus = 'S';
 
   constructor(
     private readonly poInternalReqHeaderService: PoInternalReqHeaderService,
@@ -31,20 +32,43 @@ export class PoInternalReqService {
     try {
       const data: PoInternalReqResponseDto['data'][] = [];
 
-      console.log('list', list);
-
       for (const payload of list) {
+        const validation = await this.validateBeforeCreate(
+          payload.SOURCE_HEADER_ID,
+        );
+
+        if (validation.action === 'RETURN_EXISTING') {
+          const existing = await this.getBySourceHeaderId(
+            payload.SOURCE_HEADER_ID,
+          );
+          if (!existing.status || existing.data == null) {
+            return {
+              status: false,
+              message: existing.message,
+              data: null,
+            };
+          }
+          data.push(existing.data);
+          continue;
+        }
+
         await this.poInternalReqLinesService.createMany(
           payload.LINES || [],
           payload.SOURCE_HEADER_ID,
         );
         await this.poInternalReqHeaderService.create(payload);
 
-        data.push({
-          SOURCE_HEADER_ID: payload.SOURCE_HEADER_ID,
-          TOTAL_LINES: payload.TOTAL_LINES,
-          INSERTED_LINES: payload.LINES?.length || 0,
-        });
+        const fetched = await this.getBySourceHeaderId(
+          payload.SOURCE_HEADER_ID,
+        );
+        if (!fetched.status || fetched.data == null) {
+          return {
+            status: false,
+            message: fetched.message,
+            data: null,
+          };
+        }
+        data.push(fetched.data);
       }
 
       return {
@@ -104,5 +128,73 @@ export class PoInternalReqService {
         data: null,
       };
     }
+  }
+
+  private normalizeStatus(value: unknown): string {
+    if (typeof value !== 'string') {
+      return '';
+    }
+    return value.trim().toUpperCase();
+  }
+
+  private hasIfaceSuccess(header: Record<string, unknown>): boolean {
+    const statuses = [
+      header.IFACE_STATUS_IR,
+      header.IFACE_STATUS_IO,
+      header.IFACE_STATUS_OI,
+    ];
+    return statuses.some(
+      (status) => this.normalizeStatus(status) === this.successStatus,
+    );
+  }
+
+  private async validateBeforeCreate(
+    sourceHeaderId: string,
+  ): Promise<{
+    action: 'CREATE' | 'RETURN_EXISTING';
+    response: PoInternalReqResponseDto;
+  }> {
+    const existingHeader =
+      await this.poInternalReqHeaderService.findLatestBySourceHeaderId(
+        sourceHeaderId,
+      );
+
+    if (!existingHeader) {
+      return {
+        action: 'CREATE',
+        response: {
+          status: true,
+          message: 'Validation passed',
+          data: null,
+        },
+      };
+    }
+
+    if (this.hasIfaceSuccess(existingHeader)) {
+      return {
+        action: 'RETURN_EXISTING',
+        response: {
+          status: true,
+          message:
+            `Cannot create PO internal requisition for source_header_id ${sourceHeaderId}. ` +
+            'Existing interface data already has success status (IFACE_STATUS_IR, IFACE_STATUS_IO, or IFACE_STATUS_OI = S).',
+          data: {
+            SOURCE_HEADER_ID: sourceHeaderId,
+            IFACE_STATUS_IR: existingHeader.IFACE_STATUS_IR ?? null,
+            IFACE_STATUS_IO: existingHeader.IFACE_STATUS_IO ?? null,
+            IFACE_STATUS_OI: existingHeader.IFACE_STATUS_OI ?? null,
+          },
+        },
+      };
+    }
+
+    return {
+      action: 'CREATE',
+      response: {
+        status: true,
+        message: 'Validation passed',
+        data: null,
+      },
+    };
   }
 }
