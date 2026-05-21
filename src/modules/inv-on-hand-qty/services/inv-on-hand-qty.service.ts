@@ -409,6 +409,223 @@ export class InvOnHandQtyService {
      * @param itemCode Optional item code to invalidate specific cache
      * @param subinventoryCode Optional subinventory code to invalidate specific cache
      */
+    async getOnHandMappingDetail(
+        params?: Pick<InvOnHandQtyParamsDto, 'organization_code' | 'subinventory_code'>,
+    ): Promise<{
+        data: Record<string, unknown>[];
+        count: number;
+        status: boolean;
+        message: string;
+    }> {
+        const organizationCode = params?.organization_code ?? 'CWH';
+        const subinventoryCode = params?.subinventory_code ?? 'SELISIH';
+
+        try {
+            const headerQuery = `
+                SELECT *
+                FROM XTD_INV_ON_HAND_QTY_V
+                WHERE ORGANIZATION_CODE = :1
+                  AND SUBINVENTORY_CODE = :2
+            `;
+
+            const detailQuery = `
+                SELECT
+                  INV_ORG.ORGANIZATION_CODE,
+                  INV_ORG.ORGANIZATION_NAME,
+                  (
+                    SELECT INV_ORG2.ORGANIZATION_CODE
+                    FROM MTL_MATERIAL_TRANSACTIONS MMT,
+                         XTD_ONT_BRANCHES_V INV_ORG2
+                    WHERE MMT.TRANSACTION_ID = OHD.CREATE_TRANSACTION_ID
+                      AND MMT.TRANSFER_ORGANIZATION_ID = INV_ORG2.ORGANIZATION_ID (+)
+                  ) AS FROM_ORGANIZATION_CODE,
+                  (
+                    SELECT SEGMENT1 || '.' || SEGMENT2 || '.' || SEGMENT3
+                    FROM MTL_SYSTEM_ITEMS_B MSI
+                    WHERE MSI.INVENTORY_ITEM_ID = OHD.INVENTORY_ITEM_ID
+                      AND MSI.ORGANIZATION_ID = OHD.ORGANIZATION_ID
+                  ) AS ITEM_CODE,
+                  (
+                    SELECT MSI.DESCRIPTION
+                    FROM MTL_SYSTEM_ITEMS_B MSI
+                    WHERE MSI.INVENTORY_ITEM_ID = OHD.INVENTORY_ITEM_ID
+                      AND MSI.ORGANIZATION_ID = OHD.ORGANIZATION_ID
+                  ) AS ITEM_DESC,
+                  OHD.ORGANIZATION_ID,
+                  OHD.*
+                FROM MTL_ONHAND_QUANTITIES_DETAIL OHD,
+                     XTD_ONT_BRANCHES_V INV_ORG
+                WHERE OHD.ORGANIZATION_ID = INV_ORG.ORGANIZATION_ID (+)
+                  AND OHD.SUBINVENTORY_CODE = :1
+                  AND INV_ORG.ORGANIZATION_CODE = :2
+                ORDER BY INV_ORG.ORGANIZATION_CODE, OHD.DATE_RECEIVED DESC
+            `;
+
+            const [headerResult, detailResult] = await Promise.all([
+                this.oracleService.executeQuery(headerQuery, [
+                    organizationCode,
+                    subinventoryCode,
+                ]),
+                this.oracleService.executeQuery(detailQuery, [
+                    subinventoryCode,
+                    organizationCode,
+                ]),
+            ]);
+
+            const headers = headerResult.rows || [];
+            const details = detailResult.rows || [];
+
+            const linesByInventoryItemId = new Map<
+                string,
+                Record<string, unknown>[]
+            >();
+            const linesByItemCode = new Map<string, Record<string, unknown>[]>();
+
+            for (const line of details) {
+                const inventoryItemId = line.INVENTORY_ITEM_ID;
+                if (inventoryItemId != null) {
+                    const idKey = String(inventoryItemId);
+                    if (!linesByInventoryItemId.has(idKey)) {
+                        linesByInventoryItemId.set(idKey, []);
+                    }
+                    linesByInventoryItemId.get(idKey)!.push(line);
+                }
+
+                const detailItemCode = this.normalizeItemCode(line.ITEM_CODE);
+                if (detailItemCode) {
+                    if (!linesByItemCode.has(detailItemCode)) {
+                        linesByItemCode.set(detailItemCode, []);
+                    }
+                    linesByItemCode.get(detailItemCode)!.push(line);
+                }
+            }
+
+            const mapped = headers.map((header) => {
+                const lines = this.getLinesForHeader(
+                    header,
+                    linesByInventoryItemId,
+                    linesByItemCode,
+                );
+                return {
+                    ...header,
+                    ITEM_CODE: header.ITEM_CODE,
+                    LINES: lines,
+                    LINE_COUNT: lines.length,
+                };
+            });
+
+            const matchedLineKeys = new Set<string>();
+            for (const row of mapped) {
+                for (const line of (row.LINES as Record<string, unknown>[]) || []) {
+                    matchedLineKeys.add(this.getDetailLineKey(line));
+                }
+            }
+            const unmatchedLines = details.filter(
+                (line) => !matchedLineKeys.has(this.getDetailLineKey(line)),
+            );
+
+            const response: {
+                data: Record<string, unknown>[];
+                count: number;
+                status: boolean;
+                message: string;
+                unmatched_lines?: Record<string, unknown>[];
+            } = {
+                data: mapped,
+                count: mapped.length,
+                status: true,
+                message: [
+                    'On hand mapping detail retrieved successfully',
+                    `org ${organizationCode}`,
+                    `subinventory ${subinventoryCode}`,
+                    unmatchedLines.length > 0
+                        ? `(${unmatchedLines.length} detail row(s) without matching header)`
+                        : '',
+                ]
+                    .filter(Boolean)
+                    .join(' '),
+            };
+
+            if (unmatchedLines.length > 0) {
+                response.unmatched_lines = unmatchedLines;
+            }
+
+            return response;
+        } catch (error) {
+            this.logger.error(
+                `Error in getOnHandMappingDetail: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error retrieving on hand mapping detail: ${error.message}`,
+            };
+        }
+    }
+
+    private normalizeItemCode(value: unknown): string {
+        if (value == null) {
+            return '';
+        }
+        return String(value).trim().toUpperCase();
+    }
+
+    /**
+     * Header view uses short ITEM_CODE (e.g. BHM20); detail uses segment ITEM_CODE
+     * (e.g. RK.BHM.200000, same as header ITEM_NUMBER). Match by INVENTORY_ITEM_ID first.
+     */
+    private getLinesForHeader(
+        header: Record<string, unknown>,
+        linesByInventoryItemId: Map<string, Record<string, unknown>[]>,
+        linesByItemCode: Map<string, Record<string, unknown>[]>,
+    ): Record<string, unknown>[] {
+        const seen = new Set<string>();
+        const lines: Record<string, unknown>[] = [];
+
+        const addLines = (candidates: Record<string, unknown>[] | undefined) => {
+            for (const line of candidates || []) {
+                const key = this.getDetailLineKey(line);
+                if (seen.has(key)) {
+                    continue;
+                }
+                seen.add(key);
+                lines.push(line);
+            }
+        };
+
+        if (header.INVENTORY_ITEM_ID != null) {
+            addLines(linesByInventoryItemId.get(String(header.INVENTORY_ITEM_ID)));
+        }
+
+        const headerItemCode = this.normalizeItemCode(header.ITEM_CODE);
+        const headerItemNumber = this.normalizeItemCode(header.ITEM_NUMBER);
+        if (headerItemCode) {
+            addLines(linesByItemCode.get(headerItemCode));
+        }
+        if (headerItemNumber) {
+            addLines(linesByItemCode.get(headerItemNumber));
+        }
+
+        return lines;
+    }
+
+    private getDetailLineKey(line: Record<string, unknown>): string {
+        const inventoryItemId = line.INVENTORY_ITEM_ID ?? '';
+        const createTxnId = line.CREATE_TRANSACTION_ID ?? '';
+        const locatorId = line.LOCATOR_ID ?? '';
+        const lotNumber = line.LOT_NUMBER ?? '';
+        const dateReceived = line.DATE_RECEIVED ?? '';
+        return [
+            inventoryItemId,
+            createTxnId,
+            locatorId,
+            lotNumber,
+            dateReceived,
+        ].join('|');
+    }
+
     async invalidateInvOnHandQtyCache(
         itemCode?: string,
         subinventoryCode?: string,

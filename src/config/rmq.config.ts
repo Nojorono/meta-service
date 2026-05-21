@@ -14,6 +14,7 @@ export default registerAs(
     purchaseOrder: process.env.RABBITMQ_PURCHASE_ORDER_QUEUE,
     poInternalReq: process.env.RABBITMQ_PO_INTERNAL_REQ_QUEUE,
     ontBranches: process.env.RABBITMQ_ONT_BRANCHES_QUEUE,
+    shipConfirmInternal: process.env.RABBITMQ_SHIP_CONFIRM_INTERNAL_QUEUE,
     warehouse: process.env.RABBITMQ_WAREHOUSE_QUEUE,
     salesItem: process.env.RABBITMQ_SALES_ITEM_QUEUE,
     salesman: process.env.RABBITMQ_SALESMAN_QUEUE,

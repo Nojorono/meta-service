@@ -228,6 +228,55 @@ export class InvOnHandQtyController {
         }
     }
 
+    // on hand mapping detail
+    @Get('on-hand-mapping-detail')
+    @ApiOperation({
+        summary: 'Get on hand mapping detail',
+        description:
+            'Header from XTD_INV_ON_HAND_QTY_V matched to MTL_ONHAND_QUANTITIES_DETAIL lines by ITEM_CODE (default org CWH, subinventory SELISIH)',
+    })
+    @ApiQuery({
+        name: 'organization_code',
+        required: false,
+        type: String,
+        description: 'Organization code filter for header and detail',
+        example: 'CWH',
+    })
+    @ApiQuery({
+        name: 'subinventory_code',
+        required: false,
+        type: String,
+        description: 'Subinventory code filter for header and detail',
+        example: 'SELISIH',
+    })
+    async getOnHandMappingDetail(
+        @Query('organization_code') organizationCode?: string,
+        @Query('subinventory_code') subinventoryCode?: string,
+    ): Promise<any> {
+        this.logger.log('==== REST API: Get on hand mapping detail ====');
+        this.logger.log(
+            `Organization Code: ${organizationCode || 'CWH (default)'}, Subinventory Code: ${subinventoryCode || 'SELISIH (default)'}`,
+        );
+
+        try {
+            return await this.invOnHandQtyService.getOnHandMappingDetail({
+                organization_code: organizationCode,
+                subinventory_code: subinventoryCode,
+            });
+        } catch (error) {
+            this.logger.error(
+                `REST API Error retrieving on hand mapping detail: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error retrieving on hand mapping detail: ${error.message}`,
+            };
+        }
+    }
+
     @Delete('cache')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({

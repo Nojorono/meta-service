@@ -57,6 +57,39 @@ export class InvOnHandQtyMicroserviceController {
         }
     }
 
+    @MessagePattern('get_on_hand_mapping_detail')
+    async getOnHandMappingDetail(
+        @Payload() params?: InvOnHandQtyParamsDto,
+    ): Promise<any> {
+        this.logger.log(
+            '==== Received request for on hand mapping detail ====',
+        );
+        this.logger.log(JSON.stringify(params || {}));
+
+        try {
+            const result =
+                await this.invOnHandQtyService.getOnHandMappingDetail({
+                    organization_code: params?.organization_code,
+                    subinventory_code: params?.subinventory_code,
+                });
+            this.logger.log(
+                `On hand mapping detail result: status=${result.status}, count=${result.count}`,
+            );
+            return result;
+        } catch (error) {
+            this.logger.error(
+                `Error retrieving on hand mapping detail: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error in microservice: ${error.message}`,
+            };
+        }
+    }
+
     @MessagePattern('get_inv_locator')
     async getInvLocator(
         @Payload() params?: InvOnHandQtyParamsDto,
@@ -151,6 +184,34 @@ export class InvOnHandQtyMicroserviceController {
             return {
                 success: false,
                 error: error.message,
+            };
+        }
+    }
+
+    @MessagePattern('invOnHandQty.getOnHandMappingDetail')
+    @Internal()
+    async getOnHandMappingDetailByPattern(
+        @Payload()
+        data?: {
+            organizationCode?: string;
+            organization_code?: string;
+            subinventoryCode?: string;
+            subinventory_code?: string;
+        },
+    ) {
+        try {
+            return await this.invOnHandQtyService.getOnHandMappingDetail({
+                organization_code:
+                    data?.organization_code ?? data?.organizationCode,
+                subinventory_code:
+                    data?.subinventory_code ?? data?.subinventoryCode,
+            });
+        } catch (error) {
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: error.message,
             };
         }
     }

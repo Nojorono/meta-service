@@ -69,6 +69,7 @@ import { PoLineModule } from '../modules/po-line/po-line.module';
 import { RcvReceiptModule } from '../modules/rcv-receipt/rcv-receipt.module';
 import { PoInternalReqModule } from '../modules/po-internal-req/po-internal-req.module';
 import { OntBranchesModule } from '../modules/ont-branches/ont-branches.module';
+import { ShipConfirmInternalModule } from '../modules/ship-confirm-internal/ship-confirm-internal.module';
 
 @Module({
   imports: [
@@ -129,6 +130,7 @@ import { OntBranchesModule } from '../modules/ont-branches/ont-branches.module';
     RcvReceiptModule,
     PoInternalReqModule,
     OntBranchesModule,
+    ShipConfirmInternalModule,
     AuthModule,
     // Other modules can be added here
 

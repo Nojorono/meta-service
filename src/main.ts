@@ -245,6 +245,12 @@ async function bootstrap() {
       name: 'ONT_BRANCHES_SERVICE',
       queue: configService.get('rmq.ontBranches') || 'ont_branches_queue',
     },
+    {
+      name: 'SHIP_CONFIRM_INTERNAL_SERVICE',
+      queue:
+        configService.get('rmq.shipConfirmInternal') ||
+        'ship_confirm_internal_queue',
+    },
   ];
 
   // Initialize all microservices

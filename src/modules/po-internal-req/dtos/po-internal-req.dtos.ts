@@ -91,6 +91,10 @@ export class CreatePoInternalReqDto {
   @IsString()
   HEADER_ATTRIBUTE7: string;
 
+  @ApiProperty({ example: 'batch-001' })
+  @IsString()
+  HEADER_ATTRIBUTE15: string;
+
   @ApiProperty({ type: [CreatePoInternalReqLinesDto] })
   @IsArray()
   @ValidateNested({ each: true })

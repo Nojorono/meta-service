@@ -25,9 +25,10 @@ export class PoInternalReqHeaderService {
         TOTAL_LINES,
         IO_DEST_ID,
         HEADER_ATTRIBUTE_CATEGORY,
-        HEADER_ATTRIBUTE7
+        HEADER_ATTRIBUTE7,
+        HEADER_ATTRIBUTE15
       ) VALUES (
-        :1, :2, :3, TO_DATE(SUBSTR(:4, 1, 10), 'YYYY-MM-DD'), :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15, :16, :17
+        :1, :2, :3, TO_DATE(SUBSTR(:4, 1, 10), 'YYYY-MM-DD'), :5, :6, :7, :8, :9, :10, :11, :12, :13, :14, :15, :16, :17, :18
       )
     `;
 
@@ -49,6 +50,7 @@ export class PoInternalReqHeaderService {
       payload.IO_DEST_ID ?? null,
       payload.HEADER_ATTRIBUTE_CATEGORY,
       payload.HEADER_ATTRIBUTE7,
+      payload.HEADER_ATTRIBUTE15 ?? null,
     ];
 
     await this.oracleService.executeQuery(headerSql, headerParams);
