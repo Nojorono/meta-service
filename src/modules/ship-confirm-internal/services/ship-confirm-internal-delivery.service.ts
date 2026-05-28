@@ -8,7 +8,7 @@ import {
 
 @Injectable()
 export class ShipConfirmInternalDeliveryService {
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async createMutasi(payload: CreateShipConfirmInternalDto): Promise<void> {
     const sql = `
@@ -88,15 +88,15 @@ export class ShipConfirmInternalDeliveryService {
       line.ISO_LINE_ID,
       line.ISO_INVENTORY_ITEM_ID,
       line.ISO_ORGANIZATION_ID,
-      line.DELIVERY_ATTRIBUTE_CATEGORY ?? null,
-      line.DELIVERY_ATTRIBUTE6 ?? null,
-      line.DELIVERY_ATTRIBUTE7 ?? null,
-      line.DELIVERY_ATTRIBUTE8 ?? null,
-      line.DELIVERY_ATTRIBUTE9 ?? null,
-      line.DELIVERY_ATTRIBUTE10 ?? null,
-      line.DELIVERY_ATTRIBUTE11 ?? null,
-      line.DELIVERY_ATTRIBUTE12 ?? null,
-      line.DELIVERY_ATTRIBUTE13 ?? null,
+      payload.DELIVERY_ATTRIBUTE_CATEGORY ?? null,
+      payload.DELIVERY_ATTRIBUTE6 ?? null,
+      payload.DELIVERY_ATTRIBUTE7 ?? null,
+      payload.DELIVERY_ATTRIBUTE8 ?? null,
+      payload.DELIVERY_ATTRIBUTE9 ?? null,
+      payload.DELIVERY_ATTRIBUTE10 ?? null,
+      payload.DELIVERY_ATTRIBUTE11 ?? null,
+      payload.DELIVERY_ATTRIBUTE12 ?? null,
+      payload.DELIVERY_ATTRIBUTE13 ?? null,
     ];
 
     await this.oracleService.executeQuery(sql, params);
@@ -104,6 +104,7 @@ export class ShipConfirmInternalDeliveryService {
 
   async createSubdistShipConfirm(
     payload: CreateShipConfirmInternalDto,
+    line: CreateShipConfirmPickReleaseLineDto,
   ): Promise<void> {
     const sql = `
       INSERT INTO XTD_WSH_DELIVERIES_TRX_IFACE (
@@ -122,9 +123,9 @@ export class ShipConfirmInternalDeliveryService {
       payload.TRANSACTION_TYPE,
       payload.SOURCE_SYSTEM,
       payload.SOURCE_HEADER_ID,
-      payload.DELIVERY_ID,
-      payload.DELIVERY_NAME,
-      payload.SHIPPED_QUANTITY,
+      line.DELIVERY_ID,
+      line.DELIVERY_NAME,
+      line.SHIPPED_QUANTITY,
     ];
 
     await this.oracleService.executeQuery(sql, params);
@@ -147,7 +148,9 @@ export class ShipConfirmInternalDeliveryService {
         break;
 
       case ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_SHIP_CONFIRM:
-        await this.createSubdistShipConfirm(payload);
+        for (const line of payload.LINES || []) {
+          await this.createSubdistShipConfirm(payload, line);
+        }
         break;
 
       default:

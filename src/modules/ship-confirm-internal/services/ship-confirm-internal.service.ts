@@ -127,9 +127,7 @@ export class ShipConfirmInternalService {
 
       case ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_SHIP_CONFIRM:
         if (
-          payload.DELIVERY_ID == null ||
-          !payload.DELIVERY_NAME ||
-          payload.SHIPPED_QUANTITY == null
+          !payload.LINES?.length
         ) {
           throw new Error(
             'DELIVERY_ID, DELIVERY_NAME, and SHIPPED_QUANTITY are required for Outbound GS SO Subdist Ship Confirm',

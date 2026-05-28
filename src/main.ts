@@ -251,6 +251,14 @@ async function bootstrap() {
         configService.get('rmq.shipConfirmInternal') ||
         'ship_confirm_internal_queue',
     },
+    {
+      name: 'PO_LINE_SERVICE',
+      queue: configService.get('rmq.poLine') || 'po_line_queue',
+    },
+    {
+      name: 'TRUCK_UTIL_SERVICE',
+      queue: configService.get('rmq.truckUtil') || 'truck_util_queue',
+    },
   ];
 
   // Initialize all microservices

@@ -13,6 +13,7 @@ export default registerAs(
     salesOrder: process.env.RABBITMQ_SALES_ORDER_QUEUE,
     purchaseOrder: process.env.RABBITMQ_PURCHASE_ORDER_QUEUE,
     poInternalReq: process.env.RABBITMQ_PO_INTERNAL_REQ_QUEUE,
+    poLine: process.env.RABBITMQ_PO_LINE_QUEUE,
     ontBranches: process.env.RABBITMQ_ONT_BRANCHES_QUEUE,
     shipConfirmInternal: process.env.RABBITMQ_SHIP_CONFIRM_INTERNAL_QUEUE,
     warehouse: process.env.RABBITMQ_WAREHOUSE_QUEUE,
@@ -32,5 +33,6 @@ export default registerAs(
     priceList: process.env.RABBITMQ_PRICE_LIST_QUEUE,
     itemList: process.env.RABBITMQ_ITEM_LIST_QUEUE,
     weekSales: process.env.RABBITMQ_WEEK_SALES_QUEUE,
+    truckUtil: process.env.RABBITMQ_TRUCK_UTIL_QUEUE,
   }),
 );

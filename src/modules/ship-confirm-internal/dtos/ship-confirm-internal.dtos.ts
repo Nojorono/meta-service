@@ -40,59 +40,37 @@ export class CreateShipConfirmPickReleaseLineDto {
   @IsNumber()
   ISO_ORGANIZATION_ID: number;
 
-  @ApiProperty({ example: 'WMS-SHIP', required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(150)
-  DELIVERY_ATTRIBUTE_CATEGORY?: string;
+  // --- Type 3: Outbound GS SO Subdist Ship Confirm ---
+  @ApiProperty({ example: 50001, required: false })
+  @ValidateIf(
+    (o) =>
+      o.TRANSACTION_TYPE ===
+      ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_SHIP_CONFIRM,
+  )
+  @IsNotEmpty()
+  @IsNumber()
+  DELIVERY_ID?: number;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
+  @ApiProperty({ example: 'DEL-2026-0001', required: false })
+  @ValidateIf(
+    (o) =>
+      o.TRANSACTION_TYPE ===
+      ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_SHIP_CONFIRM,
+  )
+  @IsNotEmpty()
   @IsString()
-  @MaxLength(150)
-  DELIVERY_ATTRIBUTE6?: string;
+  @MaxLength(30)
+  DELIVERY_NAME?: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(150)
-  DELIVERY_ATTRIBUTE7?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(150)
-  DELIVERY_ATTRIBUTE8?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(150)
-  DELIVERY_ATTRIBUTE9?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(150)
-  DELIVERY_ATTRIBUTE10?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(150)
-  DELIVERY_ATTRIBUTE11?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(150)
-  DELIVERY_ATTRIBUTE12?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  @MaxLength(150)
-  DELIVERY_ATTRIBUTE13?: string;
+  @ApiProperty({ example: 25, required: false })
+  @ValidateIf(
+    (o) =>
+      o.TRANSACTION_TYPE ===
+      ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_SHIP_CONFIRM,
+  )
+  @IsNotEmpty()
+  @IsNumber()
+  SHIPPED_QUANTITY?: number;
 }
 
 export class CreateShipConfirmInternalDto {
@@ -234,38 +212,6 @@ export class CreateShipConfirmInternalDto {
   @ValidateNested({ each: true })
   @Type(() => CreateShipConfirmPickReleaseLineDto)
   LINES?: CreateShipConfirmPickReleaseLineDto[];
-
-  // --- Type 3: Outbound GS SO Subdist Ship Confirm ---
-  @ApiProperty({ example: 50001, required: false })
-  @ValidateIf(
-    (o) =>
-      o.TRANSACTION_TYPE ===
-      ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_SHIP_CONFIRM,
-  )
-  @IsNotEmpty()
-  @IsNumber()
-  DELIVERY_ID?: number;
-
-  @ApiProperty({ example: 'DEL-2026-0001', required: false })
-  @ValidateIf(
-    (o) =>
-      o.TRANSACTION_TYPE ===
-      ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_SHIP_CONFIRM,
-  )
-  @IsNotEmpty()
-  @IsString()
-  @MaxLength(30)
-  DELIVERY_NAME?: string;
-
-  @ApiProperty({ example: 25, required: false })
-  @ValidateIf(
-    (o) =>
-      o.TRANSACTION_TYPE ===
-      ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_SHIP_CONFIRM,
-  )
-  @IsNotEmpty()
-  @IsNumber()
-  SHIPPED_QUANTITY?: number;
 }
 
 export class ShipConfirmInternalResponseDto {
