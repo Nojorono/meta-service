@@ -246,10 +246,10 @@ async function bootstrap() {
       queue: configService.get('rmq.ontBranches') || 'ont_branches_queue',
     },
     {
-      name: 'SHIP_CONFIRM_INTERNAL_SERVICE',
+      name: 'SHIP_CONFIRM_SERVICE',
       queue:
-        configService.get('rmq.shipConfirmInternal') ||
-        'ship_confirm_internal_queue',
+        configService.get('rmq.shipConfirm') ||
+        'ship_confirm_queue',
     },
     {
       name: 'PO_LINE_SERVICE',

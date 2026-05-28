@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   CreateShipConfirmInternalDto,
+  ShipConfirmInternalFindDto,
   ShipConfirmInternalResponseDto,
   ShipConfirmInternalTransactionType,
 } from '../dtos/ship-confirm-internal.dtos';
@@ -9,6 +10,7 @@ import { ShipConfirmInternalDeliveryService } from './ship-confirm-internal-deli
 @Injectable()
 export class ShipConfirmInternalService {
   private readonly logger = new Logger(ShipConfirmInternalService.name);
+  private readonly successStatus = 'S';
 
   constructor(
     private readonly shipConfirmInternalDeliveryService: ShipConfirmInternalDeliveryService,
@@ -33,9 +35,25 @@ export class ShipConfirmInternalService {
       for (const payload of list) {
         this.assertPayloadShape(payload);
 
+        const findCriteria = this.buildFindCriteriaFromPayload(payload);
+        const validation = await this.validateBeforeCreate(findCriteria);
+
+        if (validation.action === 'RETURN_EXISTING') {
+          const existing = await this.find(findCriteria);
+          if (!existing.status || existing.data == null) {
+            return {
+              status: false,
+              message: existing.message,
+              data: null,
+            };
+          }
+          data.push(existing.data);
+          continue;
+        }
+
         await this.shipConfirmInternalDeliveryService.create(payload);
 
-        const fetched = await this.getBySourceHeaderId(payload.SOURCE_HEADER_ID);
+        const fetched = await this.find(findCriteria);
         if (!fetched.status || fetched.data == null) {
           return {
             status: false,
@@ -64,38 +82,25 @@ export class ShipConfirmInternalService {
     }
   }
 
-  async getBySourceHeaderId(
-    sourceHeaderId: string,
+  async find(
+    criteria: ShipConfirmInternalFindDto,
   ): Promise<ShipConfirmInternalResponseDto> {
-    try {
-      const rows =
-        await this.shipConfirmInternalDeliveryService.findBySourceHeaderId(
-          sourceHeaderId,
-        );
-
-      if (rows.length === 0) {
-        return {
-          status: false,
-          message: `No ship confirm internal data found for source_header_id ${sourceHeaderId}`,
-          data: null,
-        };
-      }
-
-      const isPickRelease =
-        rows[0].TRANSACTION_TYPE ===
-        ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_PICK_RELEASE;
-
+    if (!criteria.source_header_id && criteria.iso_header_id == null) {
       return {
-        status: true,
-        message: 'Ship confirm internal interface data retrieved successfully',
-        data: isPickRelease
-          ? {
-              SOURCE_HEADER_ID: sourceHeaderId,
-              TRANSACTION_TYPE: rows[0].TRANSACTION_TYPE,
-              LINES: rows,
-            }
-          : rows[0],
+        status: false,
+        message:
+          'At least one of source_header_id or iso_header_id is required',
+        data: null,
       };
+    }
+
+    try {
+      const rows = await this.shipConfirmInternalDeliveryService.find(criteria);
+
+      return this.formatRetrievedRows(
+        rows,
+        `No ship confirm internal data found for ${this.buildFindCriteriaLabel(criteria)}`,
+      );
     } catch (error) {
       this.logger.error(
         `Error retrieving ship confirm internal interface data: ${error.message}`,
@@ -107,6 +112,97 @@ export class ShipConfirmInternalService {
         data: null,
       };
     }
+  }
+
+  private buildFindCriteriaFromPayload(
+    payload: CreateShipConfirmInternalDto,
+  ): ShipConfirmInternalFindDto {
+    const criteria: ShipConfirmInternalFindDto = {
+      source_header_id: payload.SOURCE_HEADER_ID,
+    };
+    if (payload.ISO_HEADER_ID != null) {
+      criteria.iso_header_id = payload.ISO_HEADER_ID;
+    }
+    return criteria;
+  }
+
+  private normalizeStatus(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return String(value).trim().toUpperCase();
+  }
+
+  private hasAllDeliverySuccess(row: Record<string, unknown>): boolean {
+    const statuses = [
+      row.CREATE_DELIVERY_STATUS ?? row.create_delivery_status,
+      row.UPDATE_DELIVERY_STATUS ?? row.update_delivery_status,
+      row.PICK_RELEASE_STATUS ?? row.pick_release_status,
+      row.SHIP_CONFIRM_STATUS ?? row.ship_confirm_status,
+    ];
+
+    return statuses.every(
+      (status) => this.normalizeStatus(status) === this.successStatus,
+    );
+  }
+
+  private async validateBeforeCreate(
+    criteria: ShipConfirmInternalFindDto,
+  ): Promise<{ action: 'CREATE' | 'RETURN_EXISTING' }> {
+    const rows = await this.shipConfirmInternalDeliveryService.find(criteria);
+
+    if (rows.length === 0) {
+      return { action: 'CREATE' };
+    }
+
+    if (this.hasAllDeliverySuccess(rows[0])) {
+      this.logger.log(
+        `Skipping create for ${this.buildFindCriteriaLabel(criteria)}: all delivery statuses are S`,
+      );
+      return { action: 'RETURN_EXISTING' };
+    }
+
+    return { action: 'CREATE' };
+  }
+
+  private buildFindCriteriaLabel(criteria: ShipConfirmInternalFindDto): string {
+    const parts: string[] = [];
+    if (criteria.source_header_id) {
+      parts.push(`source_header_id ${criteria.source_header_id}`);
+    }
+    if (criteria.iso_header_id != null) {
+      parts.push(`ISO_HEADER_ID ${criteria.iso_header_id}`);
+    }
+    return parts.join(' and ');
+  }
+
+  private formatRetrievedRows(
+    rows: Record<string, any>[],
+    notFoundMessage: string,
+  ): ShipConfirmInternalResponseDto {
+    if (rows.length === 0) {
+      return {
+        status: false,
+        message: notFoundMessage,
+        data: null,
+      };
+    }
+
+    const isPickRelease =
+      rows[0].TRANSACTION_TYPE ===
+      ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_PICK_RELEASE;
+
+    return {
+      status: true,
+      message: 'Ship confirm internal interface data retrieved successfully',
+      data: isPickRelease
+        ? {
+            SOURCE_HEADER_ID: rows[0].SOURCE_HEADER_ID,
+            TRANSACTION_TYPE: rows[0].TRANSACTION_TYPE,
+            LINES: rows,
+          }
+        : rows[0],
+    };
   }
 
   private assertPayloadShape(payload: CreateShipConfirmInternalDto): void {

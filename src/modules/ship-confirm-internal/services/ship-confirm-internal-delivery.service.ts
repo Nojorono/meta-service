@@ -158,17 +158,33 @@ export class ShipConfirmInternalDeliveryService {
     }
   }
 
-  async findBySourceHeaderId(
-    sourceHeaderId: string,
-  ): Promise<Record<string, any>[]> {
-    const sql = `
+  async find(criteria: {
+    source_header_id?: string;
+    iso_header_id?: number;
+  }): Promise<Record<string, any>[]> {
+    let sql = `
       SELECT *
       FROM XTD_WSH_DELIVERIES_TRX_IFACE
-      WHERE SOURCE_HEADER_ID = :1
-      ORDER BY CREATION_DATE DESC
+      WHERE 1=1
     `;
+    const params: (string | number)[] = [];
+    let paramIndex = 1;
 
-    const result = await this.oracleService.executeQuery(sql, [sourceHeaderId]);
+    if (criteria.source_header_id) {
+      sql += ` AND SOURCE_HEADER_ID = :${paramIndex}`;
+      params.push(criteria.source_header_id);
+      paramIndex++;
+    }
+
+    if (criteria.iso_header_id != null) {
+      sql += ` AND ISO_HEADER_ID = :${paramIndex}`;
+      params.push(criteria.iso_header_id);
+      paramIndex++;
+    }
+
+    sql += ` ORDER BY CREATION_DATE DESC`;
+
+    const result = await this.oracleService.executeQuery(sql, params);
     return result.rows || [];
   }
 }
