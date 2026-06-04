@@ -155,7 +155,11 @@ export class ShipConfirmInternalService {
       return { action: 'CREATE' };
     }
 
-    if (this.hasAllDeliverySuccess(rows[0])) {
+    const latestRows = this.keepLatestRows(rows);
+    if (
+      latestRows.length > 0 &&
+      latestRows.every((row) => this.hasAllDeliverySuccess(row))
+    ) {
       this.logger.log(
         `Skipping create for ${this.buildFindCriteriaLabel(criteria)}: all delivery statuses are S`,
       );
@@ -176,6 +180,50 @@ export class ShipConfirmInternalService {
     return parts.join(' and ');
   }
 
+  private keepLatestRows(rows: Record<string, any>[]): Record<string, any>[] {
+    if (rows.length <= 1) {
+      return rows;
+    }
+
+    const transactionType = rows[0].TRANSACTION_TYPE;
+
+    if (
+      transactionType ===
+      ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_PICK_RELEASE
+    ) {
+      return this.latestPerKey(rows, 'SOURCE_LINE_ID');
+    }
+
+    if (
+      transactionType ===
+      ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_SHIP_CONFIRM
+    ) {
+      return this.latestPerKey(rows, 'DELIVERY_ID');
+    }
+
+    return [rows[0]];
+  }
+
+  private latestPerKey(
+    rows: Record<string, any>[],
+    key: string,
+  ): Record<string, any>[] {
+    const seen = new Set<string>();
+    const latest: Record<string, any>[] = [];
+
+    for (const row of rows) {
+      const value = row[key] ?? row[key.toLowerCase()];
+      const lineKey = value == null ? '' : String(value);
+      if (seen.has(lineKey)) {
+        continue;
+      }
+      seen.add(lineKey);
+      latest.push(row);
+    }
+
+    return latest;
+  }
+
   private formatRetrievedRows(
     rows: Record<string, any>[],
     notFoundMessage: string,
@@ -188,20 +236,23 @@ export class ShipConfirmInternalService {
       };
     }
 
-    const isPickRelease =
-      rows[0].TRANSACTION_TYPE ===
-      ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_PICK_RELEASE;
+    const latestRows = this.keepLatestRows(rows);
+    const isMultiLine =
+      latestRows[0].TRANSACTION_TYPE ===
+        ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_PICK_RELEASE ||
+      latestRows[0].TRANSACTION_TYPE ===
+        ShipConfirmInternalTransactionType.OUTBOUND_GS_SO_SUBDIST_SHIP_CONFIRM;
 
     return {
       status: true,
       message: 'Ship confirm internal interface data retrieved successfully',
-      data: isPickRelease
+      data: isMultiLine
         ? {
-            SOURCE_HEADER_ID: rows[0].SOURCE_HEADER_ID,
-            TRANSACTION_TYPE: rows[0].TRANSACTION_TYPE,
-            LINES: rows,
+            SOURCE_HEADER_ID: latestRows[0].SOURCE_HEADER_ID,
+            TRANSACTION_TYPE: latestRows[0].TRANSACTION_TYPE,
+            LINES: latestRows,
           }
-        : rows[0],
+        : latestRows[0],
     };
   }
 

@@ -182,7 +182,7 @@ export class ShipConfirmInternalDeliveryService {
       paramIndex++;
     }
 
-    sql += ` ORDER BY CREATION_DATE DESC`;
+    sql += ` ORDER BY CREATION_DATE DESC, IFACE_ID DESC`;
 
     const result = await this.oracleService.executeQuery(sql, params);
     return result.rows || [];

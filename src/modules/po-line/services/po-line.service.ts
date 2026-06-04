@@ -6,7 +6,7 @@ import { PoLineDto, PoLineQueryDto } from '../dtos/po-line.dtos';
 export class PoLineService {
   private readonly logger = new Logger(PoLineService.name);
 
-  constructor(private readonly oracleService: OracleService) {}
+  constructor(private readonly oracleService: OracleService) { }
 
   async findAllPoLines(
     queryDto: PoLineQueryDto,
@@ -47,6 +47,7 @@ export class PoLineService {
           AND prha.attribute7 = 'YES'
           AND pla.attribute7 IS NULL
           AND pha.vendor_id = :1
+          AND pla.closed_code != 'CLOSED'
           AND 0 = (
             SELECT NVL(SUM(plla.quantity_received), 0)
             FROM APPS.po_line_locations_all plla
@@ -119,6 +120,7 @@ export class PoLineService {
           AND pla.attribute7 IS NULL
           AND pha.vendor_id = :1
           AND pla.po_line_id = :2
+          AND pla.closed_code != 'CLOSED'
           AND 0 = (
             SELECT NVL(SUM(plla.quantity_received), 0)
             FROM APPS.po_line_locations_all plla
@@ -177,6 +179,7 @@ export class PoLineService {
           AND prha.attribute7 = 'YES'
           AND pla.attribute7 IS NULL
           AND pha.vendor_id = :1
+          AND pla.closed_code != 'CLOSED'
           AND 0 = (
             SELECT NVL(SUM(plla.quantity_received), 0)
             FROM APPS.po_line_locations_all plla
