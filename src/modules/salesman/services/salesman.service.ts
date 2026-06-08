@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { OracleService } from '../../../common/services/oracle.service';
 import { RedisService } from '../../../common/services/redis.service';
 import {
-  MetaSalesmanDto,
   MetaSalesmanDtoByDate,
+  MetaSalesmanDtoBySalesrepNumber,
   MetaSalesmanResponseDto,
 } from '../dtos/salesman.dtos';
 
@@ -17,7 +17,7 @@ export class SalesmanMetaService {
     private readonly configService: ConfigService,
     private readonly oracleService: OracleService,
     private readonly redisService: RedisService,
-  ) {}
+  ) { }
 
   async getSalesmenFromOracleByDate(
     params?: MetaSalesmanDtoByDate,
@@ -57,15 +57,7 @@ export class SalesmanMetaService {
 
       const result = await this.oracleService.executeQuery(query, queryParams);
 
-      const salesmen: MetaSalesmanDto[] = result.rows.map((row) => ({
-        salesrep_id: row.SALESREP_ID,
-        salesrep_number: row.SALESREP_NUMBER,
-        salesrep_name: row.SALESREP_NAME,
-        organization_id: row.ORGANIZATION_ID,
-        organization_code: row.ORGANIZATION_CODE,
-        is_active: row.IS_ACTIVE,
-        last_update_date: row.LAST_UPDATE_DATE,
-      }));
+      const salesmen = result.rows.map((row) => this.mapSalesmanRow(row));
 
       const response: MetaSalesmanResponseDto = {
         data: salesmen,
@@ -102,5 +94,60 @@ export class SalesmanMetaService {
         message: `Error retrieving salesman data: ${error.message}`,
       };
     }
+  }
+
+  async getSalesmanBySalesrepNumber(
+    params: MetaSalesmanDtoBySalesrepNumber,
+  ): Promise<MetaSalesmanResponseDto> {
+    const salesrepNumber = params?.salesrep_number?.trim();
+
+    if (!salesrepNumber) {
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: 'salesrep_number is required',
+      };
+    }
+
+    try {
+      const query = `
+        SELECT * FROM APPS.XTD_ONT_SALESREPS_V
+        WHERE UPPER(SALESREP_NUMBER) = UPPER(:salesrep_number)
+      `;
+
+      const result = await this.oracleService.executeQuery(query, [
+        salesrepNumber,
+      ]);
+
+      const salesmen = result.rows.map((row) => this.mapSalesmanRow(row));
+
+      const response: MetaSalesmanResponseDto = {
+        data: salesmen,
+        count: salesmen.length,
+        status: salesmen.length > 0,
+        message:
+          salesmen.length > 0
+            ? 'Salesman data retrieved successfully from Oracle'
+            : `No salesman found for salesrep_number ${salesrepNumber}`,
+      };
+
+      return response;
+    } catch (error) {
+      this.logger.error(
+        `Error in getSalesmanBySalesrepNumber: ${error.message}`,
+        error.stack,
+      );
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error retrieving salesman data: ${error.message}`,
+      };
+    }
+  }
+
+  private mapSalesmanRow(row: Record<string, any>): Record<string, any> {
+    return { ...row };
   }
 }

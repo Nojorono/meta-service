@@ -1,7 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { SalesmanMetaService } from '../services/salesman.service';
-import { MetaSalesmanDtoByDate } from '../dtos/salesman.dtos';
+import {
+  MetaSalesmanDtoByDate,
+  MetaSalesmanDtoBySalesrepNumber,
+} from '../dtos/salesman.dtos';
 import { Internal } from '../../../common/decorators/internal.decorator';
 
 @Controller()
@@ -17,5 +20,10 @@ export class SalesmanMicroserviceController {
   @MessagePattern('salesman.findAll')
   async findAll() {
     return this.salesmanService.getSalesmenFromOracleByDate();
+  }
+
+  @MessagePattern('salesman.findBySalesrepNumber')
+  async findBySalesrepNumber(@Payload() dto: MetaSalesmanDtoBySalesrepNumber) {
+    return this.salesmanService.getSalesmanBySalesrepNumber(dto);
   }
 }

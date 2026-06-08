@@ -95,4 +95,50 @@ export class SalesmanMetaController {
       };
     }
   }
+
+  @Get('by-number')
+  @ApiOperation({
+    summary: 'Get salesman by salesrep number',
+    description: 'Retrieve a salesman filtered by SALESREP_NUMBER',
+  })
+  @ApiQuery({
+    name: 'salesrep_number',
+    required: true,
+    type: String,
+    description: 'Sales representative number',
+    example: 'SR-001',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Salesman retrieved successfully',
+    type: MetaSalesmanResponseDto,
+  })
+  async getSalesmanBySalesrepNumber(
+    @Query('salesrep_number') salesrepNumber: string,
+  ): Promise<MetaSalesmanResponseDto> {
+    this.logger.log('==== REST API: Get salesman by salesrep number ====');
+    this.logger.log(`Salesrep number filter: ${salesrepNumber}`);
+
+    try {
+      const result =
+        await this.salesmanMetaService.getSalesmanBySalesrepNumber({
+          salesrep_number: salesrepNumber,
+        });
+      this.logger.log(
+        `REST API getSalesmanBySalesrepNumber result: status=${result.status}, count=${result.count}`,
+      );
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `REST API Error retrieving salesman by salesrep number: ${error.message}`,
+        error.stack,
+      );
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error retrieving salesman data: ${error.message}`,
+      };
+    }
+  }
 }
