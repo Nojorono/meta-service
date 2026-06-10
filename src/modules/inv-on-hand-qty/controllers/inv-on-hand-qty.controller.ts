@@ -29,6 +29,27 @@ export class InvOnHandQtyController {
 
     constructor(private readonly invOnHandQtyService: InvOnHandQtyService) { }
 
+    private normalizeSubinventoryCodes(
+        subinventoryCode?: string | string[],
+    ): string[] {
+        if (!subinventoryCode) {
+            return [];
+        }
+
+        const rawValues = Array.isArray(subinventoryCode)
+            ? subinventoryCode
+            : [subinventoryCode];
+
+        return [
+            ...new Set(
+                rawValues
+                    .flatMap((value) => value.split(','))
+                    .map((value) => value.trim())
+                    .filter(Boolean),
+            ),
+        ];
+    }
+
     @Get()
     @ApiOperation({
         summary: 'Get inventory on hand quantity',
@@ -99,7 +120,7 @@ export class InvOnHandQtyController {
     @ApiOperation({
         summary: 'Get inventory on hand quantity by organization',
         description:
-            'Same as the main inventory endpoint, but requires organization_code to filter by inventory organization (e.g. CWH, branch code). Optional item_code and subinventory_code filters apply.',
+            'Same as the main inventory endpoint, but requires organization_code to filter by inventory organization (e.g. CWH, branch code). Optional item_code and one or more subinventory_code filters apply.',
     })
     @ApiQuery({
         name: 'organization_code',
@@ -118,8 +139,10 @@ export class InvOnHandQtyController {
     @ApiQuery({
         name: 'subinventory_code',
         required: false,
+        isArray: true,
         type: String,
-        description: 'Subinventory code to filter inventory data',
+        description:
+            'Subinventory code(s). Repeat param or comma-separated (e.g. GOOD-RK-1,GOOD-RK-2)',
         example: 'GOOD-RK-1',
     })
     @ApiResponse({
@@ -134,11 +157,13 @@ export class InvOnHandQtyController {
     async getInvOnHandQtyByOrganization(
         @Query('organization_code') organizationCode: string,
         @Query('item_code') itemCode?: string,
-        @Query('subinventory_code') subinventoryCode?: string,
+        @Query('subinventory_code') subinventoryCode?: string | string[],
     ): Promise<InvOnHandQtyResponseDto> {
+        const subinventoryCodes = this.normalizeSubinventoryCodes(subinventoryCode);
+
         this.logger.log('==== REST API: Get inventory on hand quantity by organization ====');
         this.logger.log(
-            `Organization Code: ${organizationCode || 'not provided'}, Item Code: ${itemCode || 'not provided'}, Subinventory Code: ${subinventoryCode || 'not provided'}`,
+            `Organization Code: ${organizationCode || 'not provided'}, Item Code: ${itemCode || 'not provided'}, Subinventory Codes: ${subinventoryCodes.join(', ') || 'not provided'}`,
         );
 
         if (!organizationCode?.trim()) {
@@ -149,7 +174,8 @@ export class InvOnHandQtyController {
             const params: InvOnHandQtyParamsDto = {
                 organization_code: organizationCode.trim(),
                 item_code: itemCode,
-                subinventory_code: subinventoryCode,
+                subinventory_code:
+                    subinventoryCodes.length > 0 ? subinventoryCodes : undefined,
             };
 
             const result = await this.invOnHandQtyService.getInvOnHandQtyFromOracle(params);

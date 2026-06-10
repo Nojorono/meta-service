@@ -128,9 +128,10 @@ export class InvOnHandQtyService {
     ): Promise<InvOnHandQtyResponseDto> {
         const { item_code, subinventory_code, organization_code } = params || {};
         const organizationCode = organization_code ?? 'CWH';
+        const subinventoryCodes = this.normalizeSubinventoryCodes(subinventory_code);
 
         // Generate unique cache key based on parameters
-        const cacheKey = `inv-on-hand-qty-v2:${organizationCode}:${item_code || 'all'}:${subinventory_code || 'all'}`;
+        const cacheKey = `inv-on-hand-qty-v2:${organizationCode}:${item_code || 'all'}:${this.buildSubinventoryCacheKey(subinventoryCodes)}`;
 
         // Try to get data from cache first
         try {
@@ -174,10 +175,17 @@ export class InvOnHandQtyService {
             }
 
             // Add subinventory_code filter if provided
-            if (subinventory_code) {
+            if (subinventoryCodes.length === 1) {
                 query += ` AND a.SUBINVENTORY_CODE = :${paramIndex}`;
-                queryParams.push(subinventory_code);
+                queryParams.push(subinventoryCodes[0]);
                 paramIndex++;
+            } else if (subinventoryCodes.length > 1) {
+                const placeholders = subinventoryCodes
+                    .map((_, index) => `:${paramIndex + index}`)
+                    .join(', ');
+                query += ` AND a.SUBINVENTORY_CODE IN (${placeholders})`;
+                queryParams.push(...subinventoryCodes);
+                paramIndex += subinventoryCodes.length;
             }
 
             // query += ` ORDER BY a.SUBINVENTORY_CODE, a.ITEM_CODE, a.SOURCE_UOM_CODE`;
@@ -188,7 +196,8 @@ export class InvOnHandQtyService {
                 const filterMsg = [
                     `org ${organizationCode}`,
                     item_code && `item ${item_code}`,
-                    subinventory_code && `subinventory ${subinventory_code}`,
+                    subinventoryCodes.length > 0 &&
+                        `subinventory ${subinventoryCodes.join(', ')}`,
                 ]
                     .filter(Boolean)
                     .join(', ');
@@ -248,7 +257,8 @@ export class InvOnHandQtyService {
                     'ON_HAND_QUANTITY data',
                     `org ${organizationCode}`,
                     item_code && `item ${item_code}`,
-                    subinventory_code && `subinventory ${subinventory_code}`,
+                    subinventoryCodes.length > 0 &&
+                        `subinventory ${subinventoryCodes.join(', ')}`,
                     'retrieved successfully',
                 ]
                     .filter(Boolean)
@@ -624,6 +634,33 @@ export class InvOnHandQtyService {
             lotNumber,
             dateReceived,
         ].join('|');
+    }
+
+    private normalizeSubinventoryCodes(
+        subinventoryCode?: string | string[],
+    ): string[] {
+        if (!subinventoryCode) {
+            return [];
+        }
+
+        const rawValues = Array.isArray(subinventoryCode)
+            ? subinventoryCode
+            : [subinventoryCode];
+
+        return [
+            ...new Set(
+                rawValues
+                    .flatMap((value) => value.split(','))
+                    .map((value) => value.trim())
+                    .filter(Boolean),
+            ),
+        ];
+    }
+
+    private buildSubinventoryCacheKey(subinventoryCodes: string[]): string {
+        return subinventoryCodes.length > 0
+            ? [...subinventoryCodes].sort().join(',')
+            : 'all';
     }
 
     async invalidateInvOnHandQtyCache(

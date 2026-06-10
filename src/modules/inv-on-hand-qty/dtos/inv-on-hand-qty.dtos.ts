@@ -53,12 +53,14 @@ export class InvOnHandQtyParamsDto {
     item_code?: string;
 
     @ApiPropertyOptional({
-        description: 'Subinventory Code to filter',
-        example: 'GOOD-RK-1'
+        description:
+            'Subinventory code(s) to filter. Single value, comma-separated, or repeated query param',
+        example: 'GOOD-RK-1',
+        isArray: true,
+        type: String,
     })
-    @IsString()
     @IsOptional()
-    subinventory_code?: string;
+    subinventory_code?: string | string[];
 
     @ApiPropertyOptional({
         description: 'Organization code (inventory org) to filter',
