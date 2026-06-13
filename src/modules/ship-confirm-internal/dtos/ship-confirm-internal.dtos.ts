@@ -152,6 +152,23 @@ export class CreateShipConfirmInternalDto {
   @ApiProperty({ type: [CreateShipConfirmPickReleaseLineDto], required: false })
   @Type(() => CreateShipConfirmPickReleaseLineDto)
   LINES?: CreateShipConfirmPickReleaseLineDto[];
+
+  // --- Type 3: Outbound GS SO Subdist Ship Confirm (flat single-line payload) ---
+  @ApiProperty({ example: 50001, required: false })
+  @IsOptional()
+  @IsNumber()
+  DELIVERY_ID?: number;
+
+  @ApiProperty({ example: 'DEL-2026-0001', required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  DELIVERY_NAME?: string;
+
+  @ApiProperty({ example: 25, required: false })
+  @IsOptional()
+  @IsNumber()
+  SHIPPED_QUANTITY?: number;
 }
 
 export class ShipConfirmInternalFindDto {
@@ -166,6 +183,15 @@ export class ShipConfirmInternalFindDto {
   @Type(() => Number)
   @IsNumber()
   iso_header_id?: number;
+
+  @ApiProperty({
+    enum: ShipConfirmInternalTransactionType,
+    required: false,
+    example: ShipConfirmInternalTransactionType.OUTBOUND_GS_MUTASI_SO_INTERNAL,
+  })
+  @IsOptional()
+  @IsEnum(ShipConfirmInternalTransactionType)
+  transaction_type?: ShipConfirmInternalTransactionType;
 }
 
 export class ShipConfirmInternalResponseDto {

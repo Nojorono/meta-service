@@ -3,6 +3,7 @@ import { OracleService } from 'src/common/services/oracle.service';
 import {
   CreateShipConfirmInternalDto,
   CreateShipConfirmPickReleaseLineDto,
+  ShipConfirmInternalFindDto,
   ShipConfirmInternalTransactionType,
 } from '../dtos/ship-confirm-internal.dtos';
 
@@ -158,10 +159,7 @@ export class ShipConfirmInternalDeliveryService {
     }
   }
 
-  async find(criteria: {
-    source_header_id?: string;
-    iso_header_id?: number;
-  }): Promise<Record<string, any>[]> {
+  async find(criteria: ShipConfirmInternalFindDto): Promise<Record<string, any>[]> {
     let sql = `
       SELECT *
       FROM XTD_WSH_DELIVERIES_TRX_IFACE
@@ -179,6 +177,12 @@ export class ShipConfirmInternalDeliveryService {
     if (criteria.iso_header_id != null) {
       sql += ` AND ISO_HEADER_ID = :${paramIndex}`;
       params.push(criteria.iso_header_id);
+      paramIndex++;
+    }
+
+    if (criteria.transaction_type) {
+      sql += ` AND TRANSACTION_TYPE = :${paramIndex}`;
+      params.push(criteria.transaction_type);
       paramIndex++;
     }
 

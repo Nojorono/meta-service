@@ -51,7 +51,7 @@ export class ShipConfirmInternalController {
   @ApiOperation({
     summary: 'Get ship confirm internal interface data',
     description:
-      'Filter by source_header_id and/or iso_header_id (combined with AND). At least one is required.',
+      'Filter by source_header_id and/or iso_header_id (combined with AND). Optional transaction_type filter. At least one of source_header_id or iso_header_id is required.',
   })
   @ApiResponse({
     status: 200,
