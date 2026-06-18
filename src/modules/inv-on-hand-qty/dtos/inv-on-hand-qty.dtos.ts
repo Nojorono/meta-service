@@ -71,6 +71,45 @@ export class InvOnHandQtyParamsDto {
     organization_code?: string;
 }
 
+export class InvOnHandQtyWithAtrParamsDto {
+    @ApiProperty({
+        description: 'Organization code (inventory org) to filter',
+        example: 'CWH',
+    })
+    @IsString()
+    organization_code: string;
+
+    @ApiProperty({
+        description:
+            'Subinventory code(s) to filter. Single value, comma-separated, or repeated query param',
+        example: 'GOOD-RK-1',
+        isArray: true,
+        type: String,
+    })
+    subinventory_code: string | string[];
+}
+
+export class InvOnHandQtyWithAtrResponseDto {
+    @ApiProperty({
+        description: 'Rows from XTD_INV_ON_HAND_QTY_WITH_ATR_V',
+        type: 'array',
+        items: { type: 'object' },
+    })
+    data: Record<string, unknown>[];
+
+    @ApiProperty({ description: 'Total count of records', example: 2 })
+    count: number;
+
+    @ApiProperty({
+        description: 'Response message',
+        example: 'Inventory on hand quantity with attributes retrieved successfully',
+    })
+    message: string;
+
+    @ApiProperty({ description: 'Response status', example: true })
+    status: boolean;
+}
+
 export class InvOnHandQtyResponseDto {
     @ApiProperty({
         description: 'Array of inventory on hand quantity data',

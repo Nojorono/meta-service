@@ -4,6 +4,8 @@ import { InvOnHandQtyService } from '../services/inv-on-hand-qty.service';
 import {
     InvOnHandQtyResponseDto,
     InvOnHandQtyParamsDto,
+    InvOnHandQtyWithAtrParamsDto,
+    InvOnHandQtyWithAtrResponseDto,
 } from '../dtos/inv-on-hand-qty.dtos';
 import { Internal } from 'src/common/decorators/internal.decorator';
 
@@ -205,6 +207,83 @@ export class InvOnHandQtyMicroserviceController {
                     data?.organization_code ?? data?.organizationCode,
                 subinventory_code:
                     data?.subinventory_code ?? data?.subinventoryCode,
+            });
+        } catch (error) {
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: error.message,
+            };
+        }
+    }
+
+    @MessagePattern('get_inv_on_hand_qty_with_atr')
+    async getInvOnHandQtyWithAtr(
+        @Payload() params: InvOnHandQtyWithAtrParamsDto,
+    ): Promise<InvOnHandQtyWithAtrResponseDto> {
+        this.logger.log(
+            '==== Received request for inventory on hand quantity with attributes ====',
+        );
+        this.logger.log(JSON.stringify(params || {}));
+
+        try {
+            return await this.invOnHandQtyService.getInvOnHandQtyWithAtr(params);
+        } catch (error) {
+            this.logger.error(
+                `Error retrieving inventory on hand quantity with attributes: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error in microservice: ${error.message}`,
+            };
+        }
+    }
+
+    @MessagePattern('invOnHandQty.getWithAtr')
+    @Internal()
+    async getWithAtr(
+        @Payload()
+        data: {
+            organizationCode?: string;
+            organization_code?: string;
+            subinventoryCode?: string | string[];
+            subinventory_code?: string | string[];
+        },
+    ): Promise<InvOnHandQtyWithAtrResponseDto> {
+        try {
+            const organizationCode =
+                data?.organization_code ?? data?.organizationCode;
+            const subinventoryCode =
+                data?.subinventory_code ?? data?.subinventoryCode;
+
+            if (!organizationCode?.trim()) {
+                return {
+                    data: [],
+                    count: 0,
+                    status: false,
+                    message: 'organization_code is required',
+                };
+            }
+
+            if (
+                !subinventoryCode ||
+                (Array.isArray(subinventoryCode) && subinventoryCode.length === 0)
+            ) {
+                return {
+                    data: [],
+                    count: 0,
+                    status: false,
+                    message: 'subinventory_code is required',
+                };
+            }
+
+            return await this.invOnHandQtyService.getInvOnHandQtyWithAtr({
+                organization_code: organizationCode.trim(),
+                subinventory_code: subinventoryCode,
             });
         } catch (error) {
             return {

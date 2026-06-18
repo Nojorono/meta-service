@@ -4,6 +4,8 @@ import {
     InvOnHandQtyDto,
     InvOnHandQtyParamsDto,
     InvOnHandQtyResponseDto,
+    InvOnHandQtyWithAtrParamsDto,
+    InvOnHandQtyWithAtrResponseDto,
     ItemDto,
     QuantityConversionDto,
 } from '../dtos/inv-on-hand-qty.dtos';
@@ -197,7 +199,7 @@ export class InvOnHandQtyService {
                     `org ${organizationCode}`,
                     item_code && `item ${item_code}`,
                     subinventoryCodes.length > 0 &&
-                        `subinventory ${subinventoryCodes.join(', ')}`,
+                    `subinventory ${subinventoryCodes.join(', ')}`,
                 ]
                     .filter(Boolean)
                     .join(', ');
@@ -258,7 +260,7 @@ export class InvOnHandQtyService {
                     `org ${organizationCode}`,
                     item_code && `item ${item_code}`,
                     subinventoryCodes.length > 0 &&
-                        `subinventory ${subinventoryCodes.join(', ')}`,
+                    `subinventory ${subinventoryCodes.join(', ')}`,
                     'retrieved successfully',
                 ]
                     .filter(Boolean)
@@ -684,6 +686,90 @@ export class InvOnHandQtyService {
                 `Error invalidating cache: ${error.message}`,
                 error.stack,
             );
+        }
+    }
+
+    async getInvOnHandQtyWithAtr(
+        params: InvOnHandQtyWithAtrParamsDto,
+    ): Promise<InvOnHandQtyWithAtrResponseDto> {
+        const organizationCode = params.organization_code?.trim();
+        const subinventoryCodes = this.normalizeSubinventoryCodes(
+            params.subinventory_code,
+        );
+
+        if (!organizationCode) {
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: 'organization_code is required',
+            };
+        }
+
+        if (subinventoryCodes.length === 0) {
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: 'subinventory_code is required',
+            };
+        }
+
+        try {
+            let query = `
+                SELECT *
+                FROM XTD_INV_ON_HAND_QTY_WITH_ATR_V
+                WHERE ORGANIZATION_CODE = :1
+            `;
+            const queryParams: (string | number)[] = [organizationCode];
+            let paramIndex = 2;
+
+            if (subinventoryCodes.length === 1) {
+                query += ` AND SUBINVENTORY_CODE = :${paramIndex}`;
+                queryParams.push(subinventoryCodes[0]);
+            } else {
+                const placeholders = subinventoryCodes
+                    .map((_, index) => `:${paramIndex + index}`)
+                    .join(', ');
+                query += ` AND SUBINVENTORY_CODE IN (${placeholders})`;
+                queryParams.push(...subinventoryCodes);
+            }
+
+            query += ` ORDER BY SUBINVENTORY_CODE, ITEM_CODE`;
+
+            const result = await this.oracleService.executeQuery(query, queryParams);
+            const data = (result.rows || []).map((row) => ({ ...row }));
+
+            if (data.length === 0) {
+                return {
+                    data: [],
+                    count: 0,
+                    status: false,
+                    message: `No inventory data found for org ${organizationCode}, subinventory ${subinventoryCodes.join(', ')}`,
+                };
+            }
+
+            return {
+                data,
+                count: data.length,
+                status: true,
+                message: [
+                    'Inventory on hand quantity with attributes retrieved successfully',
+                    `org ${organizationCode}`,
+                    `subinventory ${subinventoryCodes.join(', ')}`,
+                ].join(' '),
+            };
+        } catch (error) {
+            this.logger.error(
+                `Error in getInvOnHandQtyWithAtr: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error retrieving inventory on hand quantity with attributes: ${error.message}`,
+            };
         }
     }
 }

@@ -18,6 +18,7 @@ import { InvOnHandQtyService } from '../services/inv-on-hand-qty.service';
 import {
     InvOnHandQtyResponseDto,
     InvOnHandQtyParamsDto,
+    InvOnHandQtyWithAtrResponseDto,
 } from '../dtos/inv-on-hand-qty.dtos';
 import { Public } from '../../../decorators/public.decorator';
 
@@ -299,6 +300,78 @@ export class InvOnHandQtyController {
                 count: 0,
                 status: false,
                 message: `Error retrieving on hand mapping detail: ${error.message}`,
+            };
+        }
+    }
+
+    @Get('with-atr')
+    @ApiOperation({
+        summary: 'Get inventory on hand quantity with attributes',
+        description:
+            'Retrieve rows from XTD_INV_ON_HAND_QTY_WITH_ATR_V filtered by organization_code and subinventory_code',
+    })
+    @ApiQuery({
+        name: 'organization_code',
+        required: true,
+        type: String,
+        description: 'Organization code to filter',
+        example: 'CWH',
+    })
+    @ApiQuery({
+        name: 'subinventory_code',
+        required: true,
+        isArray: true,
+        type: String,
+        description:
+            'Subinventory code(s). Repeat param or comma-separated (e.g. GOOD-RK-1,GOOD-RK-2)',
+        example: 'GOOD-RK-1',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Inventory on hand quantity with attributes retrieved successfully',
+        type: InvOnHandQtyWithAtrResponseDto,
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Bad request - organization_code and subinventory_code are required',
+    })
+    async getInvOnHandQtyWithAtr(
+        @Query('organization_code') organizationCode: string,
+        @Query('subinventory_code') subinventoryCode: string | string[],
+    ): Promise<InvOnHandQtyWithAtrResponseDto> {
+        const subinventoryCodes = this.normalizeSubinventoryCodes(subinventoryCode);
+
+        this.logger.log('==== REST API: Get inventory on hand quantity with attributes ====');
+        this.logger.log(
+            `Organization Code: ${organizationCode || 'not provided'}, Subinventory Codes: ${subinventoryCodes.join(', ') || 'not provided'}`,
+        );
+
+        if (!organizationCode?.trim()) {
+            throw new BadRequestException('organization_code is required');
+        }
+
+        if (subinventoryCodes.length === 0) {
+            throw new BadRequestException('subinventory_code is required');
+        }
+
+        try {
+            return await this.invOnHandQtyService.getInvOnHandQtyWithAtr({
+                organization_code: organizationCode.trim(),
+                subinventory_code: subinventoryCodes,
+            });
+        } catch (error) {
+            if (error instanceof BadRequestException) {
+                throw error;
+            }
+            this.logger.error(
+                `REST API Error retrieving inventory on hand quantity with attributes: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error retrieving inventory data: ${error.message}`,
             };
         }
     }
