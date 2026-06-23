@@ -735,6 +735,7 @@ export class InvOnHandQtyService {
                 queryParams.push(...subinventoryCodes);
             }
 
+            query += ` AND ITEM_CODE IS NOT NULL`;
             query += ` ORDER BY SUBINVENTORY_CODE, ITEM_CODE`;
 
             const result = await this.oracleService.executeQuery(query, queryParams);

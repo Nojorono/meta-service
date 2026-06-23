@@ -4,28 +4,46 @@ import { MoveOrderService } from '../services/move-order.service';
 import {
     CreateMoveOrderDto,
     MoveOrderResponseDto,
-    UpdateMoveOrderDto,
     GetMoveOrdersQueryDto,
     CreateMoveOrderLineDto,
     MoveOrderLineResponseDto,
-    UpdateMoveOrderLineDto,
     GetMoveOrderLinesQueryDto,
     CreateMoveOrderWithLinesDto,
-    MoveOrderWithLinesResponseDto
-} from '../dtos/move-order.dtos';
+    MoveOrderWithLinesResponseDto,
+    FindMoveOrderByRequestNumberDto,
+    MoveOrderFindWithLinesResponseDto,
+} from '../dtos';
 
 @Controller()
 export class MoveOrderMicroserviceController {
     constructor(private readonly moveOrderService: MoveOrderService) { }
 
-    @MessagePattern('move_order.create')
-    async createMoveOrder(@Payload() data: { createDto: CreateMoveOrderDto, userId?: number, userName?: string }): Promise<MoveOrderResponseDto> {
-        return await this.moveOrderService.createMoveOrder(data.createDto, data.userId, data.userName);
+    @MessagePattern('move_order.create_with_lines')
+    async createMoveOrderWithLines(
+        @Payload()
+        data:
+            | { createDto: CreateMoveOrderWithLinesDto; userId?: number; userName?: string }
+            | (CreateMoveOrderWithLinesDto & { userId?: number; userName?: string }),
+    ): Promise<MoveOrderWithLinesResponseDto> {
+        const payload = data as any;
+        const createDto: CreateMoveOrderWithLinesDto = payload.createDto ?? payload;
+        const userId = payload.userId;
+        const userName = payload.userName;
+        return await this.moveOrderService.createMoveOrderWithLines(
+            createDto,
+            userId,
+            userName,
+        );
     }
 
-    @MessagePattern('move_order.create_with_lines')
-    async createMoveOrderWithLines(@Payload() data: { createDto: CreateMoveOrderWithLinesDto, userId?: number, userName?: string }): Promise<MoveOrderWithLinesResponseDto> {
-        return await this.moveOrderService.createMoveOrderWithLines(data.createDto, data.userId, data.userName);
+    @MessagePattern('move_order.find_by_request_number')
+    async findMoveOrderWithLinesByRequestNumber(
+        @Payload() payload: FindMoveOrderByRequestNumberDto,
+    ): Promise<MoveOrderFindWithLinesResponseDto> {
+        return this.moveOrderService.findMoveOrderWithLinesByRequestNumber(
+            payload.request_number,
+            payload.source_system,
+        );
     }
 
     @MessagePattern('move_order.get_all')
@@ -36,16 +54,6 @@ export class MoveOrderMicroserviceController {
     @MessagePattern('move_order.get_by_id')
     async getMoveOrderById(@Payload() id: number): Promise<MoveOrderResponseDto> {
         return await this.moveOrderService.getMoveOrderById(id);
-    }
-
-    @MessagePattern('move_order.update')
-    async updateMoveOrder(@Payload() data: { id: number, updateDto: UpdateMoveOrderDto, userId?: number }): Promise<MoveOrderResponseDto> {
-        return await this.moveOrderService.updateMoveOrder(data.id, data.updateDto, data.userId);
-    }
-
-    @MessagePattern('move_order.delete')
-    async deleteMoveOrder(@Payload() id: number): Promise<boolean> {
-        return await this.moveOrderService.deleteMoveOrder(id);
     }
 
     @MessagePattern('move_order_line.create')
@@ -66,11 +74,6 @@ export class MoveOrderMicroserviceController {
     @MessagePattern('move_order_line.get_by_header_id')
     async getMoveOrderLinesByHeaderId(@Payload() headerId: number): Promise<MoveOrderLineResponseDto[]> {
         return await this.moveOrderService.getMoveOrderLinesByHeaderId(headerId);
-    }
-
-    @MessagePattern('move_order_line.update')
-    async updateMoveOrderLine(@Payload() data: { id: number, updateDto: UpdateMoveOrderLineDto, userId?: number }): Promise<MoveOrderLineResponseDto> {
-        return await this.moveOrderService.updateMoveOrderLine(data.id, data.updateDto, data.userId);
     }
 
     @MessagePattern('move_order_line.delete')
