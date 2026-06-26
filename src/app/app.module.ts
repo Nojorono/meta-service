@@ -70,6 +70,7 @@ import { RcvReceiptModule } from '../modules/rcv-receipt/rcv-receipt.module';
 import { PoInternalReqModule } from '../modules/po-internal-req/po-internal-req.module';
 import { OntBranchesModule } from '../modules/ont-branches/ont-branches.module';
 import { ShipConfirmInternalModule } from '../modules/ship-confirm-internal/ship-confirm-internal.module';
+import { MoveOrderWmsModule } from '../modules/move-order-wms/move-order-wms.module';
 
 @Module({
   imports: [
@@ -129,6 +130,7 @@ import { ShipConfirmInternalModule } from '../modules/ship-confirm-internal/ship
     PoLineModule,
     RcvReceiptModule,
     PoInternalReqModule,
+    MoveOrderWmsModule,
     OntBranchesModule,
     ShipConfirmInternalModule,
     AuthModule,

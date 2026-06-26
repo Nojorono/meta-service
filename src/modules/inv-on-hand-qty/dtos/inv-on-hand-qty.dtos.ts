@@ -69,6 +69,14 @@ export class InvOnHandQtyParamsDto {
     @IsString()
     @IsOptional()
     organization_code?: string;
+
+    @ApiPropertyOptional({
+        description: 'Locator segment1 to filter',
+        example: 'A.01.01',
+    })
+    @IsString()
+    @IsOptional()
+    locator?: string;
 }
 
 export class InvOnHandQtyWithAtrParamsDto {
@@ -108,6 +116,22 @@ export class InvOnHandQtyWithAtrResponseDto {
 
     @ApiProperty({ description: 'Response status', example: true })
     status: boolean;
+}
+
+export class LocatorSalesParamsDto {
+    @ApiProperty({
+        description: 'Organization code filter',
+        example: 'JAT',
+    })
+    @IsString()
+    organization_code: string;
+
+    @ApiProperty({
+        description: 'Sales representative number filter',
+        example: '1000123',
+    })
+    @IsString()
+    salesrep_number: string;
 }
 
 export class InvOnHandQtyResponseDto {

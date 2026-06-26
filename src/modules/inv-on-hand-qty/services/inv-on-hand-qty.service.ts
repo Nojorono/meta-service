@@ -6,6 +6,7 @@ import {
     InvOnHandQtyResponseDto,
     InvOnHandQtyWithAtrParamsDto,
     InvOnHandQtyWithAtrResponseDto,
+    LocatorSalesParamsDto,
     ItemDto,
     QuantityConversionDto,
 } from '../dtos/inv-on-hand-qty.dtos';
@@ -30,8 +31,10 @@ export class InvOnHandQtyService {
     async getInvLocator(
         params?: InvOnHandQtyParamsDto,
     ): Promise<any> {
-        const { organization_code, subinventory_code } = params || {};
+        const { organization_code, subinventory_code, locator } = params || {};
         const organizationCode = organization_code ?? 'JAT';
+        const locatorValue = locator?.trim();
+        const locatorSegment1 = locatorValue?.split('.')?.[0]?.trim();
         const cacheKey = `inv-locator-v1:${organizationCode}:${subinventory_code || 'all'}`;
 
         // try {
@@ -79,10 +82,23 @@ export class InvOnHandQtyService {
                 WHERE mp.organization_code = :1
             `;
             const queryParams: any[] = [organizationCode];
+            let paramIndex = 2;
 
             if (subinventory_code) {
-                query += ` AND msi.secondary_inventory_name = :2`;
+                query += ` AND msi.secondary_inventory_name = :${paramIndex}`;
                 queryParams.push(subinventory_code);
+                paramIndex++;
+            }
+
+            if (locatorValue) {
+                query += `
+                    AND (
+                        UPPER(TRIM(mil.segment1)) = UPPER(TRIM(:${paramIndex}))
+                        OR UPPER(TRIM(mil.segment1)) = UPPER(TRIM(:${paramIndex + 1}))
+                    )
+                `;
+                queryParams.push(locatorValue, locatorSegment1 || locatorValue);
+                paramIndex += 2;
             }
 
             query += ` ORDER BY mp.organization_code, msi.secondary_inventory_name`;
@@ -294,6 +310,54 @@ export class InvOnHandQtyService {
                 count: 0,
                 status: false,
                 message: `Error retrieving inventory data: ${error.message}`,
+            };
+        }
+    }
+
+    async getLocatorSales(
+        params: LocatorSalesParamsDto,
+    ): Promise<any> {
+        const organizationCode = params.organization_code?.trim();
+        const salesrepNumber = params.salesrep_number?.trim();
+
+        if (!organizationCode || !salesrepNumber) {
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: 'organization_code and salesrep_number are required',
+            };
+        }
+
+        try {
+            const query = `
+                SELECT *
+                FROM XTD_ONT_SALESREPS_V
+                WHERE ORGANIZATION_CODE = :1
+                  AND SALESREP_NUMBER = :2
+            `;
+
+            const result = await this.oracleService.executeQuery(query, [
+                organizationCode,
+                salesrepNumber,
+            ]);
+
+            return {
+                data: result.rows || [],
+                count: result.rows?.length || 0,
+                status: true,
+                message: 'Locator sales data retrieved successfully',
+            };
+        } catch (error) {
+            this.logger.error(
+                `Error in getLocatorSales: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error retrieving locator sales data: ${error.message}`,
             };
         }
     }

@@ -19,6 +19,7 @@ import {
     InvOnHandQtyResponseDto,
     InvOnHandQtyParamsDto,
     InvOnHandQtyWithAtrResponseDto,
+    LocatorSalesParamsDto,
 } from '../dtos/inv-on-hand-qty.dtos';
 import { Public } from '../../../decorators/public.decorator';
 
@@ -227,19 +228,28 @@ export class InvOnHandQtyController {
         description: 'Subinventory code to filter locator data',
         example: 'GOOD-RK-1',
     })
+    @ApiQuery({
+        name: 'locator',
+        required: false,
+        type: String,
+        description: 'Locator segment1 to filter locator data',
+        example: 'A.01.01',
+    })
     async getInvLocator(
         @Query('organization_code') organizationCode?: string,
         @Query('subinventory_code') subinventoryCode?: string,
+        @Query('locator') locator?: string,
     ): Promise<any> {
         this.logger.log('==== REST API: Get inventory locator list ====');
         this.logger.log(
-            `Organization Code: ${organizationCode || 'JAT (default)'}, Subinventory Code: ${subinventoryCode || 'not provided'}`,
+            `Organization Code: ${organizationCode || 'JAT (default)'}, Subinventory Code: ${subinventoryCode || 'not provided'}, Locator: ${locator || 'not provided'}`,
         );
 
         try {
             return await this.invOnHandQtyService.getInvLocator({
                 organization_code: organizationCode,
                 subinventory_code: subinventoryCode,
+                locator,
             });
         } catch (error) {
             this.logger.error(
@@ -445,5 +455,48 @@ export class InvOnHandQtyController {
                 message: `Error clearing cache: ${error.message}`,
             };
         }
+    }
+
+    // find locator sales
+    @Get('locator-sales')
+    @ApiOperation({
+        summary: 'Find locator sales',
+        description:
+            'Retrieve salesrep data from XTD_ONT_SALESREPS_V filtered by organization_code and salesrep_number',
+    })
+    @ApiQuery({
+        name: 'organization_code',
+        required: true,
+        type: String,
+        description: 'Organization code filter',
+        example: 'JAT',
+    })
+    @ApiQuery({
+        name: 'salesrep_number',
+        required: true,
+        type: String,
+        description: 'Sales representative number filter',
+        example: '1000123',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Locator sales data retrieved successfully',
+    })
+    async getLocatorSales(
+        @Query('organization_code') organizationCode: string,
+        @Query('salesrep_number') salesrepNumber: string,
+    ): Promise<any> {
+        if (!organizationCode?.trim() || !salesrepNumber?.trim()) {
+            throw new BadRequestException(
+                'organization_code and salesrep_number are required',
+            );
+        }
+
+        const params: LocatorSalesParamsDto = {
+            organization_code: organizationCode.trim(),
+            salesrep_number: salesrepNumber.trim(),
+        };
+
+        return this.invOnHandQtyService.getLocatorSales(params);
     }
 }

@@ -6,6 +6,7 @@ import {
     InvOnHandQtyParamsDto,
     InvOnHandQtyWithAtrParamsDto,
     InvOnHandQtyWithAtrResponseDto,
+    LocatorSalesParamsDto,
 } from '../dtos/inv-on-hand-qty.dtos';
 import { Internal } from 'src/common/decorators/internal.decorator';
 
@@ -324,6 +325,31 @@ export class InvOnHandQtyMicroserviceController {
             return {
                 success: false,
                 error: error.message,
+            };
+        }
+    }
+
+    @MessagePattern('get_locator_sales')
+    async getLocatorSales(
+        @Payload() params: LocatorSalesParamsDto,
+    ): Promise<any> {
+        this.logger.log(
+            '==== Received request for locator sales with params ====',
+        );
+        this.logger.log(JSON.stringify(params || {}));
+
+        try {
+            return await this.invOnHandQtyService.getLocatorSales(params);
+        } catch (error) {
+            this.logger.error(
+                `Error retrieving locator sales data: ${error.message}`,
+                error.stack,
+            );
+            return {
+                data: [],
+                count: 0,
+                status: false,
+                message: `Error in microservice: ${error.message}`,
             };
         }
     }

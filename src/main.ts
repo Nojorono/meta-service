@@ -259,6 +259,10 @@ async function bootstrap() {
       name: 'TRUCK_UTIL_SERVICE',
       queue: configService.get('rmq.truckUtil') || 'truck_util_queue',
     },
+    {
+      name: 'MOVE_ORDER_WMS_SERVICE',
+      queue: configService.get('rmq.moveOrderWms') || 'move_order_wms_queue',
+    },
   ];
 
   // Initialize all microservices
