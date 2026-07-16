@@ -36,10 +36,18 @@ export class RcvReceiptService {
 
       for (const payload of list) {
         const validation = await this.validateBeforeCreate(payload.SOURCE_HEADER_ID);
+        
         if (validation.action === 'REJECT') {
           return validation.response;
         }
+        
+        if (validation.action === 'RETURN_EXISTING') {
+          // Return existing data instead of creating new records
+          const existingData = await this.getBySourceHeaderId(payload.SOURCE_HEADER_ID);
+          return existingData;
+        }
 
+        // Only create if validation.action === 'CREATE'
         await this.rcvReceiptLinesService.createMany(
           payload.LINES || [],
           payload.SOURCE_HEADER_ID,
