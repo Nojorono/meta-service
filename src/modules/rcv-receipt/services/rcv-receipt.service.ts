@@ -213,7 +213,7 @@ export class RcvReceiptService {
       };
     }
 
-    if (headerSuccess || headerError || successLine || errorLine) {
+    if (headerSuccess || successLine) {
       return {
         action: 'RETURN_EXISTING',
         response: {
@@ -222,6 +222,18 @@ export class RcvReceiptService {
           data: {
             SOURCE_HEADER_ID: sourceHeaderId,
           },
+        },
+      };
+    }
+
+    if (headerError || errorLine) {
+      return {
+        action: 'CREATE',
+        response: {
+          status: true,
+          message:
+            'Existing receipt has error status. Re-create is allowed.',
+          data: null,
         },
       };
     }
