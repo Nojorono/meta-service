@@ -3,10 +3,16 @@ export class MetaItemListDto {
   item_number: string;
   item_description: string;
   inventory_item_id: number;
+  organization_code?: string;
 }
 
 export class MetaItemListDtoByItemCode {
   item_code: string;
+}
+
+export class MetaItemListDtoByInventoryItemId {
+  inventory_item_id: number;
+  organization_code: string;
 }
 
 export class ItemListQueryDto {

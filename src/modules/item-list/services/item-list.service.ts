@@ -5,6 +5,7 @@ import { RedisService } from '../../../common/services/redis.service';
 import {
   MetaItemListDto,
   MetaItemListDtoByItemCode,
+  MetaItemListDtoByInventoryItemId,
   MetaItemListResponseDto,
   ItemListQueryDto,
 } from '../dtos/item-list.dtos';
@@ -102,6 +103,86 @@ export class ItemListMetaService {
         count: 0,
         status: false,
         message: `Error retrieving sales items data: ${error.message}`,
+      };
+    }
+  }
+
+  async getItemListByInventoryItemIdAndOrgCode(
+    params: MetaItemListDtoByInventoryItemId,
+  ): Promise<MetaItemListResponseDto> {
+    const { inventory_item_id, organization_code } = params;
+
+    // const cacheKey = `item_list:inventory_item_id:${inventory_item_id}:org:${organization_code}`;
+
+    // try {
+    //   const cachedData = await this.redisService.get(cacheKey);
+    //   if (cachedData) {
+    //     this.logger.log(`Cache hit for ${cacheKey}`);
+    //     return JSON.parse(cachedData as string) as MetaItemListResponseDto;
+    //   }
+    //   this.logger.log(`Cache miss for ${cacheKey}, fetching from Oracle`);
+    // } catch (error) {
+    //   this.logger.error(
+    //     `Error accessing Redis cache: ${error.message}`,
+    //     error.stack,
+    //   );
+    // }
+
+    try {
+      const query = `
+        SELECT
+         *
+        FROM XTD_INV_SALES_ITEMS_V
+        WHERE INVENTORY_ITEM_ID = :inventory_item_id
+          AND ORGANIZATION_CODE = :organization_code
+      `;
+
+      const result = await this.oracleService.executeQuery(query, [
+        Number(inventory_item_id),
+        String(organization_code),
+      ]);
+
+      const itemList: MetaItemListDto[] = result.rows.map((row) => ({
+        item_code: row.ITEM_CODE,
+        item_number: row.ITEM_NUMBER,
+        item_description: row.ITEM_DESCRIPTION,
+        inventory_item_id: row.INVENTORY_ITEM_ID,
+        organization_code: row.ORGANIZATION_CODE,
+      }));
+
+      const response: MetaItemListResponseDto = {
+        data: itemList,
+        count: itemList.length,
+        status: true,
+        message:
+          'Item list data retrieved successfully by inventory_item_id and organization_code',
+      };
+
+      // try {
+      //   await this.redisService.set(
+      //     cacheKey,
+      //     JSON.stringify(response),
+      //     this.CACHE_TTL,
+      //   );
+      //   this.logger.log(`Data stored in cache with key ${cacheKey}`);
+      // } catch (cacheError) {
+      //   this.logger.error(
+      //     `Error storing data in Redis: ${cacheError.message}`,
+      //     cacheError.stack,
+      //   );
+      // }
+
+      return response;
+    } catch (error) {
+      this.logger.error(
+        `Error in getItemListByInventoryItemIdAndOrgCode: ${error.message}`,
+        error.stack,
+      );
+      return {
+        data: [],
+        count: 0,
+        status: false,
+        message: `Error retrieving item list data: ${error.message}`,
       };
     }
   }
