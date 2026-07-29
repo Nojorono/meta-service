@@ -60,6 +60,7 @@ export class SalesOrderService {
               , APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, wdd.requested_quantity, 'BKS', 'BAL' ) bal
               , APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, wdd.requested_quantity, 'BKS', 'PRS' ) prs
               , APPS.XTD_INV_CONVERT_QTY_DUS_FNC(oola.inventory_item_id, oola.ship_from_org_id, wdd.requested_quantity, 'BKS', 'BKS' ) bks
+              , wdd.released_status released_status
 	       FROM apps.oe_order_headers_all ooha,
 	            apps.oe_order_lines_all oola,
 	            apps.oe_order_holds_all ohld,
@@ -101,6 +102,13 @@ export class SalesOrderService {
 	            AND NVL (oola.cancelled_flag, '-') = 'N'
 	            AND NVL (oola.BOOKED_flag, '-') = 'Y'
 	            AND UPPER(ot.name) NOT LIKE '%CANVAS%'
+	            AND (
+	              ot.name <> 'HOQ-Taking Order'
+	              OR (
+	                wdd.released_status = 'R'
+	                AND oola.flow_status_code = 'AWAITING_SHIPPING'
+	              )
+	            )
 	   ORDER BY organization_id, order_number`
     let sql = `
       SELECT so.HEADER_ID, so.SO_TYPE, so.ORG_ID, hou.NAME as ORG_NAME, so.STATUS, so.ORGANIZATION_ID, so.TRANSACTION_TYPE, so.ORDER_NUMBER,
@@ -108,7 +116,7 @@ export class SalesOrderService {
         so.LOCATION_BILL, so.LOCATON_SHIP, so.INVOICE_TO_ADDRESS1, so.CREATED_BY, so.CREATED_DATE, so.LINE_NUMBER,
         so.INVENTORY_ITEM_ID, so.ITEM_DESC, so.ORDERED_QUANTITY, so.ORDER_QUANTITY_UOM, so.SHIPPING_QUANTITY, so.SHIPPING_QUANTITY_UOM,
         si.ITEM_CODE, si.ITEM_NUMBER, si.ITEM_DESCRIPTION, 
-        so.DUS, so.BAL, so.PRS, so.BKS
+        so.DUS, so.BAL, so.PRS, so.BKS, so.RELEASED_STATUS
       FROM (${XTD_ONT_SO_OPEN_V}) so
       LEFT JOIN (
         SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
@@ -202,6 +210,7 @@ export class SalesOrderService {
         ORDER_QUANTITY_UOM: row.ORDER_QUANTITY_UOM,
         SHIPPING_QUANTITY: row.SHIPPING_QUANTITY,
         SHIPPING_QUANTITY_UOM: row.SHIPPING_QUANTITY_UOM,
+        RELEASED_STATUS: row.RELEASED_STATUS,
         CONVERTED_TO_DUS: row.DUS,
         CONVERTED_TO_BAL: row.BAL,
         CONVERTED_TO_PRS: row.PRS,
