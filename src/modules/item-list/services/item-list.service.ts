@@ -112,22 +112,6 @@ export class ItemListMetaService {
   ): Promise<MetaItemListResponseDto> {
     const { inventory_item_id, organization_code } = params;
 
-    // const cacheKey = `item_list:inventory_item_id:${inventory_item_id}:org:${organization_code}`;
-
-    // try {
-    //   const cachedData = await this.redisService.get(cacheKey);
-    //   if (cachedData) {
-    //     this.logger.log(`Cache hit for ${cacheKey}`);
-    //     return JSON.parse(cachedData as string) as MetaItemListResponseDto;
-    //   }
-    //   this.logger.log(`Cache miss for ${cacheKey}, fetching from Oracle`);
-    // } catch (error) {
-    //   this.logger.error(
-    //     `Error accessing Redis cache: ${error.message}`,
-    //     error.stack,
-    //   );
-    // }
-
     try {
       const query = `
         SELECT
@@ -157,20 +141,6 @@ export class ItemListMetaService {
         message:
           'Item list data retrieved successfully by inventory_item_id and organization_code',
       };
-
-      // try {
-      //   await this.redisService.set(
-      //     cacheKey,
-      //     JSON.stringify(response),
-      //     this.CACHE_TTL,
-      //   );
-      //   this.logger.log(`Data stored in cache with key ${cacheKey}`);
-      // } catch (cacheError) {
-      //   this.logger.error(
-      //     `Error storing data in Redis: ${cacheError.message}`,
-      //     cacheError.stack,
-      //   );
-      // }
 
       return response;
     } catch (error) {
