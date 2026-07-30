@@ -174,9 +174,21 @@ export class ShipConfirmInternalDeliveryService {
       paramIndex++;
     }
 
+    if (criteria.source_line_id) {
+      sql += ` AND SOURCE_LINE_ID = :${paramIndex}`;
+      params.push(criteria.source_line_id);
+      paramIndex++;
+    }
+
     if (criteria.iso_header_id != null) {
       sql += ` AND ISO_HEADER_ID = :${paramIndex}`;
       params.push(criteria.iso_header_id);
+      paramIndex++;
+    }
+
+    if (criteria.delivery_id) {
+      sql += ` AND DELIVERY_ID = :${paramIndex}`;
+      params.push(criteria.delivery_id);
       paramIndex++;
     }
 

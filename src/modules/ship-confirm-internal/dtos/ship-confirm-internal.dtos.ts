@@ -175,8 +175,20 @@ export class ShipConfirmInternalFindDto {
   @ApiProperty({ example: 'HDR-2026-0001', required: false })
   @IsOptional()
   @IsString()
-  @MaxLength(100)
+  @MaxLength(255)
   source_header_id?: string;
+
+  @ApiProperty({ example: 'LINE-2026-0001', required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  source_line_id?: string;
+
+  @ApiProperty({ example: 'DEL-2026-0001', required: false })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  delivery_id?: string;
 
   @ApiProperty({ example: 12345, required: false })
   @IsOptional()
