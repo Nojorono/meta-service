@@ -40,10 +40,10 @@ export class SalesOrderService {
                 ot.name transaction_type,
                 ooha.order_number,
                 oola.ship_from_org_id organization_id_from,
-                mp.organization_code subinventory_from,
+                mp.organization_code organization_code_from,
                 ooha.ordered_date ordered_date,
-                oola.ship_from_org_id organization_id_to,
-                hp_bill.party_name subinventory_to,
+                nvl(prl.destination_organization_id, oola.ship_to_org_id) organization_id_to,
+                nvl((select organization_code from mtl_parameters where organization_id = nvl(prl.destination_organization_id,0)), hp_bill.party_name) organization_code_to,
                 hcs_bill.location location_bill,
                 hcs_ship.location locaton_ship,
                 hl_ship.address1 invoice_to_address1,
@@ -77,7 +77,8 @@ export class SalesOrderService {
 	            hz_cust_accounts hca,
 	            mtl_system_items_b msib,
 	            mtl_parameters mp,
-    			    wsh_delivery_details wdd
+    			    wsh_delivery_details wdd,
+    			    po_requisition_lines_all prl
 	      WHERE     1 = 1
 	      		  and wdd.source_header_id = ooha.header_id
     			    and wdd.source_line_id = oola.line_id(+)
@@ -99,6 +100,7 @@ export class SalesOrderService {
 	            AND msib.organization_id = oola.ship_from_org_id
 	            AND ooha.order_type_id = ot.transaction_type_id
 	            AND oola.ship_from_org_id = mp.organization_id
+	            AND oola.source_document_line_id = prl.requisition_line_id (+)
 	            AND NVL (oola.cancelled_flag, '-') = 'N'
 	            AND NVL (oola.BOOKED_flag, '-') = 'Y'
 	            AND UPPER(ot.name) NOT LIKE '%CANVAS%'
@@ -112,7 +114,7 @@ export class SalesOrderService {
 	   ORDER BY organization_id, order_number`
     let sql = `
       SELECT so.HEADER_ID, so.SO_TYPE, so.ORG_ID, hou.NAME as ORG_NAME, so.STATUS, so.ORGANIZATION_ID, so.TRANSACTION_TYPE, so.ORDER_NUMBER,
-        so.ORGANIZATION_ID_FROM, so.SUBINVENTORY_FROM, so.ORDERED_DATE, so.ORGANIZATION_ID_TO, so.SUBINVENTORY_TO,
+        so.ORGANIZATION_ID_FROM, so.ORGANIZATION_CODE_FROM, so.ORDERED_DATE, so.ORGANIZATION_ID_TO, so.ORGANIZATION_CODE_TO,
         so.LOCATION_BILL, so.LOCATON_SHIP, so.INVOICE_TO_ADDRESS1, so.CREATED_BY, so.CREATED_DATE, so.LINE_NUMBER,
         so.INVENTORY_ITEM_ID, so.ITEM_DESC, so.ORDERED_QUANTITY, so.ORDER_QUANTITY_UOM, so.SHIPPING_QUANTITY, so.SHIPPING_QUANTITY_UOM,
         si.ITEM_CODE, si.ITEM_NUMBER, si.ITEM_DESCRIPTION, 
