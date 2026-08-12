@@ -17,9 +17,9 @@ export class MoveOrderWmsMicroserviceController {
     @Payload() payload: CreateMoveOrderWmsDto | CreateMoveOrderWmsDto[],
   ): Promise<MoveOrderWmsResponseDto> {
     const list = Array.isArray(payload) ? payload : [payload];
-    console.log(list);
+    console.log('list', list);
     const result = await this.moveOrderWmsService.create(list);
-    console.log(result);
+    console.log('result', result);
     return result;
   }
 

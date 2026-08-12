@@ -102,8 +102,8 @@ export class MoveOrderWmsService {
         };
       }
 
-      const lines = await this.moveOrderWmsLinesService.findBySourceHeaderId(
-        sourceHeaderId,
+      const lines = await this.moveOrderWmsLinesService.findByHeaderIfaceId(
+        header.HEADER_IFACE_ID,
       );
 
       return {

@@ -69,17 +69,17 @@ export class MoveOrderWmsLinesService {
     }
   }
 
-  async findBySourceHeaderId(
-    sourceHeaderId: string,
+  async findByHeaderIfaceId(
+    headerIfaceId: number,
   ): Promise<Record<string, any>[]> {
     const sql = `
       SELECT *
-      FROM XTD_INV_MO_LINES_IFACE
-      WHERE SOURCE_HEADER_ID = :1
+      FROM XTD_INV_MO_LINES_IFACE_V
+      WHERE HEADER_IFACE_ID = :1
       ORDER BY LINE_NUMBER ASC, CREATION_DATE DESC
     `;
 
-    const result = await this.oracleService.executeQuery(sql, [sourceHeaderId]);
+    const result = await this.oracleService.executeQuery(sql, [headerIfaceId]);
     return result.rows || [];
   }
 }
