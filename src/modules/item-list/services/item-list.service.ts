@@ -87,6 +87,13 @@ export class ItemListMetaService {
         item_number: row.ITEM_NUMBER,
         item_description: row.ITEM_DESCRIPTION,
         inventory_item_id: row.INVENTORY_ITEM_ID,
+        principle: row.PRINCIPLE,
+        status_code: row.STATUS_CODE,
+        urut: row.URUT,
+        dus_bal: row.DUS_BAL,
+        bal_prs: row.BAL_PRS,
+        prs_bks: row.PRS_BKS,
+        bks_btg: row.BKS_BTG,
       }));
 
       const response: MetaItemListResponseDto = {
@@ -170,6 +177,13 @@ export class ItemListMetaService {
         item_description: row.ITEM_DESCRIPTION,
         inventory_item_id: row.INVENTORY_ITEM_ID,
         organization_code: row.ORGANIZATION_CODE,
+        principle: row.PRINCIPLE,
+        status_code: row.STATUS_CODE,
+        urut: row.URUT,
+        dus_bal: row.DUS_BAL,
+        bal_prs: row.BAL_PRS,
+        prs_bks: row.PRS_BKS,
+        bks_btg: row.BKS_BTG,
       }));
 
       const response: MetaItemListResponseDto = {
