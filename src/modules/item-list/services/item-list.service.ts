@@ -59,7 +59,6 @@ export class ItemListMetaService {
                       WHERE     1 = 1
                             AND INVENTORY_ITEM_ID = mcr.INVENTORY_ITEM_ID
                             AND CATEGORY_SET_NAME = 'Principal Category') Principle,
-              MCR.CROSS_REFERENCE ITEM_CODE,
               mcr.INVENTORY_ITEM_ID,
               MCR.ATTRIBUTE6, 
               mtls.inventory_item_status_code status_code,
@@ -144,7 +143,6 @@ export class ItemListMetaService {
                   WHERE     1 = 1
                         AND INVENTORY_ITEM_ID = mcr.INVENTORY_ITEM_ID
                         AND CATEGORY_SET_NAME = 'Principal Category') Principle,
-          MCR.CROSS_REFERENCE ITEM_CODE,
           mcr.INVENTORY_ITEM_ID,
           MCR.ATTRIBUTE6, 
           mtls.inventory_item_status_code status_code,
@@ -226,7 +224,6 @@ export class ItemListMetaService {
                   WHERE     1 = 1
                         AND INVENTORY_ITEM_ID = mcr.INVENTORY_ITEM_ID
                         AND CATEGORY_SET_NAME = 'Principal Category') Principle,
-          MCR.CROSS_REFERENCE ITEM_CODE,
           mcr.INVENTORY_ITEM_ID,
           MCR.ATTRIBUTE6, 
           mtls.inventory_item_status_code status_code,
