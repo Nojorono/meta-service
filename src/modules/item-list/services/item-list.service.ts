@@ -14,6 +14,7 @@ import {
 export class ItemListMetaService {
   private readonly logger = new Logger(ItemListMetaService.name);
   private readonly CACHE_TTL = 60 * 60; // Cache for 1 hour
+  private readonly CACHE_VERSION = 'v2';
 
   constructor(
     private readonly configService: ConfigService,
@@ -21,14 +22,31 @@ export class ItemListMetaService {
     private readonly redisService: RedisService,
   ) { }
 
+  private mapRowToItemListDto(row: Record<string, any>): MetaItemListDto {
+    return {
+      item_code: row.ITEM_CODE,
+      item_number: row.ITEM_NUMBER,
+      item_description: row.ITEM_DESCRIPTION,
+      inventory_item_id: row.INVENTORY_ITEM_ID,
+      organization_code: row.ORGANIZATION_CODE,
+      principle: row.PRINCIPLE,
+      status_code: row.STATUS_CODE,
+      urut: row.URUT,
+      dus_bal: row.DUS_BAL,
+      bal_prs: row.BAL_PRS,
+      prs_bks: row.PRS_BKS,
+      bks_btg: row.BKS_BTG,
+    };
+  }
+
   async getItemListFromOracleByItemCode(
     params?: MetaItemListDtoByItemCode,
   ): Promise<MetaItemListResponseDto> {
     const item_code = params?.item_code;
 
     const cacheKey = item_code
-      ? `item_list:item_code:${item_code}`
-      : 'item_list:all';
+      ? `item_list:${this.CACHE_VERSION}:item_code:${item_code}`
+      : `item_list:${this.CACHE_VERSION}:all`;
 
     // Try to get data from cache first
     try {
@@ -82,19 +100,9 @@ export class ItemListMetaService {
 
       const result = await this.oracleService.executeQuery(query, queryParams);
 
-      const itemList: MetaItemListDto[] = result.rows.map((row) => ({
-        item_code: row.ITEM_CODE,
-        item_number: row.ITEM_NUMBER,
-        item_description: row.ITEM_DESCRIPTION,
-        inventory_item_id: row.INVENTORY_ITEM_ID,
-        principle: row.PRINCIPLE,
-        status_code: row.STATUS_CODE,
-        urut: row.URUT,
-        dus_bal: row.DUS_BAL,
-        bal_prs: row.BAL_PRS,
-        prs_bks: row.PRS_BKS,
-        bks_btg: row.BKS_BTG,
-      }));
+      const itemList: MetaItemListDto[] = result.rows.map((row) =>
+        this.mapRowToItemListDto(row),
+      );
 
       const response: MetaItemListResponseDto = {
         data: itemList,
@@ -171,20 +179,9 @@ export class ItemListMetaService {
         String(organization_code),
       ]);
 
-      const itemList: MetaItemListDto[] = result.rows.map((row) => ({
-        item_code: row.ITEM_CODE,
-        item_number: row.ITEM_NUMBER,
-        item_description: row.ITEM_DESCRIPTION,
-        inventory_item_id: row.INVENTORY_ITEM_ID,
-        organization_code: row.ORGANIZATION_CODE,
-        principle: row.PRINCIPLE,
-        status_code: row.STATUS_CODE,
-        urut: row.URUT,
-        dus_bal: row.DUS_BAL,
-        bal_prs: row.BAL_PRS,
-        prs_bks: row.PRS_BKS,
-        bks_btg: row.BKS_BTG,
-      }));
+      const itemList: MetaItemListDto[] = result.rows.map((row) =>
+        this.mapRowToItemListDto(row),
+      );
 
       const response: MetaItemListResponseDto = {
         data: itemList,
@@ -212,7 +209,7 @@ export class ItemListMetaService {
   async findAllItemLists(params: ItemListQueryDto): Promise<MetaItemListResponseDto> {
     this.logger.log('==== MICROSERVICE: Find all item lists ====');
 
-    const cacheKey = `item_list:findAll`;
+    const cacheKey = `item_list:${this.CACHE_VERSION}:findAll`;
 
     try {
       const cachedData = await this.redisService.get(cacheKey);
@@ -255,7 +252,7 @@ export class ItemListMetaService {
       const queryParams: any[] = [];
 
       if (params.search) {
-        query += ` WHERE UPPER(si.ITEM_DESCRIPTION) LIKE UPPER(?)`;
+        query += ` AND UPPER(si.ITEM_DESCRIPTION) LIKE UPPER(?)`;
         queryParams.push(`%${params.search}%`);
       }
 
@@ -267,7 +264,9 @@ export class ItemListMetaService {
       }
 
       const result = await this.oracleService.executeQuery(query, queryParams);
-      const data = result.rows as MetaItemListDto[];
+      const data: MetaItemListDto[] = result.rows.map((row) =>
+        this.mapRowToItemListDto(row),
+      );
 
       const response: MetaItemListResponseDto = {
         data,
