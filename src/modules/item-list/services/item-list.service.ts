@@ -47,17 +47,37 @@ export class ItemListMetaService {
 
     try {
       let query = `
-        SELECT * FROM 
-        (SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID  
-        FROM XTD_INV_SALES_ITEMS_V
-        GROUP BY ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID 
-        ORDER BY ITEM_CODE)
+        SELECT 	* FROM 
+          (SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
+                FROM XTD_INV_SALES_ITEMS_V 
+                GROUP BY ITEM_CODE,ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID 
+                ORDER BY ITEM_CODE) si
+                LEFT JOIN (select 
+              DISTINCT 
+                (SELECT MAX (CATEGORY_CONCAT_SEGS)
+                        FROM MTL_ITEM_CATEGORIES_V
+                      WHERE     1 = 1
+                            AND INVENTORY_ITEM_ID = mcr.INVENTORY_ITEM_ID
+                            AND CATEGORY_SET_NAME = 'Principal Category') Principle,
+              MCR.CROSS_REFERENCE ITEM_CODE,
+              mcr.INVENTORY_ITEM_ID,
+              MCR.ATTRIBUTE6, 
+              mtls.inventory_item_status_code status_code,
+              to_number(MCR.ATTRIBUTE7) as urut,
+              inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'DUS','BAL') DUS_BAL,
+              inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BAL','PRS') BAL_PRS,
+              inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'PRS','BKS') PRS_BKS, 
+              inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BKS','BTG') BKS_BTG
+              FROM mtl_cross_references_v mcr, mtl_system_items_b mtls
+              where mcr.INVENTORY_ITEM_ID = mtls.INVENTORY_ITEM_ID
+              AND mtls.inventory_item_status_code ='Active'
+              ORDER BY ITEM_CODE) csi ON csi.INVENTORY_ITEM_ID = si.INVENTORY_ITEM_ID  
         WHERE 1=1
       `;
 
       const queryParams = [];
       if (item_code) {
-        query += ` AND ITEM_CODE = :item_code`;
+        query += ` AND si.ITEM_CODE = :item_code`;
         queryParams.push(item_code);
       }
 
@@ -116,9 +136,29 @@ export class ItemListMetaService {
       const query = `
         SELECT
          *
-        FROM XTD_INV_SALES_ITEMS_V
-        WHERE INVENTORY_ITEM_ID = :inventory_item_id
-          AND ORGANIZATION_CODE = :organization_code
+        FROM XTD_INV_SALES_ITEMS_V si
+        LEFT JOIN (select 
+          DISTINCT 
+            (SELECT MAX (CATEGORY_CONCAT_SEGS)
+                    FROM MTL_ITEM_CATEGORIES_V
+                  WHERE     1 = 1
+                        AND INVENTORY_ITEM_ID = mcr.INVENTORY_ITEM_ID
+                        AND CATEGORY_SET_NAME = 'Principal Category') Principle,
+          MCR.CROSS_REFERENCE ITEM_CODE,
+          mcr.INVENTORY_ITEM_ID,
+          MCR.ATTRIBUTE6, 
+          mtls.inventory_item_status_code status_code,
+          to_number(MCR.ATTRIBUTE7) as urut,
+          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'DUS','BAL') DUS_BAL,
+          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BAL','PRS') BAL_PRS,
+          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'PRS','BKS') PRS_BKS, 
+          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BKS','BTG') BKS_BTG
+          FROM mtl_cross_references_v mcr, mtl_system_items_b mtls
+          where mcr.INVENTORY_ITEM_ID = mtls.INVENTORY_ITEM_ID
+          AND mtls.inventory_item_status_code ='Active'
+          ORDER BY ITEM_CODE) csi ON csi.INVENTORY_ITEM_ID = si.INVENTORY_ITEM_ID  
+        WHERE si.INVENTORY_ITEM_ID = :inventory_item_id
+        AND si.ORGANIZATION_CODE = :organization_code
       `;
 
       const result = await this.oracleService.executeQuery(query, [
@@ -178,17 +218,37 @@ export class ItemListMetaService {
         (SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID  
         FROM XTD_INV_SALES_ITEMS_V
         GROUP BY ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID 
-        ORDER BY ITEM_CODE)
+        ORDER BY ITEM_CODE) si
+        LEFT JOIN (select 
+          DISTINCT 
+            (SELECT MAX (CATEGORY_CONCAT_SEGS)
+                    FROM MTL_ITEM_CATEGORIES_V
+                  WHERE     1 = 1
+                        AND INVENTORY_ITEM_ID = mcr.INVENTORY_ITEM_ID
+                        AND CATEGORY_SET_NAME = 'Principal Category') Principle,
+          MCR.CROSS_REFERENCE ITEM_CODE,
+          mcr.INVENTORY_ITEM_ID,
+          MCR.ATTRIBUTE6, 
+          mtls.inventory_item_status_code status_code,
+          to_number(MCR.ATTRIBUTE7) as urut,
+          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'DUS','BAL') DUS_BAL,
+          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BAL','PRS') BAL_PRS,
+          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'PRS','BKS') PRS_BKS, 
+          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BKS','BTG') BKS_BTG
+          FROM mtl_cross_references_v mcr, mtl_system_items_b mtls
+          where mcr.INVENTORY_ITEM_ID = mtls.INVENTORY_ITEM_ID
+          AND mtls.inventory_item_status_code ='Active'
+          ORDER BY ITEM_CODE) csi ON csi.INVENTORY_ITEM_ID = si.INVENTORY_ITEM_ID
         WHERE 1=1
       `;
       const queryParams: any[] = [];
 
       if (params.search) {
-        query += ` WHERE UPPER(ITEM_DESCRIPTION) LIKE UPPER(?)`;
+        query += ` WHERE UPPER(si.ITEM_DESCRIPTION) LIKE UPPER(?)`;
         queryParams.push(`%${params.search}%`);
       }
 
-      query += ` ORDER BY ITEM_CODE`;
+      query += ` ORDER BY si.ITEM_CODE`;
 
       if (params.limit) {
         const offset = ((params.page || 1) - 1) * params.limit;
