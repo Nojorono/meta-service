@@ -14,13 +14,43 @@ import {
 export class ItemListMetaService {
   private readonly logger = new Logger(ItemListMetaService.name);
   private readonly CACHE_TTL = 60 * 60; // Cache for 1 hour
-  private readonly CACHE_VERSION = 'v2';
+  private readonly CACHE_VERSION = 'v3';
 
   constructor(
     private readonly configService: ConfigService,
     private readonly oracleService: OracleService,
     private readonly redisService: RedisService,
   ) { }
+
+  private readonly conversionJoinSql = `
+    LEFT JOIN (
+      SELECT DISTINCT
+        (
+          SELECT MAX(CATEGORY_CONCAT_SEGS)
+          FROM MTL_ITEM_CATEGORIES_V
+          WHERE 1 = 1
+            AND INVENTORY_ITEM_ID = mcr.INVENTORY_ITEM_ID
+            AND CATEGORY_SET_NAME = 'Principal Category'
+        ) Principle,
+        MCR.CROSS_REFERENCE ITEM_CODE,
+        mcr.INVENTORY_ITEM_ID,
+        MCR.ATTRIBUTE6,
+        mtls.inventory_item_status_code status_code,
+        CASE
+          WHEN REGEXP_LIKE(TRIM(MCR.ATTRIBUTE7), '^[0-9]+(\\.[0-9]+)?$')
+          THEN TO_NUMBER(TRIM(MCR.ATTRIBUTE7))
+          ELSE NULL
+        END AS urut,
+        inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'DUS', 'BAL') DUS_BAL,
+        inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'BAL', 'PRS') BAL_PRS,
+        inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'PRS', 'BKS') PRS_BKS,
+        inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'BKS', 'BTG') BKS_BTG
+      FROM mtl_cross_references_v mcr, mtl_system_items_b mtls
+      WHERE mcr.INVENTORY_ITEM_ID = mtls.INVENTORY_ITEM_ID
+        AND mtls.inventory_item_status_code = 'Active'
+      ORDER BY ITEM_CODE
+    ) csi ON csi.INVENTORY_ITEM_ID = si.INVENTORY_ITEM_ID
+  `;
 
   private mapRowToItemListDto(row: Record<string, any>): MetaItemListDto {
     return {
@@ -65,30 +95,25 @@ export class ItemListMetaService {
 
     try {
       let query = `
-        SELECT 	* FROM 
-          (SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
-                FROM XTD_INV_SALES_ITEMS_V 
-                GROUP BY ITEM_CODE,ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID 
-                ORDER BY ITEM_CODE) si
-                LEFT JOIN (select 
-              DISTINCT 
-                (SELECT MAX (CATEGORY_CONCAT_SEGS)
-                        FROM MTL_ITEM_CATEGORIES_V
-                      WHERE     1 = 1
-                            AND INVENTORY_ITEM_ID = mcr.INVENTORY_ITEM_ID
-                            AND CATEGORY_SET_NAME = 'Principal Category') Principle,
-              mcr.INVENTORY_ITEM_ID,
-              MCR.ATTRIBUTE6, 
-              mtls.inventory_item_status_code status_code,
-              to_number(MCR.ATTRIBUTE7) as urut,
-              inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'DUS','BAL') DUS_BAL,
-              inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BAL','PRS') BAL_PRS,
-              inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'PRS','BKS') PRS_BKS, 
-              inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BKS','BTG') BKS_BTG
-              FROM mtl_cross_references_v mcr, mtl_system_items_b mtls
-              where mcr.INVENTORY_ITEM_ID = mtls.INVENTORY_ITEM_ID
-              AND mtls.inventory_item_status_code ='Active'
-              ORDER BY ITEM_CODE) csi ON csi.INVENTORY_ITEM_ID = si.INVENTORY_ITEM_ID  
+        SELECT
+          si.ITEM_CODE,
+          si.ITEM_NUMBER,
+          si.ITEM_DESCRIPTION,
+          si.INVENTORY_ITEM_ID,
+          csi.Principle AS PRINCIPLE,
+          csi.status_code AS STATUS_CODE,
+          csi.urut AS URUT,
+          csi.DUS_BAL,
+          csi.BAL_PRS,
+          csi.PRS_BKS,
+          csi.BKS_BTG
+        FROM (
+          SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
+          FROM XTD_INV_SALES_ITEMS_V
+          GROUP BY ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
+          ORDER BY ITEM_CODE
+        ) si
+        ${this.conversionJoinSql}
         WHERE 1=1
       `;
 
@@ -149,29 +174,22 @@ export class ItemListMetaService {
     try {
       const query = `
         SELECT
-         *
+          si.ITEM_CODE,
+          si.ITEM_NUMBER,
+          si.ITEM_DESCRIPTION,
+          si.INVENTORY_ITEM_ID,
+          si.ORGANIZATION_CODE,
+          csi.Principle AS PRINCIPLE,
+          csi.status_code AS STATUS_CODE,
+          csi.urut AS URUT,
+          csi.DUS_BAL,
+          csi.BAL_PRS,
+          csi.PRS_BKS,
+          csi.BKS_BTG
         FROM XTD_INV_SALES_ITEMS_V si
-        LEFT JOIN (select 
-          DISTINCT 
-            (SELECT MAX (CATEGORY_CONCAT_SEGS)
-                    FROM MTL_ITEM_CATEGORIES_V
-                  WHERE     1 = 1
-                        AND INVENTORY_ITEM_ID = mcr.INVENTORY_ITEM_ID
-                        AND CATEGORY_SET_NAME = 'Principal Category') Principle,
-          mcr.INVENTORY_ITEM_ID,
-          MCR.ATTRIBUTE6, 
-          mtls.inventory_item_status_code status_code,
-          to_number(MCR.ATTRIBUTE7) as urut,
-          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'DUS','BAL') DUS_BAL,
-          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BAL','PRS') BAL_PRS,
-          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'PRS','BKS') PRS_BKS, 
-          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BKS','BTG') BKS_BTG
-          FROM mtl_cross_references_v mcr, mtl_system_items_b mtls
-          where mcr.INVENTORY_ITEM_ID = mtls.INVENTORY_ITEM_ID
-          AND mtls.inventory_item_status_code ='Active'
-          ORDER BY ITEM_CODE) csi ON csi.INVENTORY_ITEM_ID = si.INVENTORY_ITEM_ID  
+        ${this.conversionJoinSql}
         WHERE si.INVENTORY_ITEM_ID = :inventory_item_id
-        AND si.ORGANIZATION_CODE = :organization_code
+          AND si.ORGANIZATION_CODE = :organization_code
       `;
 
       const result = await this.oracleService.executeQuery(query, [
@@ -223,30 +241,25 @@ export class ItemListMetaService {
 
     try {
       let query = `
-        SELECT * FROM 
-        (SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID  
-        FROM XTD_INV_SALES_ITEMS_V
-        GROUP BY ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID 
-        ORDER BY ITEM_CODE) si
-        LEFT JOIN (select 
-          DISTINCT 
-            (SELECT MAX (CATEGORY_CONCAT_SEGS)
-                    FROM MTL_ITEM_CATEGORIES_V
-                  WHERE     1 = 1
-                        AND INVENTORY_ITEM_ID = mcr.INVENTORY_ITEM_ID
-                        AND CATEGORY_SET_NAME = 'Principal Category') Principle,
-          mcr.INVENTORY_ITEM_ID,
-          MCR.ATTRIBUTE6, 
-          mtls.inventory_item_status_code status_code,
-          to_number(MCR.ATTRIBUTE7) as urut,
-          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'DUS','BAL') DUS_BAL,
-          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BAL','PRS') BAL_PRS,
-          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'PRS','BKS') PRS_BKS, 
-          inv_convert.inv_um_convert (MCR.INVENTORY_ITEM_ID,'BKS','BTG') BKS_BTG
-          FROM mtl_cross_references_v mcr, mtl_system_items_b mtls
-          where mcr.INVENTORY_ITEM_ID = mtls.INVENTORY_ITEM_ID
-          AND mtls.inventory_item_status_code ='Active'
-          ORDER BY ITEM_CODE) csi ON csi.INVENTORY_ITEM_ID = si.INVENTORY_ITEM_ID
+        SELECT
+          si.ITEM_CODE,
+          si.ITEM_NUMBER,
+          si.ITEM_DESCRIPTION,
+          si.INVENTORY_ITEM_ID,
+          csi.Principle AS PRINCIPLE,
+          csi.status_code AS STATUS_CODE,
+          csi.urut AS URUT,
+          csi.DUS_BAL,
+          csi.BAL_PRS,
+          csi.PRS_BKS,
+          csi.BKS_BTG
+        FROM (
+          SELECT ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
+          FROM XTD_INV_SALES_ITEMS_V
+          GROUP BY ITEM_CODE, ITEM_NUMBER, ITEM_DESCRIPTION, INVENTORY_ITEM_ID
+          ORDER BY ITEM_CODE
+        ) si
+        ${this.conversionJoinSql}
         WHERE 1=1
       `;
       const queryParams: any[] = [];
