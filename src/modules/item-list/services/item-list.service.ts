@@ -14,7 +14,7 @@ import {
 export class ItemListMetaService {
   private readonly logger = new Logger(ItemListMetaService.name);
   private readonly CACHE_TTL = 60 * 60; // Cache for 1 hour
-  private readonly CACHE_VERSION = 'v3';
+  private readonly CACHE_VERSION = 'v4';
 
   constructor(
     private readonly configService: ConfigService,
@@ -41,16 +41,30 @@ export class ItemListMetaService {
           THEN TO_NUMBER(TRIM(MCR.ATTRIBUTE7))
           ELSE NULL
         END AS urut,
-        inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'DUS', 'BAL') DUS_BAL,
-        inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'BAL', 'PRS') BAL_PRS,
-        inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'PRS', 'BKS') PRS_BKS,
-        inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'BKS', 'BTG') BKS_BTG
+        ROUND(inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'DUS', 'BAL'), 6) DUS_BAL,
+        ROUND(inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'BAL', 'PRS'), 6) BAL_PRS,
+        ROUND(inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'PRS', 'BKS'), 6) PRS_BKS,
+        ROUND(inv_convert.inv_um_convert(MCR.INVENTORY_ITEM_ID, 'BKS', 'BTG'), 6) BKS_BTG
       FROM mtl_cross_references_v mcr, mtl_system_items_b mtls
       WHERE mcr.INVENTORY_ITEM_ID = mtls.INVENTORY_ITEM_ID
         AND mtls.inventory_item_status_code = 'Active'
       ORDER BY ITEM_CODE
     ) csi ON csi.INVENTORY_ITEM_ID = si.INVENTORY_ITEM_ID
   `;
+
+  private roundConversion(value: unknown): number | undefined {
+    if (value == null || value === '') {
+      return undefined;
+    }
+
+    const n = Number(value);
+    if (Number.isNaN(n)) {
+      return undefined;
+    }
+
+    // Strip IEEE-754 artifacts from Oracle NUMBER -> JS Number conversion.
+    return Math.round(n * 1e6) / 1e6;
+  }
 
   private mapRowToItemListDto(row: Record<string, any>): MetaItemListDto {
     return {
@@ -61,11 +75,11 @@ export class ItemListMetaService {
       organization_code: row.ORGANIZATION_CODE,
       principle: row.PRINCIPLE,
       status_code: row.STATUS_CODE,
-      urut: row.URUT,
-      dus_bal: row.DUS_BAL,
-      bal_prs: row.BAL_PRS,
-      prs_bks: row.PRS_BKS,
-      bks_btg: row.BKS_BTG,
+      urut: this.roundConversion(row.URUT),
+      dus_bal: this.roundConversion(row.DUS_BAL),
+      bal_prs: this.roundConversion(row.BAL_PRS),
+      prs_bks: this.roundConversion(row.PRS_BKS),
+      bks_btg: this.roundConversion(row.BKS_BTG),
     };
   }
 
